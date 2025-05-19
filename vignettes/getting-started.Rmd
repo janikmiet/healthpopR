@@ -1,0 +1,197 @@
+---
+title: "getting-started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{getting-started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  eval=FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(healthpopR)
+```
+
+
+# Load Data 
+```{r}
+## Testing and debugging functions with base ICD codes
+if(FALSE){
+  loc = "data/" # for OSTPRE
+  population <- arrow::read_parquet(file = paste0(loc, "population.parquet"))
+  diagnoses <- arrow::read_parquet(file = paste0(loc, "diagnoses.parquet"))
+  data_codes <- arrow::read_parquet(file = paste0(loc, "data_codes.parquet"))
+  ostpre_vastpaiv <- arrow::read_parquet(file = paste0(loc, "ostpre_vastpaiv.parquet"))
+  edumiage <- arrow::read_parquet(file = paste0(loc, "edumiage.parquet"))
+}
+```
+
+Let's define some sample case of intrest.
+
+
+```{r}
+selected_exposure_icd10 = "^E11"
+selected_exposure_icd9 = "^250A"
+selected_exposure_icd8 = "^250"
+selected_exposure_regsrc = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa")
+selected_response_icd10 = "^I2[0-5]"
+selected_response_icd9 = "^41[0-4]"
+selected_response_icd8 = "^41[0-4]"
+selected_response_regsrc = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa")
+```
+
+# Diagnoses data 
+
+Creating exposure diagnosis data 
+
+```{r}
+exposure_diagnoses <- search_diagnoses(
+  regex_icd10 = selected_exposure_icd10,
+  regex_icd9 = selected_exposure_icd9,
+  regex_icd8 = selected_exposure_icd8,
+  registry_source = selected_exposure_regsrc,
+  data_diagnoses = diagnoses
+)
+```
+
+Creating response diagnosis data
+
+```{r}
+response_diagnoses <- search_diagnoses(
+  regex_icd10 = selected_response_icd10,
+  regex_icd9 = selected_response_icd9,
+  regex_icd8 = selected_response_icd8,
+  registry_source = selected_response_regsrc,
+  data_diagnoses = diagnoses
+)
+```
+
+Checking what sources are found of the diagnoses
+
+```{r}
+plot_diagnoses_src(exposure_diagnoses)
+plot_diagnoses_src(response_diagnoses, per_source = TRUE)
+```
+
+# Population Data 
+
+Just exposure population without all the exposure codes 
+
+```{r}
+dpop_exposure <- classify_population(
+  exposure_icd10 = selected_exposure_icd10,
+  exposure_src = selected_exposure_regsrc)
+```
+
+Both, exposure and response population in one 
+
+```{r}
+dpop <- classify_population(exposure_icd10 = selected_exposure_icd10,
+                     exposure_icd9 = selected_exposure_icd9,
+                     exposure_icd8 = selected_exposure_icd8,
+                     exposure_src = selected_exposure_regsrc,
+                     response_icd10 = selected_response_icd10,
+                     response_icd9 = selected_response_icd9,
+                     response_icd8 = selected_response_icd8,
+                     response_src = selected_response_regsrc)
+```
+
+# Population Analytics 
+
+Exposure age distribution 
+```{r}
+plot_age_distribution(dpop, group = "exposure")
+plot_age_distribution(dpop, group = "exposure", subgroups = TRUE)
+```
+
+Response age distribution 
+
+```{r}
+plot_age_distribution(dpop, group = "response")
+plot_age_distribution(dpop, group = "response", subgroups = TRUE)
+```
+
+Age Distribution Tables 
+
+```{r}
+table_age_distribution(dpop, group = "exposure")
+table_age_distribution(dpop, group = "response")
+table_age_distribution(dpop, group = "response", subgroups = TRUE)
+table_age_distribution(dpop, group = "exposure", subgroups = TRUE)
+```
+
+Summaries of Exposure Response Diagnoses 
+
+```{r}
+summary_exp_resp_order(dpop)
+summary_exp_resp_crosstabulation(dpop, output = "viewer")
+```
+
+# Health Analytics
+
+Creating A ICD-10 profile of the group
+```{r}
+health_profiles <- classify_icd10_profile(dpop, diagnoses = diagnoses, exposure_icd10 = selected_exposure_icd10, exposure_src = selected_exposure_regsrc)
+plot_health_icd10_profile(health_profiles)
+```
+
+Finding top ICD-10 diagnoses on exposure group (compared to no-exposure group)
+
+```{r}
+tbl_health <- tbl_icd10_diff_by_exposure(dpop, diagnoses = diagnoses, exposure_icd10 = selected_exposure_icd10, exposure_src = selected_exposure_regsrc)
+plot_icd10_diff_by_exposure(tbl_health)
+```
+
+
+# Survival Analysis
+
+Creating a survival object and plotting Kaplan Meier and Competing Risk
+
+```{r}
+dsurv <- create_dsurv(dpop, 
+                      censoring_date = as.Date("2023-12-21"), 
+                      filter_early_responses = FALSE)
+plot_kaplan_meier(dsurv)
+plot_competing_risk(dsurv)
+```
+
+## Cox Analysis
+
+Creating a cox dataset
+
+```{r}
+cox_base <- cox_create_data(dpop, 
+                            data_dates = ostpre_vastpaiv, 
+                            data_socioeconomic = edumiage,
+                            reference_values = list("bmi_cat1" = "Healthy Weight", 
+                                                    "bmi_cat2" = "Healthy Weight", 
+                                                    "edu" = "3 - High"),
+                            censoring_date = as.Date("2023-12-31"))
+```
+
+Plotting a survival element
+
+```{r}
+cox_plot_overall(cox_base, type = "event")
+```
+
+
+Creating a model for Cox analysis
+
+```{r}
+model1 <- create_cox_model(cox_base,  normal_vars = c("edu"), spline_vars = c("age_bs", "bmi") )
+```
+
+Checking spline variable
+
+```{r}
+cox_plot_spline(model1, spline_var = "age_bs")
+```
+

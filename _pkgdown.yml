@@ -1,0 +1,56 @@
+url: https://janikmiet.github.io/healthpopR/
+template:
+  bootstrap: 5
+  bootswatch: flatly  # or cosmo, united, etc.
+
+navbar:
+  title: "healthpopR"
+  type: default
+  left:
+    - text: "Reference"
+      href: reference/index.html
+    - text: "Articles"
+      href: articles/index.html
+
+reference:
+  - title: "Main functions"
+    contents:
+      - classify_population
+      - classify_icd10_profile
+      - search_diagnoses
+      - plot_age_distribution
+      - plot_diagnoses_src
+      - summary_exp_resp_crosstabulation
+      - summary_exp_resp_order
+      - table_age_distribution
+  - title: "Health Analysis functions"
+    contents:
+      - plot_health_icd10_profile
+      - plot_icd10_diff_by_exposure
+      - tbl_icd10_diff_by_exposure
+  - title: "Survival Analysis functions"
+    contents:
+      - create_dsurv
+      - plot_survival_cr
+      - plot_survival_km
+  - title: "Cox Model Analysis"
+    contents:
+      - cox_create_data
+      - create_cox_model
+      - cox_plot_overall
+      - cox_plot_spline
+  - title: "Helper functions"
+    contents:
+      - .regex_clean
+      - .capitalize
+      - .relevel_by_reference
+      - .safe_inc_progress
+
+articles:
+  - title: "Getting Started"
+    contents:
+      - getting-started
+  - title: "Data Model"
+    contents:
+      - data-model
+

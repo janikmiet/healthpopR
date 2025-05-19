@@ -1,0 +1,26 @@
+Package: healthpopR
+Type: Package
+Title: This package is used for exploring population health with certain diagnoses. Package has functions which helps analysing how exposure diagnoses affects to response diagnoses in follow-up dataset. 
+Version: 0.1.2
+Authors@R: c(
+    person(
+      "Jani", "Miettinen",
+      email = "jani.miettinen@uef.fi",
+      role = c("aut", "cre")
+    ),
+    person(
+      "Reijo", "Sund",
+      email = "reijo.sund@uef.fi",
+      role = c("aut")
+    )
+  )
+Description: More about what it does (maybe more than one line).
+    Continuation lines should be indented.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
