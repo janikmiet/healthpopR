@@ -96,7 +96,7 @@ plot_age_distribution <- function(
     # Plotting with SUBGROUP or WITHOUT
     if(subgroups){
       # Plot with subgroup
-      plt <- ggplot2::ggplot(d, aes(x = AGE, y = freq, fill = SUBGROUP, group = SUBGROUP)) +
+      plt <- ggplot2::ggplot(d, ggplot2::aes(x = AGE, y = freq, fill = SUBGROUP, group = SUBGROUP)) +
         ggplot2::geom_bar(
           stat = "identity"
         ) +

@@ -219,8 +219,9 @@ cox_plot_overall <- function(data,
     risk_table = FALSE
   }
 
-  # Fit the survival model, not needed bc done in cox_base_data function
-  # fit <- survfit(data$Surv ~ exposure, id = ID, data=data)
+  # Fit the survival model
+  # TODO not needed bc done in cox_base_data function. How to pick from there?
+  fit <- survfit(data$Surv ~ exposure, id = ID, data=data)
 
   # Choose plot type based on 'type' argument
   plot <- switch(
@@ -296,12 +297,12 @@ cox_plot_spline <- function(data_model,
   mda <- ggeffects::ggpredict(data_model, terms = paste0(spline_var, " [all]"))
 
   # Create the plot
-  p <- ggplot2::ggplot(mda, aes(x = x, y = predicted)) +
-    ggplot2::geom_line(color = color, size = 1.2) +
-    ggplot2::geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, fill = color) +
+  p <- ggplot2::ggplot(mda, ggplot2::aes(x = x, y = predicted)) +
+    ggplot2::geom_line(color = color, linewidth = 1.2) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, fill = color) +
     ggplot2::labs(
       title = title,
-      x = ifelse(is.null(xlab), var, xlab),
+      x = ifelse(is.null(xlab), spline_var, xlab),
       y = ylab
     ) +
     ggplot2::theme_minimal()

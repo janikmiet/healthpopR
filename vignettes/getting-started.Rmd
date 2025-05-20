@@ -162,7 +162,9 @@ plot_kaplan_meier(dsurv)
 plot_competing_risk(dsurv)
 ```
 
-## Cox Analysis
+# Cox Analysis
+
+*This under development and is currently relying on two extra datasets `data_dates` and `data_socioeconomic`*
 
 Creating a cox dataset
 

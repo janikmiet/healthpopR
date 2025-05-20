@@ -349,18 +349,18 @@ plot_icd10_diff_by_exposure <- function(data,
 ){
   internal_function <- function(){
     dplot <- data %>%
-      filter(diff_pct > limit ) %>%
-      pivot_longer(cols = c(exposure_group_pct, no_exposure_group_pct))
+      dplyr::filter(diff_pct > limit ) %>%
+      tidyr::pivot_longer(cols = c(exposure_group_pct, no_exposure_group_pct))
 
     .safe_inc_progress(1/2)
 
     colors_in <- c(colors[2], colors[1])
 
-    plt <- ggplot(dplot ) +
-      geom_bar(aes(x=reorder(ICD10_3LETTERS, -value), y=value, fill=name, group=name), stat = "identity", position = "dodge") +
-      coord_flip() +
-      scale_fill_manual(values = colors_in) +
-      labs(x="diagnose", y="percentage (%)", title = "Exposure group top diagnoses") +
+    plt <- ggplot2::ggplot(dplot ) +
+      ggplot2::geom_bar(ggplot2::aes(x=reorder(ICD10_3LETTERS, -value), y=value, fill=name, group=name), stat = "identity", position = "dodge") +
+      ggplot2::coord_flip() +
+      ggplot2::scale_fill_manual(values = colors_in) +
+      ggplot2::labs(x="diagnose", y="percentage (%)", title = "Exposure group top diagnoses") +
       hrbrthemes::theme_ipsum_rc()
 
     .safe_inc_progress(2/2)
