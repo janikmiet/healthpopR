@@ -18,7 +18,6 @@
 #' }
 #'
 #' @import dplyr
-#' @importFrom magrittr %>%
 #' @importFrom tibble tibble as_tibble
 #' @export
 search_diagnoses <- function(regex_icd10="",
@@ -65,48 +64,48 @@ search_diagnoses <- function(regex_icd10="",
     ) # ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE
     .safe_inc_progress(1/6)
     if(regex_icd10 != ""){
-      d1 <- data_diagnoses %>%
-        dplyr::filter(DGREG == "ICD10") %>%
-        dplyr::filter(SRC %in% registry_source) %>%
-        dplyr::filter(grepl(pattern = regex_icd10, x = DG)) %>%
+      d1 <- data_diagnoses |>
+        dplyr::filter(DGREG == "ICD10") |>
+        dplyr::filter(SRC %in% registry_source) |>
+        dplyr::filter(grepl(pattern = regex_icd10, x = DG)) |>
         dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
     }
     .safe_inc_progress(2/6)
     if(regex_icd9 != ""){
-      d2 <- data_diagnoses %>%
-        dplyr::filter(DGREG == "ICD9") %>%
-        dplyr::filter(SRC %in% registry_source) %>%
-        dplyr::filter(grepl(pattern = regex_icd9, x = DG))%>%
+      d2 <- data_diagnoses |>
+        dplyr::filter(DGREG == "ICD9") |>
+        dplyr::filter(SRC %in% registry_source) |>
+        dplyr::filter(grepl(pattern = regex_icd9, x = DG))|>
         dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
     }
     .safe_inc_progress(3/6)
     if(regex_icd8 != ""){
-      d3 <- data_diagnoses %>%
-        dplyr::filter(DGREG == "ICD8") %>%
-        dplyr::filter(SRC %in% registry_source) %>%
-        dplyr::filter(grepl(pattern = regex_icd8, x = DG))%>%
+      d3 <- data_diagnoses |>
+        dplyr::filter(DGREG == "ICD8") |>
+        dplyr::filter(SRC %in% registry_source) |>
+        dplyr::filter(grepl(pattern = regex_icd8, x = DG))|>
         dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
     }
     .safe_inc_progress(4/6)
     #TODO kun src extra mukaan
     # if(regex_extra != ""){
-    #   d4 <- data_diagnoses %>%
-    #     # filter(DGREG == "ICD8") %>%
-    #     filter(SRC %in% src_extra) %>%
-    #     filter(grepl(pattern = regex_extra, x = DG))%>%
+    #   d4 <- data_diagnoses |>
+    #     # filter(DGREG == "ICD8") |>
+    #     filter(SRC %in% src_extra) |>
+    #     filter(grepl(pattern = regex_extra, x = DG))|>
     #     select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
     # }
     .safe_inc_progress(5/6)
 
     ## Kaikki ICD rekisterit yhdessa.
-    d <- tibble() %>%
-      dplyr::bind_rows(d1) %>%
-      dplyr::bind_rows(d2) %>%
+    d <- tibble() |>
+      dplyr::bind_rows(d1) |>
+      dplyr::bind_rows(d2) |>
       dplyr::bind_rows(d3)
     # rbind(if(exists("d4") & nrow(d4)>0) d4)
 
     rm(list = c("d1", "d2", "d3"))
-    d <- as_tibble(d) %>%
+    d <- as_tibble(d) |>
       dplyr::arrange(ID, DGREG, DATE)
 
     .safe_inc_progress(6/6)
@@ -137,21 +136,21 @@ plot_diagnoses_src <- function(data, per_source = FALSE) {
   all <- function() {
     .safe_inc_progress(1/4)
 
-    dvenn <- data %>%
+    dvenn <- data |>
       dplyr::arrange(ID, DATE)
 
     # Grouping logic based on per_source flag
     dvenn <- if (per_source) {
-      dvenn %>%
-        dplyr::group_by(ID, SRC) %>%
+      dvenn |>
+        dplyr::group_by(ID, SRC) |>
         dplyr::summarise(DATE = first(DATE),
-                  SRC = first(SRC), .groups = "drop")%>%
+                  SRC = first(SRC), .groups = "drop")|>
         dplyr::select(ID, SRC)
     } else {
-      dvenn %>%
-        dplyr::group_by(ID) %>%
+      dvenn |>
+        dplyr::group_by(ID) |>
         dplyr::summarise(DATE = first(DATE),
-                  SRC = first(SRC), .groups = "drop")%>%
+                  SRC = first(SRC), .groups = "drop")|>
         dplyr::select(ID, SRC)
     }
 
@@ -159,9 +158,9 @@ plot_diagnoses_src <- function(data, per_source = FALSE) {
 
     # Helper to split tibble into named list for Venn plotting
     split_tibble <- function(tibble, column = 'SRC') {
-      temp <- tibble %>%
-        split(., .[[column]]) %>%
-        lapply(function(x) x[setdiff(names(x), column)]) %>%
+      temp <- tibble |>
+        split(., .[[column]]) |>
+        lapply(function(x) x[setdiff(names(x), column)]) |>
         unlist(recursive = FALSE)
       names(temp) <- gsub("\\.ID$", "", names(temp))  # Clean names
       return(temp)

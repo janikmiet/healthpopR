@@ -38,16 +38,16 @@
   # safe_inc_progress(1 / 4)
 
   ## Phase 2: Individuals with diagnosis
-  d1 <- dat %>%
-    dplyr::arrange(ID, DATE) %>%
-    dplyr::group_by(ID) %>%
+  d1 <- dat |>
+    dplyr::arrange(ID, DATE) |>
+    dplyr::group_by(ID) |>
     dplyr::summarise(
       DATE = first(DATE),
       SRC = first(SRC),
       DGREG = first(DGREG),
       .groups = "drop"
-    ) %>%
-    dplyr::left_join(population, by = "ID") %>%
+    ) |>
+    dplyr::left_join(population, by = "ID") |>
     dplyr::mutate(
       GROUP = groups[1],
       AGE_DG = trunc((DATE_BIRTH %--% DATE) / lubridate::years(1))
@@ -55,8 +55,8 @@
   # safe_inc_progress(2 / 4)
 
   ## Phase 3: Individuals without diagnosis
-  d2 <- data_population %>%
-    dplyr::filter(!ID %in% d1$ID) %>%
+  d2 <- data_population |>
+    dplyr::filter(!ID %in% d1$ID) |>
     dplyr::mutate(
       GROUP = groups[2],
       AGE_DG = NA,
@@ -70,7 +70,7 @@
   d <- rbind(d1, d2)
   # safe_inc_progress(4 / 4)
 
-  if (nrow(d %>% filter(GROUP == groups[1])) > 5) {
+  if (nrow(d |> filter(GROUP == groups[1])) > 5) {
     return(d)
   } else {
     return(NULL)
@@ -154,12 +154,12 @@ classify_population <- function(exposure_icd10 = "",
                                registry_source = exposure_src,
                                groups = c("exposure", "no exposure"),
                                data_population = data_population,
-                               data_diagnoses = data_diagnoses) %>%
-      dplyr::rename_with(~ paste0("exp.", .)) %>%
+                               data_diagnoses = data_diagnoses) |>
+      dplyr::rename_with(~ paste0("exp.", .)) |>
       dplyr::rename(ID = exp.ID,
              DATE_BIRTH = exp.DATE_BIRTH,
              DATE_DEATH = exp.DATE_DEATH,
-             DATE_MIGRATION = exp.DATE_MIGRATION) %>%
+             DATE_MIGRATION = exp.DATE_MIGRATION) |>
       dplyr::select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, exp.DATE, exp.SRC, exp.DGREG, exp.GROUP, exp.AGE_DG)
 
     .safe_inc_progress(2/4)
@@ -172,24 +172,24 @@ classify_population <- function(exposure_icd10 = "",
                                   registry_source = response_src,
                                   groups = c("response", "no response"),
                                   data_population = data_population,
-                                  data_diagnoses = data_diagnoses) %>%
-        dplyr::select(-DATE_BIRTH, -DATE_DEATH, -DATE_MIGRATION) %>%
-        dplyr::rename_with(~ paste0("resp.", .)) %>%
-        dplyr::rename(ID = resp.ID) %>%
+                                  data_diagnoses = data_diagnoses) |>
+        dplyr::select(-DATE_BIRTH, -DATE_DEATH, -DATE_MIGRATION) |>
+        dplyr::rename_with(~ paste0("resp.", .)) |>
+        dplyr::rename(ID = resp.ID) |>
         dplyr::select(ID, resp.DATE, resp.SRC, resp.DGREG, resp.GROUP, resp.AGE_DG)
 
       .safe_inc_progress(3/4)
 
       ## Join
-      d <- exp %>%
-        dplyr::left_join(resp, by = "ID") %>%
+      d <- exp |>
+        dplyr::left_join(resp, by = "ID") |>
         dplyr::mutate(
           exposure = ifelse(!is.na(exp.DATE), 1, 0),
           response = ifelse(!is.na(resp.DATE), 1, 0)
         )
 
     } else {
-      d <- exp %>%
+      d <- exp |>
         dplyr::mutate(
           exposure = ifelse(!is.na(exp.DATE), 1, 0)
         )

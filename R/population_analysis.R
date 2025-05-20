@@ -56,31 +56,31 @@ plot_age_distribution <- function(
   plot_internal <- function() {
     .safe_inc_progress(1/4)
 
-    d1 <- data %>%
+    d1 <- data |>
       dplyr::select(ID, exp.AGE_DG, exp.GROUP, resp.AGE_DG, resp.GROUP)
 
     # Filter and group exposure data
     if(group == "exposure"){
-      d1 <- d1 %>%
-        dplyr::filter(exp.GROUP == "exposure") %>%
+      d1 <- d1 |>
+        dplyr::filter(exp.GROUP == "exposure") |>
         dplyr::rename(AGE = exp.AGE_DG,
                       GROUP = exp.GROUP,
                       SUBGROUP = resp.GROUP)
     }else if(group == "response"){
-      d1 <- d1 %>%
-        dplyr::filter(resp.GROUP == "response") %>%
+      d1 <- d1 |>
+        dplyr::filter(resp.GROUP == "response") |>
         dplyr::rename(AGE = resp.AGE_DG,
                       GROUP = resp.GROUP,
                       SUBGROUP = exp.GROUP)
     }
     # Group & Subgroup Aggregate
     if(subgroups){
-      d <- d1 %>%
-        dplyr::group_by(GROUP, SUBGROUP, AGE) %>%
+      d <- d1 |>
+        dplyr::group_by(GROUP, SUBGROUP, AGE) |>
         dplyr::summarise(freq = n())
     }else{
-      d <- d1 %>%
-        dplyr::group_by(GROUP, AGE) %>%
+      d <- d1 |>
+        dplyr::group_by(GROUP, AGE) |>
         dplyr::summarise(freq = n())
     }
 
@@ -187,11 +187,11 @@ table_age_distribution <- function(
 
     ## Simple statistics, output is one row
     if (group == "exposure") {
-      d1 <- data %>%
-        dplyr::filter(exp.GROUP == "exposure") %>%
+      d1 <- data |>
+        dplyr::filter(exp.GROUP == "exposure") |>
         dplyr::rename(GROUP = exp.GROUP,
-                      AGE = exp.AGE_DG) %>%
-        dplyr::group_by(GROUP) %>%
+                      AGE = exp.AGE_DG) |>
+        dplyr::group_by(GROUP) |>
         dplyr::summarise(
           pop_n = n(),
           age_min = min(AGE, na.rm = TRUE),
@@ -201,11 +201,11 @@ table_age_distribution <- function(
         )
     } else if (group == "response") {
       # Response by group
-      d1 <- data %>%
-        dplyr::filter(resp.GROUP == "response") %>%
+      d1 <- data |>
+        dplyr::filter(resp.GROUP == "response") |>
         dplyr::rename(GROUP = resp.GROUP,
-                      AGE = resp.AGE_DG) %>%
-        dplyr::group_by(GROUP) %>%
+                      AGE = resp.AGE_DG) |>
+        dplyr::group_by(GROUP) |>
         dplyr::summarise(
           pop_n = n(),
           age_min = min(AGE, na.rm = TRUE),
@@ -220,11 +220,11 @@ table_age_distribution <- function(
     # Stats for subgroups
     if(subgroups){
       if(group == "response"){
-        d2 <- data %>%
-          dplyr::filter(resp.GROUP == "response") %>%
+        d2 <- data |>
+          dplyr::filter(resp.GROUP == "response") |>
           dplyr::rename(GROUP = exp.GROUP,
-                        AGE = resp.AGE_DG) %>%
-          dplyr::group_by(GROUP) %>%
+                        AGE = resp.AGE_DG) |>
+          dplyr::group_by(GROUP) |>
           dplyr::summarise(
             pop_n = n(),
             age_min = min(AGE, na.rm = TRUE),
@@ -233,11 +233,11 @@ table_age_distribution <- function(
             age_max = max(AGE, na.rm = TRUE)
           )
       }else{
-        d2 <- data %>%
-          dplyr::filter(exp.GROUP == "exposure") %>%
+        d2 <- data |>
+          dplyr::filter(exp.GROUP == "exposure") |>
           dplyr::rename(GROUP = resp.GROUP,
-                        AGE = exp.AGE_DG) %>%
-          dplyr::group_by(GROUP) %>%
+                        AGE = exp.AGE_DG) |>
+          dplyr::group_by(GROUP) |>
           dplyr::summarise(
             pop_n = n(),
             age_min = min(AGE, na.rm = TRUE),
@@ -248,7 +248,7 @@ table_age_distribution <- function(
       }
       ## Combine datas d1 and d2
       d1$GROUP <-  "All"
-      d <- d2 %>%
+      d <- d2 |>
         rbind(d1)
     }else{
       ## No subgroups
@@ -376,18 +376,18 @@ summary_exp_resp_order <- function(data){
   #OBS! Previously named: tab_exp_resp
   all <- function(){
     .safe_inc_progress(amount = 1/4)
-    d <- data %>%
-      dplyr::filter(exposure == 1 & response == 1) %>%
+    d <- data |>
+      dplyr::filter(exposure == 1 & response == 1) |>
       dplyr::mutate(
         exp_resp = ifelse(exp.DATE < resp.DATE, 1, ifelse(exp.DATE == resp.DATE, 0, -1))
         # exp_resp = ifelse(exposure_date < response_date, 1, 0)
-      ) %>%
-      dplyr::group_by(exp_resp) %>%
+      ) |>
+      dplyr::group_by(exp_resp) |>
       dplyr::summarise(
         n = n()
-      ) %>%
+      ) |>
       dplyr::mutate(
-        percentage = round(100 * n / nrow(data %>% filter(exposure == 1 & response == 1)), 1),
+        percentage = round(100 * n / nrow(data |> filter(exposure == 1 & response == 1)), 1),
         exp_resp = factor(case_when(
           exp_resp == 1 ~ "Exposure < Response",
           exp_resp == 0 ~ "Exposure == Response",

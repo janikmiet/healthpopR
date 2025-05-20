@@ -25,6 +25,8 @@
 <url><loc>https://janikmiet.github.io/healthpopR/reference/plot_icd10_diff_by_exposure.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/plot_survival_cr.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/plot_survival_km.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/reference/recode_icd10_3letters.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/reference/recode_icd10_class.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/search_diagnoses.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/summary_exp_resp_crosstabulation.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/summary_exp_resp_order.html</loc></url>

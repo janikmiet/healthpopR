@@ -33,7 +33,7 @@ if(FALSE){
 }
 ```
 
-Let's define some sample case of intrest.
+Let's define some sample case of interest.
 
 
 ```{r}
@@ -158,8 +158,8 @@ Creating a survival object and plotting Kaplan Meier and Competing Risk
 dsurv <- create_dsurv(dpop, 
                       censoring_date = as.Date("2023-12-21"), 
                       filter_early_responses = FALSE)
-plot_kaplan_meier(dsurv)
-plot_competing_risk(dsurv)
+plot_survival_km(dsurv)
+plot_survival_cr(dsurv)
 ```
 
 # Cox Analysis
@@ -195,5 +195,15 @@ Checking spline variable
 
 ```{r}
 cox_plot_spline(model1, spline_var = "age_bs")
+```
+
+Other packages has some good functions to create plots
+
+```{r}
+ftest <- survival::cox.zph(model1)
+survminer::ggcoxzph(ftest)
+testmodel <- survival::coxph(as.formula(paste(deparse(model1$formula), collapse = " ")),
+                   data =  cox_base)
+survminer::ggforest(testmodel)
 ```
 

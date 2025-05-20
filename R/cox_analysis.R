@@ -49,29 +49,29 @@ cox_create_data <- function(data,
   }
 
   # 1. Prepare answering dates and compute age at baseline
-  dadates <- data_dates %>%
-    dplyr::mutate(age_bs = as.numeric(difftime(as.Date(vpvmbl), as.Date(spvm), unit = "weeks")) / 52.25) %>%
+  dadates <- data_dates |>
+    dplyr::mutate(age_bs = as.numeric(difftime(as.Date(vpvmbl), as.Date(spvm), unit = "weeks")) / 52.25) |>
     dplyr::select(ID, age_bs, vpvmbl)
 
   # 2. Join answering dates to population data
-  d1 <- data %>%
+  d1 <- data |>
     dplyr::left_join(dadates, by = "ID")
 
   # 3. Time variable calculations
-  d2 <- d1 %>%
-    dplyr::filter(!is.na(vpvmbl)) %>%
-    dplyr::select(ID, age_bs, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, exp.DATE, resp.DATE, vpvmbl) %>%
+  d2 <- d1 |>
+    dplyr::filter(!is.na(vpvmbl)) |>
+    dplyr::select(ID, age_bs, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, exp.DATE, resp.DATE, vpvmbl) |>
     dplyr::mutate(
       t_exposure = as.numeric(exp.DATE - vpvmbl),
       t_response = as.numeric(resp.DATE - vpvmbl),
       epvm = pmin(DATE_MIGRATION, censoring_date, DATE_DEATH, resp.DATE + 1, na.rm = TRUE),
       t_censoring = as.numeric(epvm - vpvmbl)
-    ) %>%
+    ) |>
     dplyr::select(ID, age_bs, t_exposure, t_response, t_censoring)
 
   # 4. Join time variables with data_socioeconomic
-  data_base <- data_socioeconomic %>%
-    dplyr::left_join(d2, by = "ID") %>%
+  data_base <- data_socioeconomic |>
+    dplyr::left_join(d2, by = "ID") |>
     dplyr::filter(t_censoring > 0)  # remove invalid rows
 
   # 5. Relevel with checking
@@ -79,7 +79,7 @@ cox_create_data <- function(data,
   # levels(data_base$bmi_cat1)
 
   # 6. Create survival time structure with tmerge and time-dependent covariates
-  newd1 <- survival::tmerge(data1 = data_base %>% select(ID, age_bs, bmi, bmi_cat1, bmi_cat2, edu),
+  newd1 <- survival::tmerge(data1 = data_base |> select(ID, age_bs, bmi, bmi_cat1, bmi_cat2, edu),
                   data2 = data_base, id = ID, tstop = t_censoring)
 
   newd1 <- survival::tmerge(data1 = newd1, data2 = data_base, id = ID, diagnose = event(t_response))

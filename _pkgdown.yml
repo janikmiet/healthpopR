@@ -53,6 +53,10 @@ reference:
       - .capitalize
       - .relevel_by_reference
       - .safe_inc_progress
+  - title: "Data Handling"
+    contents:
+      - recode_icd10_3letters
+      - recode_icd10_class
 
 articles:
   - title: "Getting Started"

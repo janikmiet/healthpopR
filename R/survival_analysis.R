@@ -28,7 +28,7 @@
 #' )
 #' }
 #'
-#' @importFrom dplyr filter mutate select arrange group_by summarise %>%
+#' @importFrom dplyr filter mutate select arrange group_by summarise
 #' @importFrom tidyr pivot_longer
 #' @importFrom lubridate days `%--%`
 #' @importFrom shiny isRunning withProgress
@@ -42,31 +42,31 @@ create_dsurv <- function(data,
 
     .safe_inc_progress(1/3)
 
-    exposure_to_response <- data %>%
-      dplyr::filter(exp.GROUP == "exposure") %>%
+    exposure_to_response <- data |>
+      dplyr::filter(exp.GROUP == "exposure") |>
       dplyr::mutate(
         epvm=pmin(DATE_MIGRATION, censoring_date, na.rm = TRUE)
-      ) %>%
+      ) |>
       dplyr::mutate(diagnose =  trunc((exp.DATE %--% resp.DATE) / days(1) ),
              dead = ifelse(!is.na(DATE_DEATH), trunc((exp.DATE %--% DATE_DEATH) / days(1) ) , NA),
              censoring = trunc((exp.DATE %--% epvm) / days(1))
-      ) %>%
+      ) |>
       dplyr::mutate(censoring = ifelse(is.na(dead), censoring, NA))
 
     .safe_inc_progress(2/3)
 
-    d <- exposure_to_response %>%
-      dplyr::select(ID, resp.DATE, diagnose, dead, censoring) %>%
-      dplyr::arrange(ID, resp.DATE) %>%
+    d <- exposure_to_response |>
+      dplyr::select(ID, resp.DATE, diagnose, dead, censoring) |>
+      dplyr::arrange(ID, resp.DATE) |>
       ## FILTER , take response cases before 0 timepoint, yes/no. This is going to be recoded as 0.
-      dplyr::filter(if(filter_early_responses){diagnose >= 0 }else{is.numeric(diagnose)}) %>%
-      dplyr::arrange(ID, resp.DATE) %>%
-      dplyr::group_by(ID) %>%
+      dplyr::filter(if(filter_early_responses){diagnose >= 0 }else{is.numeric(diagnose)}) |>
+      dplyr::arrange(ID, resp.DATE) |>
+      dplyr::group_by(ID) |>
       dplyr::summarise(diagnose = first(diagnose),
                 dead = first(dead),
-                censoring = first(censoring)) %>%
-      dplyr::mutate(diagnose = ifelse(diagnose < 0, 0 , diagnose)) %>% # Recoding possible before 0 timepoints for response dg
-      tidyr::pivot_longer(cols = c(diagnose, dead, censoring)) %>%
+                censoring = first(censoring)) |>
+      dplyr::mutate(diagnose = ifelse(diagnose < 0, 0 , diagnose)) |> # Recoding possible before 0 timepoints for response dg
+      tidyr::pivot_longer(cols = c(diagnose, dead, censoring)) |>
       dplyr::filter(!is.na(value))
 
     .safe_inc_progress(3/3)
@@ -105,7 +105,7 @@ create_dsurv <- function(data,
 #' km_plot <- plot_survival_km(data = long_surv_df)
 #' }
 #'
-#' @importFrom dplyr mutate %>%
+#' @importFrom dplyr mutate
 #' @importFrom survival Surv survfit
 #' @importFrom shiny isRunning withProgress
 #'
@@ -115,7 +115,7 @@ plot_survival_km <- function(data){
     .safe_inc_progress(1/3)
 
     ## Event: 0 = censoring/kuollut, 1 = diagnose
-    dsurv <- data %>%
+    dsurv <- data |>
       dplyr::mutate(event = ifelse(name == "diagnose", 1, 0) )
 
     .safe_inc_progress(2/3)
@@ -166,7 +166,7 @@ plot_survival_km <- function(data){
 #' cr_plot <- plot_survival_cr(data = long_surv_df)
 #' }
 #'
-#' @importFrom dplyr mutate %>%
+#' @importFrom dplyr mutate
 #' @importFrom cmprsk cuminc
 #' @importFrom survminer ggcompetingrisks
 #' @importFrom ggplot2 scale_color_manual
@@ -181,7 +181,7 @@ plot_survival_cr <- function(data,
     .safe_inc_progress(1/3)
 
     ## Data
-    dsurv <- data %>%
+    dsurv <- data |>
       dplyr::mutate(
         event = ifelse(name == "diagnose", 1, ifelse(name == "dead", 2, 3))
       )

@@ -49,12 +49,12 @@ classify_icd10_profile <- function(data,
     ## Summat ja exposure patient prossat
     d <- data
     # pop sizes
-    d_exp_popn <- d %>%
-      select(ID, exp.GROUP) %>%
-      group_by(exp.GROUP) %>%
+    d_exp_popn <- d |>
+      select(ID, exp.GROUP) |>
+      group_by(exp.GROUP) |>
       summarise(n_group=length(unique(ID)))
     ## add total group pop sizes
-    d <- d %>%
+    d <- d |>
       left_join(d_exp_popn, by = "exp.GROUP")
 
     .safe_inc_progress(1/4)
@@ -62,17 +62,17 @@ classify_icd10_profile <- function(data,
     ## Diagnoses full data
     data_diagnoses <- diagnoses
     # Groups / group & no exposure
-    icd10_recoded_summary <- data_diagnoses %>%
-      filter(DGREG == "ICD10") %>%
-      filter(SRC %in% exposure_src) %>%
-      filter(!grepl(pattern = .regex_clean(exposure_icd10), x = DG)) %>% ## Ei oteta exposure diagnooseja analyysiin
-      left_join(d %>% select(ID, exp.GROUP, n_group), by = "ID") %>%
-      group_by(exp.GROUP, ICD10_CLASS) %>%
+    icd10_recoded_summary <- data_diagnoses |>
+      filter(DGREG == "ICD10") |>
+      filter(SRC %in% exposure_src) |>
+      filter(!grepl(pattern = .regex_clean(exposure_icd10), x = DG)) |> ## Ei oteta exposure diagnooseja analyysiin
+      left_join(d |> select(ID, exp.GROUP, n_group), by = "ID") |>
+      group_by(exp.GROUP, ICD10_CLASS) |>
       summarise(
         cases=n(),
         patients=length(unique(ID)),
         n_group = first(n_group)
-      ) %>%
+      ) |>
       mutate(
         per100=cases/100 * n_group,
         pct = 100 * patients / n_group,
@@ -81,8 +81,8 @@ classify_icd10_profile <- function(data,
     .safe_inc_progress(2/4)
 
     # create 'data'
-    data_final <- icd10_recoded_summary %>%
-      tidyr::pivot_wider(id_cols = exp.GROUP, values_from = pct, names_from = ICD10_CLASS) %>%
+    data_final <- icd10_recoded_summary |>
+      tidyr::pivot_wider(id_cols = exp.GROUP, values_from = pct, names_from = ICD10_CLASS) |>
       dplyr::arrange(exp.GROUP)
     data_final <- as.data.frame(data_final)
     custom_row_names <- c("Max", "Min", data_final$exp.GROUP)  # adding these later step, but next we need to remove col
@@ -248,14 +248,14 @@ tbl_icd10_diff_by_exposure <- function(data, diagnoses, exposure_icd10, exposure
     data_diagnoses <- diagnoses
 
     # Tarkastellaan TOP diagnoosit exposure populaatiolla
-    d1 <- data_diagnoses %>%
-      filter(DGREG == "ICD10") %>%
-      filter(SRC  %in% exposure_src) %>%
-      filter(ID %in% data$ID[data$exp.GROUP == "exposure"] & !(grepl(pattern = .regex_clean(exposure_icd10), DG))) %>%
-      group_by(ICD10_3LETTERS) %>%
+    d1 <- data_diagnoses |>
+      filter(DGREG == "ICD10") |>
+      filter(SRC  %in% exposure_src) |>
+      filter(ID %in% data$ID[data$exp.GROUP == "exposure"] & !(grepl(pattern = .regex_clean(exposure_icd10), DG))) |>
+      group_by(ICD10_3LETTERS) |>
       summarise(
         exposure_group_patients = length(unique(ID))
-      ) %>%
+      ) |>
       mutate(
         exposure_group_pct = round(100 * exposure_group_patients / nrow(data[data$exp.GROUP == "exposure",]), 1)
       )
@@ -263,26 +263,26 @@ tbl_icd10_diff_by_exposure <- function(data, diagnoses, exposure_icd10, exposure
     .safe_inc_progress(2/4)
 
     # Tarkastellaan TOP diagnoosit no-exposure populaatiolla
-    d2 <- data_diagnoses %>%
-      filter(DGREG == "ICD10") %>%
-      filter(SRC  %in% exposure_src) %>%
-      filter(ID %in% data$ID[data$exp.GROUP == "no exposure"]) %>%
-      group_by(ICD10_3LETTERS) %>%
+    d2 <- data_diagnoses |>
+      filter(DGREG == "ICD10") |>
+      filter(SRC  %in% exposure_src) |>
+      filter(ID %in% data$ID[data$exp.GROUP == "no exposure"]) |>
+      group_by(ICD10_3LETTERS) |>
       summarise(
         no_exposure_group_patients = length(unique(ID))
-      ) %>%
+      ) |>
       mutate(
         no_exposure_group_pct = round(100 * no_exposure_group_patients / nrow(data[data$exp.GROUP == "no exposure",]), 1)
       )
 
     .safe_inc_progress(3/4)
 
-    d <- left_join(d1,d2, by = "ICD10_3LETTERS") %>%
+    d <- left_join(d1,d2, by = "ICD10_3LETTERS") |>
       mutate(diff_pct = exposure_group_pct - no_exposure_group_pct,
-             total_patients = exposure_group_patients + no_exposure_group_patients) %>%
+             total_patients = exposure_group_patients + no_exposure_group_patients) |>
       left_join(
-        data_codes %>% filter(CODECLASS == "ICD10") %>% select(DG, DESC), ## TODO data_codes needs to go inside the function package
-        by = c("ICD10_3LETTERS" = "DG")) %>%
+        data_codes |> filter(CODECLASS == "ICD10") |> select(DG, DESC), ## TODO data_codes needs to go inside the function package
+        by = c("ICD10_3LETTERS" = "DG")) |>
       select(ICD10_3LETTERS, total_patients, exposure_group_patients, exposure_group_pct, no_exposure_group_patients, no_exposure_group_pct, diff_pct, DESC )
 
     .safe_inc_progress(4/4)
@@ -348,8 +348,8 @@ plot_icd10_diff_by_exposure <- function(data,
                                         colors = c("#5BC0DE66", "#D9534F66")
 ){
   internal_function <- function(){
-    dplot <- data %>%
-      dplyr::filter(diff_pct > limit ) %>%
+    dplot <- data |>
+      dplyr::filter(diff_pct > limit ) |>
       tidyr::pivot_longer(cols = c(exposure_group_pct, no_exposure_group_pct))
 
     .safe_inc_progress(1/2)
