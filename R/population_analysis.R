@@ -261,13 +261,17 @@ table_age_distribution <- function(
   }
 
   if (shiny::isRunning()) {
-    withProgress(message = paste("Table", group_type, "Age Distribution"), value = 0, {
+    withProgress(message = paste("Table", .capitalize(group), "Age Distribution"), value = 0, {
       summarize_data()
     })
   } else {
     summarize_data()
   }
 }
+
+
+
+
 
 #' Summary Crosstabulation of Exposure and Response Diagnoses
 #'

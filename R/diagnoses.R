@@ -186,3 +186,106 @@ plot_diagnoses_src <- function(data, per_source = FALSE) {
     return(all())
   }
 }
+
+
+
+#' Summary Table of Diagnoses by Group
+#'
+#' Creates a summary table of selected diagnoses for a specified group (`exposure` or `response`),
+#' including number of patients, number of cases, percentage of group, and diagnosis descriptions.
+#'
+#' Diagnoses with fewer than a specified number of patients (`sum_small_groups`) will be grouped
+#' into a combined "Rest of the diagnoses" row to comply with data privacy practices.
+#'
+#' @param data A data frame containing diagnoses and group information. Must include columns `ID`, `DG`, `DGREG`, and `GROUP`.
+#' @param diagnoses A data frame of population diagnoses over timeline
+#' @param group Character. Either `"exposure"` or `"response"`, indicating the group to summarize. Defaults to `"exposure"`.
+#' @param sum_small_groups Integer. Diagnoses with fewer than this number of patients are grouped into an aggregate row. Default is 6.
+#'
+#' @return A data frame with columns:
+#' \describe{
+#'   \item{DG}{Diagnosis group code}
+#'   \item{DGREG}{Diagnosis registry group}
+#'   \item{patients}{Number of unique patients with the diagnosis in the group}
+#'   \item{cases}{Total number of diagnosis cases}
+#'   \item{group_pct}{Percentage of patients within the group}
+#'   \item{DESC}{Description of the diagnosis}
+#' }
+#'
+#' @details
+#' If the function is used inside a running Shiny app, it includes progress indicators for user feedback.
+#'
+#' @import dplyr
+#' @importFrom shiny isRunning withProgress
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' summary_table <- table_summary_diagnoses(data = df, diagnoses = c("E10", "E11"), group = "exposure")
+#' }
+table_summary_diagnoses <- function(data, diagnoses, group = "exposure", sum_small_groups=6){
+  ## Creates a summary of selected diagnoses on the group (exposure/response)
+  ## and gives summary information (Cases, Patients, PCT, Desc)
+
+  all <- function(){
+    .safe_inc_progress(1/3)
+
+    koehenkiloita <- nrow(data[data$GROUP == group,]) ## Group joko exposure tai response
+    if (koehenkiloita == 0) {
+      return(data.frame(DG = "No data", DGREG = "No data", patients = 0, cases = 0, group_pct = NA, DESC = "No data"))
+    }
+
+    d <- diagnoses %>%
+      dplyr::group_by(DG, DGREG) %>%
+      dplyr::summarise(
+        patients = length(unique(ID)),
+        cases = n()
+      ) %>%
+      dplyr::mutate(
+        group_pct = round(100 * patients / koehenkiloita, 1)
+      ) %>%
+      dplyr::left_join(data_codes, by = "DG") %>%
+      dplyr::select(DG, DGREG, patients, cases, group_pct, DESC)
+
+    .safe_inc_progress(2/3)
+
+    ## Combine small diagnose groups
+    ## Tietosuoja alle 6 tapaukset
+    d <- d %>%
+      dplyr::filter(patients >= sum_small_groups) %>%
+      rbind(
+        d %>%
+          dplyr::filter(patients < sun_small_groups) %>%
+          dplyr::summarise(
+            DG = "XX",
+            DGREG = "XX",
+            patients = sum(patients),
+            cases = sum(cases),
+            group_pct = NA,#sum(group_pct),
+            # Diagnose = "Rest of the diagnoses",
+            DESC = "Rest of the diagnoses"
+          ) %>%
+          dplyr::group_by(DG, DGREG) %>%
+          dplyr::summarise(
+            patients = sum(patients),
+            cases = sum(cases)
+          ) %>%
+          dplyr::mutate(
+            group_pct = round(100 * patients / koehenkiloita, 1)
+          )
+      )
+
+    .safe_inc_progress(3/3)
+
+    return(d)
+  }
+
+  if(shiny::isRunning()){
+    withProgress(message = paste0("Table of ", .capitalize(group), " Diagnoses"), value = 0, {
+      return(all())
+    })
+  }else{
+    return(all())
+  }
+}
+
