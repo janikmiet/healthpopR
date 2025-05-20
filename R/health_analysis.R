@@ -82,8 +82,8 @@ classify_icd10_profile <- function(data,
 
     # create 'data'
     data_final <- icd10_recoded_summary %>%
-      pivot_wider(id_cols = exp.GROUP, values_from = pct, names_from = ICD10_CLASS) %>%
-      arrange(exp.GROUP)
+      tidyr::pivot_wider(id_cols = exp.GROUP, values_from = pct, names_from = ICD10_CLASS) %>%
+      dplyr::arrange(exp.GROUP)
     data_final <- as.data.frame(data_final)
     custom_row_names <- c("Max", "Min", data_final$exp.GROUP)  # adding these later step, but next we need to remove col
     data_final <- data_final[, 2:ncol(data_final)]
@@ -150,7 +150,7 @@ plot_health_icd10_profile <- function(data,
     colors_border <- c(colors_exposure_groups_shade[2], colors_exposure_groups_shade[1])
     colors_in <- c(colors_exposure_groups[2], colors_exposure_groups[1])
     # Custom the radarChart !
-    radarchart(data,  axistype=1,
+    fmsb::radarchart(data,  axistype=1,
                ## Custom polygon
                pcol=colors_border,pfcol=alpha(colors_in, .5), plwd=4,
                plty=1,
