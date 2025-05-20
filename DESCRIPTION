@@ -1,7 +1,8 @@
 Package: healthpopR
 Type: Package
-Title: This package is used for exploring population health with certain diagnoses. Package has functions which helps analysing how exposure diagnoses affects to response diagnoses in follow-up dataset. 
-Version: 0.1.2
+URL: https://github.com/janikmiet/healthpopR
+Title: Explore Exposure and Response diagnoses connection with R
+Version: 0.1.4
 Authors@R: c(
     person(
       "Jani", "Miettinen",
@@ -14,8 +15,8 @@ Authors@R: c(
       role = c("aut")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
+Description: **healthpopR** helps researchers and analysts classify populations into exposure and response groups, visualize ICD-10-based health profiles, and perform survival and Cox regression analysis using tidy workflows.
+    The package is designed for analyzing how exposure diagnoses affect response diagnoses in population health data research. Package uses regex code for identifying ICD-10/9/8 codes.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

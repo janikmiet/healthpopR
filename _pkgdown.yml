@@ -2,8 +2,16 @@ url: https://janikmiet.github.io/healthpopR/
 template:
   bootstrap: 5
   bootswatch: flatly  # or cosmo, united, etc.
+  # light-switch: true
+  logo: man/figures/logo.png
+  bslib:
+    navbar-bg: "#66CCFF"
+    navbar-light-bg: "#66CCFF"
+    # navbar-dark-bg: "#3399CC"
 
 navbar:
+  # bg: light
+  # type: light
   title: "healthpopR"
   type: default
   left:

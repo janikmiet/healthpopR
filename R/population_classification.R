@@ -39,25 +39,25 @@
 
   ## Phase 2: Individuals with diagnosis
   d1 <- dat %>%
-    arrange(ID, DATE) %>%
-    group_by(ID) %>%
-    summarise(
+    dplyr::arrange(ID, DATE) %>%
+    dplyr::group_by(ID) %>%
+    dplyr::summarise(
       DATE = first(DATE),
       SRC = first(SRC),
       DGREG = first(DGREG),
       .groups = "drop"
     ) %>%
-    left_join(population, by = "ID") %>%
-    mutate(
+    dplyr::left_join(population, by = "ID") %>%
+    dplyr::mutate(
       GROUP = groups[1],
-      AGE_DG = trunc((DATE_BIRTH %--% DATE) / years(1))
+      AGE_DG = trunc((DATE_BIRTH %--% DATE) / lubridate::years(1))
     )
   # safe_inc_progress(2 / 4)
 
   ## Phase 3: Individuals without diagnosis
   d2 <- data_population %>%
-    filter(!ID %in% d1$ID) %>%
-    mutate(
+    dplyr::filter(!ID %in% d1$ID) %>%
+    dplyr::mutate(
       GROUP = groups[2],
       AGE_DG = NA,
       DATE = NA,
@@ -155,12 +155,12 @@ classify_population <- function(exposure_icd10 = "",
                                groups = c("exposure", "no exposure"),
                                data_population = data_population,
                                data_diagnoses = data_diagnoses) %>%
-      rename_with(~ paste0("exp.", .)) %>%
-      rename(ID = exp.ID,
+      dplyr::rename_with(~ paste0("exp.", .)) %>%
+      dplyr::rename(ID = exp.ID,
              DATE_BIRTH = exp.DATE_BIRTH,
              DATE_DEATH = exp.DATE_DEATH,
              DATE_MIGRATION = exp.DATE_MIGRATION) %>%
-      select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, exp.DATE, exp.SRC, exp.DGREG, exp.GROUP, exp.AGE_DG)
+      dplyr::select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, exp.DATE, exp.SRC, exp.DGREG, exp.GROUP, exp.AGE_DG)
 
     .safe_inc_progress(2/4)
 
@@ -173,24 +173,24 @@ classify_population <- function(exposure_icd10 = "",
                                   groups = c("response", "no response"),
                                   data_population = data_population,
                                   data_diagnoses = data_diagnoses) %>%
-        select(-DATE_BIRTH, -DATE_DEATH, -DATE_MIGRATION) %>%
-        rename_with(~ paste0("resp.", .)) %>%
-        rename(ID = resp.ID) %>%
-        select(ID, resp.DATE, resp.SRC, resp.DGREG, resp.GROUP, resp.AGE_DG)
+        dplyr::select(-DATE_BIRTH, -DATE_DEATH, -DATE_MIGRATION) %>%
+        dplyr::rename_with(~ paste0("resp.", .)) %>%
+        dplyr::rename(ID = resp.ID) %>%
+        dplyr::select(ID, resp.DATE, resp.SRC, resp.DGREG, resp.GROUP, resp.AGE_DG)
 
       .safe_inc_progress(3/4)
 
       ## Join
       d <- exp %>%
-        left_join(resp, by = "ID") %>%
-        mutate(
+        dplyr::left_join(resp, by = "ID") %>%
+        dplyr::mutate(
           exposure = ifelse(!is.na(exp.DATE), 1, 0),
           response = ifelse(!is.na(resp.DATE), 1, 0)
         )
 
     } else {
       d <- exp %>%
-        mutate(
+        dplyr::mutate(
           exposure = ifelse(!is.na(exp.DATE), 1, 0)
         )
     }

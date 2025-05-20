@@ -2,7 +2,7 @@
 
 **healthpopR** helps researchers and analysts classify populations into exposure and response groups, visualize ICD-10-based health profiles, and perform survival and Cox regression analysis using tidy workflows.
 
-The package is designed for analyzing how exposure diagnoses affect response diagnoses in population health data research.
+The package is designed for analyzing how exposure diagnoses affect response diagnoses in population health data research. Package uses regex code for identifying ICD-10/9/8 codes. Check Quick Example for motivation.
 
 <!-- <img src="man/figures/ueflogo.jpg" align="right" alt="" width="120" /> -->
 
@@ -30,7 +30,7 @@ library(healthpopR)
 diagnoses <- read.csv("your_diagnoses_data.csv")
 dpop <- classify_population(diagnoses, 
                     exposure_icd10 = "^E11", 
-                    response_icd_10 = "^I2[0-5]")
+                    response_icd10 = "^I2[0-5]")
 head(dpop)
 ```
 

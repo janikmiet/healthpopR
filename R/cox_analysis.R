@@ -50,40 +50,40 @@ cox_create_data <- function(data,
 
   # 1. Prepare answering dates and compute age at baseline
   dadates <- data_dates %>%
-    mutate(age_bs = as.numeric(difftime(as.Date(vpvmbl), as.Date(spvm), unit = "weeks")) / 52.25) %>%
-    select(ID, age_bs, vpvmbl)
+    dplyr::mutate(age_bs = as.numeric(difftime(as.Date(vpvmbl), as.Date(spvm), unit = "weeks")) / 52.25) %>%
+    dplyr::select(ID, age_bs, vpvmbl)
 
   # 2. Join answering dates to population data
   d1 <- data %>%
-    left_join(dadates, by = "ID")
+    dplyr::left_join(dadates, by = "ID")
 
   # 3. Time variable calculations
   d2 <- d1 %>%
-    filter(!is.na(vpvmbl)) %>%
-    select(ID, age_bs, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, exp.DATE, resp.DATE, vpvmbl) %>%
-    mutate(
+    dplyr::filter(!is.na(vpvmbl)) %>%
+    dplyr::select(ID, age_bs, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, exp.DATE, resp.DATE, vpvmbl) %>%
+    dplyr::mutate(
       t_exposure = as.numeric(exp.DATE - vpvmbl),
       t_response = as.numeric(resp.DATE - vpvmbl),
       epvm = pmin(DATE_MIGRATION, censoring_date, DATE_DEATH, resp.DATE + 1, na.rm = TRUE),
       t_censoring = as.numeric(epvm - vpvmbl)
     ) %>%
-    select(ID, age_bs, t_exposure, t_response, t_censoring)
+    dplyr::select(ID, age_bs, t_exposure, t_response, t_censoring)
 
   # 4. Join time variables with data_socioeconomic
   data_base <- data_socioeconomic %>%
-    left_join(d2, by = "ID") %>%
-    filter(t_censoring > 0)  # remove invalid rows
+    dplyr::left_join(d2, by = "ID") %>%
+    dplyr::filter(t_censoring > 0)  # remove invalid rows
 
   # 5. Relevel with checking
   data_base <- .relevel_by_reference(data_base, reference_values)
   # levels(data_base$bmi_cat1)
 
   # 6. Create survival time structure with tmerge and time-dependent covariates
-  newd1 <- tmerge(data1 = data_base %>% select(ID, age_bs, bmi, bmi_cat1, bmi_cat2, edu),
+  newd1 <- survival::tmerge(data1 = data_base %>% select(ID, age_bs, bmi, bmi_cat1, bmi_cat2, edu),
                   data2 = data_base, id = ID, tstop = t_censoring)
 
-  newd1 <- tmerge(data1 = newd1, data2 = data_base, id = ID, diagnose = event(t_response))
-  newd1 <- tmerge(data1 = newd1, data2 = data_base, id = ID, exposure = tdc(t_exposure))
+  newd1 <- survival::tmerge(data1 = newd1, data2 = data_base, id = ID, diagnose = event(t_response))
+  newd1 <- survival::tmerge(data1 = newd1, data2 = data_base, id = ID, exposure = tdc(t_exposure))
 
   # 7. Define survival object
   newd1$Surv <- with(newd1, Surv(tstart, tstop, diagnose))
@@ -160,7 +160,7 @@ create_cox_model <- function(data,
     }
     mdl_str <- paste0(mdl_str, " + ", var, " ")
   }
-  model <- coxph(as.formula(mdl_str), data = data, id = data[[id_var]])
+  model <- survival::coxph(as.formula(mdl_str), data = data, id = data[[id_var]])
   return(model)
 }
 
@@ -225,13 +225,13 @@ cox_plot_overall <- function(data,
   # Choose plot type based on 'type' argument
   plot <- switch(
     type,
-    "event" = ggsurvplot(
+    "event" = survminer::ggsurvplot(
       fit, data = data, fun = "event", palette = colors_exposure_groups
     ),
-    "cumhaz" = ggsurvplot(
+    "cumhaz" = survminer::ggsurvplot(
       fit, data = data, fun = "cumhaz", palette = colors_exposure_groups
     ),
-    "pct" = ggsurvplot(
+    "pct" = survminer::ggsurvplot(
       fit,
       data = data,
       fun = "pct",
@@ -293,18 +293,18 @@ cox_plot_spline <- function(data_model,
   # Predict effects using ggeffects
   library(ggeffects)
   # mda <- ggeffect(data_model, terms = var)
-  mda <- ggpredict(data_model, terms = paste0(spline_var, " [all]"))
+  mda <- ggeffects::ggpredict(data_model, terms = paste0(spline_var, " [all]"))
 
   # Create the plot
-  p <- ggplot(mda, aes(x = x, y = predicted)) +
-    geom_line(color = color, size = 1.2) +
-    geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, fill = color) +
-    labs(
+  p <- ggplot2::ggplot(mda, aes(x = x, y = predicted)) +
+    ggplot2::geom_line(color = color, size = 1.2) +
+    ggplot2::geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, fill = color) +
+    ggplot2::labs(
       title = title,
       x = ifelse(is.null(xlab), var, xlab),
       y = ylab
     ) +
-    theme_minimal()
+    ggplot2::theme_minimal()
 
   return(p)
 }

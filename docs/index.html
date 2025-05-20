@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>This package is used for exploring population health with certain diagnoses. Package has functions which helps analysing how exposure diagnoses affects to response diagnoses in follow-up dataset. • healthpopR</title>
+<title>Explore Exposure and Response diagnoses connection with R • healthpopR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="This package is used for exploring population health with certain diagnoses. Package has functions which helps analysing how exposure diagnoses affects to response diagnoses in follow-up dataset.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Explore Exposure and Response diagnoses connection with R">
 <meta name="description" content="**healthpopR** helps researchers and analysts classify populations into exposure and response groups, visualize ICD-10-based health profiles, and perform survival and Cox regression analysis using tidy workflows. The package is designed for analyzing how exposure diagnoses affect response diagnoses in population health data research. Package uses regex code for identifying ICD-10/9/8 codes.">
 <meta property="og:description" content="**healthpopR** helps researchers and analysts classify populations into exposure and response groups, visualize ICD-10-based health profiles, and perform survival and Cox regression analysis using tidy workflows. The package is designed for analyzing how exposure diagnoses affect response diagnoses in population health data research. Package uses regex code for identifying ICD-10/9/8 codes.">
 <meta property="og:image" content="https://janikmiet.github.io/healthpopR/logo.png">
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">healthpopR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,7 +79,7 @@
 <span><span class="va">diagnoses</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"your_diagnoses_data.csv"</span><span class="op">)</span></span>
 <span><span class="va">dpop</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/classify_population.html">classify_population</a></span><span class="op">(</span><span class="va">diagnoses</span>,</span>
 <span>                    exposure_icd10 <span class="op">=</span> <span class="st">"^E11"</span>,</span>
-<span>                    response_icd_10 <span class="op">=</span> <span class="st">"^I2[0-5]"</span><span class="op">)</span></span>
+<span>                    response_icd10 <span class="op">=</span> <span class="st">"^I2[0-5]"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dpop</span><span class="op">)</span></span></code></pre>
 </div>
 <div class="section level2">

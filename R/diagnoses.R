@@ -66,26 +66,26 @@ search_diagnoses <- function(regex_icd10="",
     .safe_inc_progress(1/6)
     if(regex_icd10 != ""){
       d1 <- data_diagnoses %>%
-        filter(DGREG == "ICD10") %>%
-        filter(SRC %in% registry_source) %>%
-        filter(grepl(pattern = regex_icd10, x = DG)) %>%
-        select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
+        dplyr::filter(DGREG == "ICD10") %>%
+        dplyr::filter(SRC %in% registry_source) %>%
+        dplyr::filter(grepl(pattern = regex_icd10, x = DG)) %>%
+        dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
     }
     .safe_inc_progress(2/6)
     if(regex_icd9 != ""){
       d2 <- data_diagnoses %>%
-        filter(DGREG == "ICD9") %>%
-        filter(SRC %in% registry_source) %>%
-        filter(grepl(pattern = regex_icd9, x = DG))%>%
-        select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
+        dplyr::filter(DGREG == "ICD9") %>%
+        dplyr::filter(SRC %in% registry_source) %>%
+        dplyr::filter(grepl(pattern = regex_icd9, x = DG))%>%
+        dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
     }
     .safe_inc_progress(3/6)
     if(regex_icd8 != ""){
       d3 <- data_diagnoses %>%
-        filter(DGREG == "ICD8") %>%
-        filter(SRC %in% registry_source) %>%
-        filter(grepl(pattern = regex_icd8, x = DG))%>%
-        select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
+        dplyr::filter(DGREG == "ICD8") %>%
+        dplyr::filter(SRC %in% registry_source) %>%
+        dplyr::filter(grepl(pattern = regex_icd8, x = DG))%>%
+        dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
     }
     .safe_inc_progress(4/6)
     #TODO kun src extra mukaan
@@ -100,14 +100,14 @@ search_diagnoses <- function(regex_icd10="",
 
     ## Kaikki ICD rekisterit yhdessa.
     d <- tibble() %>%
-      bind_rows(d1) %>%
-      bind_rows(d2) %>%
-      bind_rows(d3)
+      dplyr::bind_rows(d1) %>%
+      dplyr::bind_rows(d2) %>%
+      dplyr::bind_rows(d3)
     # rbind(if(exists("d4") & nrow(d4)>0) d4)
 
     rm(list = c("d1", "d2", "d3"))
     d <- as_tibble(d) %>%
-      arrange(ID, DGREG, DATE)
+      dplyr::arrange(ID, DGREG, DATE)
 
     .safe_inc_progress(6/6)
     return(d)
@@ -138,21 +138,21 @@ plot_diagnoses_src <- function(data, per_source = FALSE) {
     .safe_inc_progress(1/4)
 
     dvenn <- data %>%
-      arrange(ID, DATE)
+      dplyr::arrange(ID, DATE)
 
     # Grouping logic based on per_source flag
     dvenn <- if (per_source) {
       dvenn %>%
-        group_by(ID, SRC) %>%
-        summarise(DATE = first(DATE),
+        dplyr::group_by(ID, SRC) %>%
+        dplyr::summarise(DATE = first(DATE),
                   SRC = first(SRC), .groups = "drop")%>%
-        select(ID, SRC)
+        dplyr::select(ID, SRC)
     } else {
       dvenn %>%
-        group_by(ID) %>%
-        summarise(DATE = first(DATE),
+        dplyr::group_by(ID) %>%
+        dplyr::summarise(DATE = first(DATE),
                   SRC = first(SRC), .groups = "drop")%>%
-        select(ID, SRC)
+        dplyr::select(ID, SRC)
     }
 
     .safe_inc_progress(2/4)
@@ -171,8 +171,8 @@ plot_diagnoses_src <- function(data, per_source = FALSE) {
 
     .safe_inc_progress(3/4)
 
-    plt <- ggVennDiagram(x) +
-      scale_fill_gradient(low = "#F4FAFE", high = "#4981BF")
+    plt <- ggVennDiagram::ggVennDiagram(x) +
+      ggplot2::scale_fill_gradient(low = "#F4FAFE", high = "#4981BF")
 
     .safe_inc_progress(4/4)
 

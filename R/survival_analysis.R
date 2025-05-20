@@ -43,31 +43,31 @@ create_dsurv <- function(data,
     .safe_inc_progress(1/3)
 
     exposure_to_response <- data %>%
-      filter(exp.GROUP == "exposure") %>%
-      mutate(
+      dplyr::filter(exp.GROUP == "exposure") %>%
+      dplyr::mutate(
         epvm=pmin(DATE_MIGRATION, censoring_date, na.rm = TRUE)
       ) %>%
-      mutate(diagnose =  trunc((exp.DATE %--% resp.DATE) / days(1) ),
+      dplyr::mutate(diagnose =  trunc((exp.DATE %--% resp.DATE) / days(1) ),
              dead = ifelse(!is.na(DATE_DEATH), trunc((exp.DATE %--% DATE_DEATH) / days(1) ) , NA),
              censoring = trunc((exp.DATE %--% epvm) / days(1))
       ) %>%
-      mutate(censoring = ifelse(is.na(dead), censoring, NA))
+      dplyr::mutate(censoring = ifelse(is.na(dead), censoring, NA))
 
     .safe_inc_progress(2/3)
 
     d <- exposure_to_response %>%
-      select(ID, resp.DATE, diagnose, dead, censoring) %>%
-      arrange(ID, resp.DATE) %>%
+      dplyr::select(ID, resp.DATE, diagnose, dead, censoring) %>%
+      dplyr::arrange(ID, resp.DATE) %>%
       ## FILTER , take response cases before 0 timepoint, yes/no. This is going to be recoded as 0.
-      filter(if(filter_early_responses){diagnose >= 0 }else{is.numeric(diagnose)}) %>%
-      arrange(ID, resp.DATE) %>%
-      group_by(ID) %>%
-      summarise(diagnose = first(diagnose),
+      dplyr::filter(if(filter_early_responses){diagnose >= 0 }else{is.numeric(diagnose)}) %>%
+      dplyr::arrange(ID, resp.DATE) %>%
+      dplyr::group_by(ID) %>%
+      dplyr::summarise(diagnose = first(diagnose),
                 dead = first(dead),
                 censoring = first(censoring)) %>%
-      mutate(diagnose = ifelse(diagnose < 0, 0 , diagnose)) %>% # Recoding possible before 0 timepoints for response dg
-      pivot_longer(cols = c(diagnose, dead, censoring)) %>%
-      filter(!is.na(value))
+      dplyr::mutate(diagnose = ifelse(diagnose < 0, 0 , diagnose)) %>% # Recoding possible before 0 timepoints for response dg
+      tidyr::pivot_longer(cols = c(diagnose, dead, censoring)) %>%
+      dplyr::filter(!is.na(value))
 
     .safe_inc_progress(3/3)
 
@@ -116,14 +116,14 @@ plot_survival_km <- function(data){
 
     ## Event: 0 = censoring/kuollut, 1 = diagnose
     dsurv <- data %>%
-      mutate(event = ifelse(name == "diagnose", 1, 0) )
+      dplyr::mutate(event = ifelse(name == "diagnose", 1, 0) )
 
     .safe_inc_progress(2/3)
 
     ## Mallinnetaan elinaika-analyysi
     # library(survival)
     surv_object <- survival::Surv(time = dsurv$value, event = dsurv$event)
-    fit1 <- survfit(surv_object ~ 1, data = dsurv, id = ID)
+    fit1 <- survival::survfit(surv_object ~ 1, data = dsurv, id = ID)
 
     .safe_inc_progress(3/3)
 
@@ -182,23 +182,23 @@ plot_survival_cr <- function(data,
 
     ## Data
     dsurv <- data %>%
-      mutate(
+      dplyr::mutate(
         event = ifelse(name == "diagnose", 1, ifelse(name == "dead", 2, 3))
       )
 
     ## fitting a competing risks model
-    CR <- cuminc(ftime = dsurv$value,
+    CR <- cmprsk::cuminc(ftime = dsurv$value,
                  fstatus = dsurv$event,
                  cencode = 3)
 
     .safe_inc_progress(2/3)
 
-    plt <- ggcompetingrisks(fit = CR,
+    plt <- survminer::ggcompetingrisks(fit = CR,
                             multiple_panels = F,
                             xlab = "Days",
                             ylab = "Cumulative incidence of event",
                             title = "Competing Risks Analysis") +
-      scale_color_manual(name="",
+      ggplot2::scale_color_manual(name="",
                          values=colors,
                          labels=c("Response Diagnose", "Dead"))
 
