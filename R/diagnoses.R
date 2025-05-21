@@ -130,9 +130,18 @@ search_diagnoses <- function(regex_icd10="",
 #' @param per_source logical. If \code{FALSE} (default), uses only the first source per ID. If \code{TRUE}, includes one record per source per ID.
 #'
 #' @return A ggplot object with a Venn diagram.
-#'
+#' @importFrom magrittr %>%
+#' @importFrom ggVennDiagram ggVennDiagram
+#' @importFrom ggplot2 scale_fill_gradient
+#' @importFrom dplyr group_by summarise first select arrange
 #' @export
 plot_diagnoses_src <- function(data, per_source = FALSE) {
+
+  if(FALSE){
+    data=exposure_diagnoses
+    per_source = FALSE
+  }
+
   all <- function() {
     .safe_inc_progress(1/4)
 
@@ -143,14 +152,14 @@ plot_diagnoses_src <- function(data, per_source = FALSE) {
     dvenn <- if (per_source) {
       dvenn |>
         dplyr::group_by(ID, SRC) |>
-        dplyr::summarise(DATE = first(DATE),
-                  SRC = first(SRC), .groups = "drop")|>
+        dplyr::summarise(DATE = dplyr::first(DATE),
+                         SRC = dplyr::first(SRC), .groups = "drop")|>
         dplyr::select(ID, SRC)
     } else {
       dvenn |>
         dplyr::group_by(ID) |>
-        dplyr::summarise(DATE = first(DATE),
-                  SRC = first(SRC), .groups = "drop")|>
+        dplyr::summarise(DATE = dplyr::first(DATE),
+                         SRC = dplyr::first(SRC), .groups = "drop")|>
         dplyr::select(ID, SRC)
     }
 
@@ -158,9 +167,9 @@ plot_diagnoses_src <- function(data, per_source = FALSE) {
 
     # Helper to split tibble into named list for Venn plotting
     split_tibble <- function(tibble, column = 'SRC') {
-      temp <- tibble |>
-        split(., .[[column]]) |>
-        lapply(function(x) x[setdiff(names(x), column)]) |>
+      temp <- tibble %>%
+        split(., .[[column]]) %>%
+        lapply(function(x) x[setdiff(names(x), column)]) %>%
         unlist(recursive = FALSE)
       names(temp) <- gsub("\\.ID$", "", names(temp))  # Clean names
       return(temp)

@@ -71,7 +71,7 @@ classify_icd10_profile <- function(data,
       summarise(
         cases=n(),
         patients=length(unique(ID)),
-        n_group = first(n_group)
+        n_group = dplyr::first(n_group)
       ) |>
       mutate(
         per100=cases/100 * n_group,

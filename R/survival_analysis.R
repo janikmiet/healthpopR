@@ -62,9 +62,9 @@ create_dsurv <- function(data,
       dplyr::filter(if(filter_early_responses){diagnose >= 0 }else{is.numeric(diagnose)}) |>
       dplyr::arrange(ID, resp.DATE) |>
       dplyr::group_by(ID) |>
-      dplyr::summarise(diagnose = first(diagnose),
-                dead = first(dead),
-                censoring = first(censoring)) |>
+      dplyr::summarise(diagnose = dplyr::first(diagnose),
+                dead = dplyr::first(dead),
+                censoring = dplyr::first(censoring)) |>
       dplyr::mutate(diagnose = ifelse(diagnose < 0, 0 , diagnose)) |> # Recoding possible before 0 timepoints for response dg
       tidyr::pivot_longer(cols = c(diagnose, dead, censoring)) |>
       dplyr::filter(!is.na(value))

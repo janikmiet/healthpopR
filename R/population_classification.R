@@ -42,9 +42,9 @@
     dplyr::arrange(ID, DATE) |>
     dplyr::group_by(ID) |>
     dplyr::summarise(
-      DATE = first(DATE),
-      SRC = first(SRC),
-      DGREG = first(DGREG),
+      DATE = dplyr::first(DATE),
+      SRC = dplyr::first(SRC),
+      DGREG = dplyr::first(DGREG),
       .groups = "drop"
     ) |>
     dplyr::left_join(population, by = "ID") |>
