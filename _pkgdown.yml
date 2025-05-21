@@ -31,6 +31,11 @@ reference:
       - summary_exp_resp_crosstabulation
       - summary_exp_resp_order
       - table_age_distribution
+  - title: "Diagnoses"
+    contents:
+      - search_diagnoses
+      - plot_diagnoses_src
+      - table_summary_diagnoses
   - title: "Health Analysis functions"
     contents:
       - plot_health_icd10_profile

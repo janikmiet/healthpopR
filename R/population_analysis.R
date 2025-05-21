@@ -77,11 +77,11 @@ plot_age_distribution <- function(
     if(subgroups){
       d <- d1 |>
         dplyr::group_by(GROUP, SUBGROUP, AGE) |>
-        dplyr::summarise(freq = n())
+        dplyr::summarise(freq = dplyr::n())
     }else{
       d <- d1 |>
         dplyr::group_by(GROUP, AGE) |>
-        dplyr::summarise(freq = n())
+        dplyr::summarise(freq = dplyr::n())
     }
 
     .safe_inc_progress(2/4)
@@ -193,7 +193,7 @@ table_age_distribution <- function(
                       AGE = exp.AGE_DG) |>
         dplyr::group_by(GROUP) |>
         dplyr::summarise(
-          pop_n = n(),
+          pop_n = dplyr::n(),
           age_min = min(AGE, na.rm = TRUE),
           age_median = median(AGE, na.rm = TRUE),
           age_mean = mean(AGE, na.rm = TRUE),
@@ -207,7 +207,7 @@ table_age_distribution <- function(
                       AGE = resp.AGE_DG) |>
         dplyr::group_by(GROUP) |>
         dplyr::summarise(
-          pop_n = n(),
+          pop_n = dplyr::n(),
           age_min = min(AGE, na.rm = TRUE),
           age_median = median(AGE, na.rm = TRUE),
           age_mean = mean(AGE, na.rm = TRUE),
@@ -226,7 +226,7 @@ table_age_distribution <- function(
                         AGE = resp.AGE_DG) |>
           dplyr::group_by(GROUP) |>
           dplyr::summarise(
-            pop_n = n(),
+            pop_n = dplyr::n(),
             age_min = min(AGE, na.rm = TRUE),
             age_median = median(AGE, na.rm = TRUE),
             age_mean = mean(AGE, na.rm = TRUE),
@@ -239,7 +239,7 @@ table_age_distribution <- function(
                         AGE = exp.AGE_DG) |>
           dplyr::group_by(GROUP) |>
           dplyr::summarise(
-            pop_n = n(),
+            pop_n = dplyr::n(),
             age_min = min(AGE, na.rm = TRUE),
             age_median = median(AGE, na.rm = TRUE),
             age_mean = mean(AGE, na.rm = TRUE),
@@ -388,7 +388,7 @@ summary_exp_resp_order <- function(data){
       ) |>
       dplyr::group_by(exp_resp) |>
       dplyr::summarise(
-        n = n()
+        n = dplyr::n()
       ) |>
       dplyr::mutate(
         percentage = round(100 * n / nrow(data |> filter(exposure == 1 & response == 1)), 1),
