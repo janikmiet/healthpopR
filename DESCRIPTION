@@ -2,7 +2,7 @@ Package: healthpopR
 Type: Package
 URL: https://github.com/janikmiet/healthpopR
 Title: Explore Exposure and Response diagnoses connection with R
-Version: 0.1.6
+Version: 0.1.7
 Authors@R: c(
     person(
       "Jani", "Miettinen",
