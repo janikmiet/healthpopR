@@ -67,21 +67,18 @@ recode_icd10_class <- function(ICD10_3LETTERS, DGREG = DGREG){
 
 #' Categorize BMI values into clinical weight categories
 #'
-#' This function categorizes BMI (Body Mass Index) values into either 4 or 6 clinical categories.
-#' It is designed to be used inside `dplyr::mutate()` for labeling BMI values in a dataset.
+#' Categorizes BMI values into 4 or 6 clinical categories as ordered factors,
+#' with "Healthy Weight" as the reference level.
 #'
 #' @param bmi A numeric vector of BMI values.
-#' @param levels Integer value indicating the number of category levels to use.
-#'   - Use `4` for basic categories: "Underweight", "Healthy Weight", "Overweight", "Obesity".
-#'   - Use `6` for detailed obesity classes: adds "Class 1–3 Obesity".
+#' @param levels Integer. Use 4 for: Underweight, Healthy Weight, Overweight, Obesity.
+#'   Use 6 for detailed obesity classification.
 #'
-#' @return An ordered factor vector of BMI category labels.
-#'   If `bmi` is `NA`, or outside any known range, returns `NA`.
+#' @return An ordered factor with "Healthy Weight" as the reference level.
 #'
 #' @examples
-#' library(dplyr)
-#' df <- tibble(bmi = c(17, 22, 27, 32, 37, 42, NA))
-#' df %>% mutate(
+#' df <- tibble::tibble(bmi = c(17, 22, 27, 32, 37, 42, NA))
+#' df %>% dplyr::mutate(
 #'   bmi_cat4 = categorize_bmi(bmi, levels = 4),
 #'   bmi_cat6 = categorize_bmi(bmi, levels = 6)
 #' )
@@ -92,7 +89,7 @@ categorize_bmi <- function(bmi, levels = 4) {
   labels_6 <- c("Underweight", "Healthy Weight", "Overweight",
                 "Class 1 Obesity", "Class 2 Obesity", "Class 3 Obesity")
 
-  cats <- case_when(
+  cats <- dplyr::case_when(
     levels == 6 & bmi < 18.5 ~ "Underweight",
     levels == 6 & bmi >= 18.5 & bmi < 25 ~ "Healthy Weight",
     levels == 6 & bmi >= 25 & bmi < 30 ~ "Overweight",
@@ -108,5 +105,7 @@ categorize_bmi <- function(bmi, levels = 4) {
     TRUE ~ NA_character_
   )
 
-  factor(cats, levels = if (levels == 4) labels_4 else labels_6, ordered = TRUE)
+  levels_used <- if (levels == 4) labels_4 else labels_6
+  factor(cats, levels = levels_used) |>
+    stats::relevel(ref = "Healthy Weight")
 }
