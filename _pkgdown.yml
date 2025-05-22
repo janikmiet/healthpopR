@@ -38,9 +38,10 @@ reference:
       - table_summary_diagnoses
   - title: "Health Analysis functions"
     contents:
+      - classify_icd10_profile
       - plot_health_icd10_profile
-      - plot_icd10_diff_by_exposure
       - tbl_icd10_diff_by_exposure
+      - plot_icd10_diff_by_exposure
   - title: "Survival Analysis functions"
     contents:
       - create_dsurv
@@ -62,6 +63,9 @@ reference:
     contents:
       - recode_icd10_3letters
       - recode_icd10_class
+  - title: "Data sets"
+    contents:
+      - data_codes
 
 articles:
   - title: "Getting Started"

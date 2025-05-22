@@ -2,7 +2,7 @@ Package: healthpopR
 Type: Package
 URL: https://github.com/janikmiet/healthpopR
 Title: Explore Exposure and Response diagnoses connection with R
-Version: 0.1.5
+Version: 0.1.6
 Authors@R: c(
     person(
       "Jani", "Miettinen",
@@ -25,3 +25,5 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+Depends: 
+    R (>= 3.5)
