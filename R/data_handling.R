@@ -75,8 +75,8 @@ recode_icd10_class <- function(ICD10_3LETTERS, DGREG = DGREG){
 #'   - Use `4` for basic categories: "Underweight", "Healthy Weight", "Overweight", "Obesity".
 #'   - Use `6` for detailed obesity classes: adds "Class 1–3 Obesity".
 #'
-#' @return A character vector of BMI category labels.
-#'   If `bmi` is `NA`, or outside any known range, returns `NA_character_`.
+#' @return An ordered factor vector of BMI category labels.
+#'   If `bmi` is `NA`, or outside any known range, returns `NA`.
 #'
 #' @examples
 #' library(dplyr)
@@ -88,7 +88,11 @@ recode_icd10_class <- function(ICD10_3LETTERS, DGREG = DGREG){
 #'
 #' @export
 categorize_bmi <- function(bmi, levels = 4) {
-  case_when(
+  labels_4 <- c("Underweight", "Healthy Weight", "Overweight", "Obesity")
+  labels_6 <- c("Underweight", "Healthy Weight", "Overweight",
+                "Class 1 Obesity", "Class 2 Obesity", "Class 3 Obesity")
+
+  cats <- case_when(
     levels == 6 & bmi < 18.5 ~ "Underweight",
     levels == 6 & bmi >= 18.5 & bmi < 25 ~ "Healthy Weight",
     levels == 6 & bmi >= 25 & bmi < 30 ~ "Overweight",
@@ -103,4 +107,6 @@ categorize_bmi <- function(bmi, levels = 4) {
 
     TRUE ~ NA_character_
   )
+
+  factor(cats, levels = if (levels == 4) labels_4 else labels_6, ordered = TRUE)
 }

@@ -60,8 +60,8 @@ It is designed to be used inside `dplyr::mutate()` for labeling BMI values in a 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A character vector of BMI category labels.
-  If `bmi` is `NA`, or outside any known range, returns `NA_character_`.</p>
+    <p>An ordered factor vector of BMI category labels.
+  If `bmi` is `NA`, or outside any known range, returns `NA`.</p>
     </div>
 
     <div class="section level2">
@@ -82,7 +82,7 @@ It is designed to be used inside `dplyr::mutate()` for labeling BMI values in a 
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 7 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     bmi bmi_cat4       bmi_cat6       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;ord&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;ord&gt;</span>          </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>    17 Underweight    Underweight    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>    22 Healthy Weight Healthy Weight </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>    27 Overweight     Overweight     </span>
