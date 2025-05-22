@@ -61,3 +61,46 @@ recode_icd10_class <- function(ICD10_3LETTERS, DGREG = DGREG){
     DGREG != "ICD10" ~ NA,
   )
 }
+
+
+
+
+#' Categorize BMI values into clinical weight categories
+#'
+#' This function categorizes BMI (Body Mass Index) values into either 4 or 6 clinical categories.
+#' It is designed to be used inside `dplyr::mutate()` for labeling BMI values in a dataset.
+#'
+#' @param bmi A numeric vector of BMI values.
+#' @param levels Integer value indicating the number of category levels to use.
+#'   - Use `4` for basic categories: "Underweight", "Healthy Weight", "Overweight", "Obesity".
+#'   - Use `6` for detailed obesity classes: adds "Class 1–3 Obesity".
+#'
+#' @return A character vector of BMI category labels.
+#'   If `bmi` is `NA`, or outside any known range, returns `NA_character_`.
+#'
+#' @examples
+#' library(dplyr)
+#' df <- tibble(bmi = c(17, 22, 27, 32, 37, 42, NA))
+#' df %>% mutate(
+#'   bmi_cat4 = categorize_bmi(bmi, levels = 4),
+#'   bmi_cat6 = categorize_bmi(bmi, levels = 6)
+#' )
+#'
+#' @export
+categorize_bmi <- function(bmi, levels = 4) {
+  case_when(
+    levels == 6 & bmi < 18.5 ~ "Underweight",
+    levels == 6 & bmi >= 18.5 & bmi < 25 ~ "Healthy Weight",
+    levels == 6 & bmi >= 25 & bmi < 30 ~ "Overweight",
+    levels == 6 & bmi >= 30 & bmi < 35 ~ "Class 1 Obesity",
+    levels == 6 & bmi >= 35 & bmi < 40 ~ "Class 2 Obesity",
+    levels == 6 & bmi >= 40 ~ "Class 3 Obesity",
+
+    levels == 4 & bmi < 18.5 ~ "Underweight",
+    levels == 4 & bmi >= 18.5 & bmi < 25 ~ "Healthy Weight",
+    levels == 4 & bmi >= 25 & bmi < 30 ~ "Overweight",
+    levels == 4 & bmi >= 30 ~ "Obesity",
+
+    TRUE ~ NA_character_
+  )
+}

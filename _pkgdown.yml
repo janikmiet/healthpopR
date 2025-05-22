@@ -63,6 +63,7 @@ reference:
     contents:
       - recode_icd10_3letters
       - recode_icd10_class
+      - categorize_bmi
   - title: "Data sets"
     contents:
       - data_codes

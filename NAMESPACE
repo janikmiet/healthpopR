@@ -2,6 +2,7 @@
 
 export(.regex_clean)
 export(.safe_inc_progress)
+export(categorize_bmi)
 export(classify_icd10_profile)
 export(classify_population)
 export(cox_create_data)
