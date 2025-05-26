@@ -48,49 +48,74 @@ cox_create_data <- function(data,
                             "edu" = "1 - Low")
   }
 
-  # 1. Prepare answering dates and compute age at baseline
-  dadates <- data_dates |>
-    dplyr::mutate(age_bs = as.numeric(difftime(as.Date(vpvmbl), as.Date(spvm), unit = "weeks")) / 52.25) |>
-    dplyr::select(ID, age_bs, vpvmbl)
+  internal_function <- function(){
+    # 1. Prepare answering dates and compute age at baseline
+    dadates <- data_dates |>
+      dplyr::mutate(age_bs = as.numeric(difftime(as.Date(vpvmbl), as.Date(spvm), unit = "weeks")) / 52.25) |>
+      dplyr::select(ID, age_bs, vpvmbl)
 
-  # 2. Join answering dates to population data
-  d1 <- data |>
-    dplyr::left_join(dadates, by = "ID")
+    .safe_inc_progress(1/7)
 
-  # 3. Time variable calculations
-  d2 <- d1 |>
-    dplyr::filter(!is.na(vpvmbl)) |>
-    dplyr::select(ID, age_bs, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, exp.DATE, resp.DATE, vpvmbl) |>
-    dplyr::mutate(
-      t_exposure = as.numeric(exp.DATE - vpvmbl),
-      t_response = as.numeric(resp.DATE - vpvmbl),
-      epvm = pmin(DATE_MIGRATION, censoring_date, DATE_DEATH, resp.DATE + 1, na.rm = TRUE),
-      t_censoring = as.numeric(epvm - vpvmbl)
-    ) |>
-    dplyr::select(ID, age_bs, t_exposure, t_response, t_censoring)
+    # 2. Join answering dates to population data
+    d1 <- data |>
+      dplyr::left_join(dadates, by = "ID")
 
-  # 4. Join time variables with data_socioeconomic
-  data_base <- data_socioeconomic |>
-    dplyr::left_join(d2, by = "ID") |>
-    dplyr::filter(t_censoring > 0)  # remove invalid rows
+    .safe_inc_progress(2/7)
 
-  # 5. Relevel with checking
-  data_base <- .relevel_by_reference(data_base, reference_values)
-  # levels(data_base$bmi_cat1)
+    # 3. Time variable calculations
+    d2 <- d1 |>
+      dplyr::filter(!is.na(vpvmbl)) |>
+      dplyr::select(ID, age_bs, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, exp.DATE, resp.DATE, vpvmbl) |>
+      dplyr::mutate(
+        t_exposure = as.numeric(exp.DATE - vpvmbl),
+        t_response = as.numeric(resp.DATE - vpvmbl),
+        epvm = pmin(DATE_MIGRATION, censoring_date, DATE_DEATH, resp.DATE + 1, na.rm = TRUE),
+        t_censoring = as.numeric(epvm - vpvmbl)
+      ) |>
+      dplyr::select(ID, age_bs, t_exposure, t_response, t_censoring)
 
-  # 6. Create survival time structure with tmerge and time-dependent covariates
-  newd1 <- survival::tmerge(data1 = data_base |> select(ID, age_bs, bmi, bmi_cat1, bmi_cat2, edu),
-                  data2 = data_base, id = ID, tstop = t_censoring)
+    .safe_inc_progress(3/7)
 
-  newd1 <- survival::tmerge(data1 = newd1, data2 = data_base, id = ID, diagnose = event(t_response))
-  newd1 <- survival::tmerge(data1 = newd1, data2 = data_base, id = ID, exposure = tdc(t_exposure))
+    # 4. Join time variables with data_socioeconomic
+    data_base <- data_socioeconomic |>
+      dplyr::left_join(d2, by = "ID") |>
+      dplyr::filter(t_censoring > 0)  # remove invalid rows
 
-  # 7. Define survival object
-  newd1$Surv <- with(newd1, Surv(tstart, tstop, diagnose))
+    .safe_inc_progress(4/7)
 
-  rm(list = c("d1", "d2", "dadates"))
+    # 5. Relevel with checking
+    data_base <- .relevel_by_reference(data_base, reference_values)
+    # levels(data_base$bmi_cat1)
 
-  return(newd1)
+    .safe_inc_progress(5/7)
+
+    # 6. Create survival time structure with tmerge and time-dependent covariates
+    newd1 <- survival::tmerge(data1 = data_base |> select(ID, age_bs, bmi, bmi_cat1, bmi_cat2, edu),
+                              data2 = data_base, id = ID, tstop = t_censoring)
+
+    newd1 <- survival::tmerge(data1 = newd1, data2 = data_base, id = ID, diagnose = event(t_response))
+    newd1 <- survival::tmerge(data1 = newd1, data2 = data_base, id = ID, exposure = tdc(t_exposure))
+
+    .safe_inc_progress(6/7)
+
+    # 7. Define survival object
+    newd1$Surv <- with(newd1, Surv(tstart, tstop, diagnose))
+
+    rm(list = c("d1", "d2", "dadates"))
+
+    .safe_inc_progress(7/7)
+
+    return(newd1)
+  }
+
+  if (shiny::isRunning()) {
+    withProgress(message = paste("Table", .capitalize(group), "Age Distribution"), value = 0, {
+      internal_function()
+    })
+  } else {
+    internal_function()
+  }
+
 }
 
 
@@ -141,27 +166,49 @@ create_cox_model <- function(data,
     id_var = "ID"
   }
 
-  mdl_str <- "Surv~exposure"
-  for (var in spline_vars) {
-    if (!var %in% names(data)) {
-      stop(paste("Variable", var, "not found in the dataset."))
+  internal_function <- function(){
+
+    .safe_inc_progress(1/4)
+
+    mdl_str <- "Surv~exposure"
+    for (var in spline_vars) {
+      if (!var %in% names(data)) {
+        stop(paste("Variable", var, "not found in the dataset."))
+      }
+      if (all(is.na(data[[var]]))) {
+        stop(paste("Variable", var, "contains only NA values. Cannot create splines."))
+      }
+      mdl_str <- paste0(mdl_str, " + splines::bs(", var,")")
     }
-    if (all(is.na(data[[var]]))) {
-      stop(paste("Variable", var, "contains only NA values. Cannot create splines."))
+
+    .safe_inc_progress(2/4)
+
+    for (var in normal_vars) {
+      if (!var %in% names(data)) {
+        stop(paste("Variable", var, "not found in the dataset."))
+      }
+      if (all(is.na(data[[var]]))) {
+        stop(paste("Variable", var, "contains only NA values."))
+      }
+      mdl_str <- paste0(mdl_str, " + ", var, " ")
     }
-    mdl_str <- paste0(mdl_str, " + splines::bs(", var,")")
+
+    .safe_inc_progress(3/4)
+
+    model <- survival::coxph(as.formula(mdl_str), data = data, id = data[[id_var]])
+
+    .safe_inc_progress(4/4)
+    return(model)
   }
-  for (var in normal_vars) {
-    if (!var %in% names(data)) {
-      stop(paste("Variable", var, "not found in the dataset."))
-    }
-    if (all(is.na(data[[var]]))) {
-      stop(paste("Variable", var, "contains only NA values."))
-    }
-    mdl_str <- paste0(mdl_str, " + ", var, " ")
+
+  if (shiny::isRunning()) {
+    withProgress(message = paste("Table", .capitalize(group), "Age Distribution"), value = 0, {
+      internal_function()
+    })
+  } else {
+    internal_function()
   }
-  model <- survival::coxph(as.formula(mdl_str), data = data, id = data[[id_var]])
-  return(model)
+
 }
 
 #' Plot Survival Curves from Cox Model Data
