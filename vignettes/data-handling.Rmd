@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE, eval=FALSE)
 
 # Description
 
-This document gives idea what kind of data is correct to use with the functions and demonstrates few classifying functions.
+This document gives idea what kind of data is correct to use with the package functions and demonstrates few classifying functions.
 
 
 ```{r}
@@ -35,7 +35,7 @@ population_variables <- arrow::read_parquet("../data/synth_population_variables.
 ```
 
 
-Population should have these variables:
+`population` data should have these variables:
 
 | Variable Name | Description |
 | :------------ | :--------------------------------------------------------------------- |
@@ -45,7 +45,7 @@ Population should have these variables:
 | DATE_MIGRATION | Date of when patient migrated to abroad or NA  |
 
 
-Diagnoses data should have these variables:
+`diagnoses` data should have these variables:
 
 | Variable Name | Description |
 | :------------ | :--------------------------------------------------------------------- |
@@ -55,7 +55,7 @@ Diagnoses data should have these variables:
 | DATE | Date of the diagnose |
 | DG | Full Diagnose Code (ex. E11, H903, H0410)|
 
-But then we will create also these variables:
+To diagnoses data we will create also these variables:
 
 | ICD10_3LETTERS | **Only with ICD10 code.** Diagnose Code in first 3 letters |
 | ICD10_CLASS | **Only with ICD10 code.** ICD-10 Diagnose Class (Ex. E00–E90, H60–H95, H00–H59) |
@@ -63,7 +63,7 @@ But then we will create also these variables:
 | AGE | **Only with murtumat** Patient age on diagnose date |
 
 
-population_variables should have these variables:
+`population_variables` should have these variables:
 
 | Variable Name | Description |
 | :------------ | :--------------------------------------------------------------------- |
@@ -92,7 +92,7 @@ diagnoses <- diagnoses %>%
 
 ## Categorize population_variables BMI
 
-BMI can be categorized to 4 or 6 category classes:
+BMI can be categorized to 4 or 6 category classes. We can use these variables in Cox model in future.
 
 ```{r}
 population_variables <- population_variables %>% 

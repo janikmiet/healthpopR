@@ -8,7 +8,7 @@ search_diagnoses(
   regex_icd10 = "",
   regex_icd9 = "",
   regex_icd8 = "",
-  registry_source = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa"),
+  registry_source = c(""),
   regex_extra = "",
   src_extra = "",
   data_diagnoses = diagnoses

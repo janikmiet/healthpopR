@@ -15,24 +15,38 @@ Install the development version from GitHub:
 install.packages("devtools")
 
 # Install healthpopR
-devtools::install_github("janikmiet/healthpopR")
+remotes::install_github("janikmiet/healthpopR")
 ```
 
 
 ## Quick Example
 
-Package uses regex to search diagnoses. Here's how to classify a population based on a sample dataset:
+Package uses regex to search diagnoses. Here's how to classify a population to exposure and response groups, where 
+
+- Exposure is ICD-10 code E11 (*Type 2 diabetes mellitus*)
+- Response is ICD-10 codes I20-I25 (*Ischemic heart diseases*)
+
+In diagnoses dataset we use only 2 registry sources `local` and `hilmo`.
 
 
 ```
 library(healthpopR)
 
+## Load Datasets
+population <- read.csv("your_population_data.csv")
 diagnoses <- read.csv("your_diagnoses_data.csv")
+## Classify population
 dpop <- classify_population(diagnoses, 
-                    exposure_icd10 = "^E11", 
-                    response_icd10 = "^I2[0-5]")
+                    exposure_icd10 = "^E11",
+                    exposure_src = c("local", "hilmo"),
+                    response_icd10 = "^I2[0-5]",
+                    response_src = c("local", "hilmo"),
+                    data_population = population,
+                    data_diagnoses = diagnoses)
 head(dpop)
 ```
+
+Check [`data model`](articles/data-model.html) -vignette to view how you should arrange your `population` and `diagnoses` -datasets.
 
 
 ## Key Features
@@ -45,6 +59,7 @@ head(dpop)
 
 ## Learn More
 
-- [Reference Manual](reference/index.html)
-- [Getting Started Guide](articles/getting-started.html)
 - [Data Model](articles/data-model.html)
+- [Data Handling](articles/data-handling.html)
+- [Getting Started Guide](articles/getting-started.html)
+- [Functions Reference Manual](reference/index.html)

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthpopR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,12 +66,15 @@
 <div class="section level2">
 <h2 id="description">Description<a class="anchor" aria-label="anchor" href="#description"></a>
 </h2>
-<p>Function uses follow up datasets, which have fixed variable names.
-This document describes variables and names.</p>
+<p><code>healthpopR</code> functions uses follow up datasets, which have
+fixed variable names. This document describes variables and names. Here
+you can get idea of the shape of the datasets needed.</p>
 </div>
 <div class="section level2">
 <h2 id="population">population<a class="anchor" aria-label="anchor" href="#population"></a>
 </h2>
+<p>Population data should include only one row per ID and few DATE
+variables.</p>
 <table class="table">
 <colgroup>
 <col width="15%">
@@ -104,6 +107,8 @@ This document describes variables and names.</p>
 <div class="section level2">
 <h2 id="diagnoses">diagnoses<a class="anchor" aria-label="anchor" href="#diagnoses"></a>
 </h2>
+<p>Diagnoses data is follow-up of the patients diagnoses over the
+timeline.</p>
 <table class="table">
 <colgroup>
 <col width="15%">
@@ -167,6 +172,8 @@ cox modelling phases</strong></p>
 <div class="section level3">
 <h3 id="data_sosioeconomic">data_sosioeconomic<a class="anchor" aria-label="anchor" href="#data_sosioeconomic"></a>
 </h3>
+<p>Data Sosioeconomic includes few extra variables for the population
+data.</p>
 <table class="table">
 <colgroup>
 <col width="15%">
@@ -199,6 +206,7 @@ cox modelling phases</strong></p>
 <div class="section level3">
 <h3 id="data_dates">data_dates<a class="anchor" aria-label="anchor" href="#data_dates"></a>
 </h3>
+<p>Data dates should include more date variables for the population.</p>
 <table class="table">
 <colgroup>
 <col width="15%">

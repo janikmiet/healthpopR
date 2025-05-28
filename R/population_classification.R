@@ -20,7 +20,7 @@
 .group_by_diagnosis <- function(regex_icd10 = "",
                                 regex_icd9 = "",
                                 regex_icd8 = "",
-                                registry_source = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa"),
+                                registry_source = c(""),
                                 groups = c("exposure", "no exposure"),
                                 data_diagnoses = diagnoses,
                                 data_population = population,
@@ -98,12 +98,10 @@
 #' @param exposure_icd9 A character vector of ICD-9 codes (regex-supported) to identify exposure group.
 #' @param exposure_icd8 A character vector of ICD-8 codes (regex-supported) to identify exposure group.
 #' @param exposure_src A character vector of registry sources used to search for exposure diagnoses.
-#'                     Defaults to all available sources.
 #' @param response_icd10 Optional character vector of ICD-10 codes for response group (default: NULL).
 #' @param response_icd9 Optional character vector of ICD-9 codes for response group (default: NULL).
 #' @param response_icd8 Optional character vector of ICD-8 codes for response group (default: NULL).
 #' @param response_src A character vector of registry sources used to search for response diagnoses.
-#'                     Defaults to all available sources.
 #' @param data_population A data frame of the target population (default: `population`).
 #' @param data_diagnoses A data frame of diagnoses (default: `diagnoses`).
 #' @param runtime_shiny Logical; if TRUE and run inside a Shiny app, shows progress bar (default: FALSE).
@@ -122,11 +120,11 @@
 classify_population <- function(exposure_icd10 = "",
                                 exposure_icd9 = "",
                                 exposure_icd8 = "",
-                                exposure_src = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa"),
+                                exposure_src = c(""),
                                 response_icd10 = NULL,
                                 response_icd9 = NULL,
                                 response_icd8 = NULL,
-                                response_src = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa"),
+                                response_src = c(""),
                                 data_population = population,
                                 data_diagnoses = diagnoses,
                                 runtime_shiny = FALSE) {

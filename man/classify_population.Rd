@@ -8,11 +8,11 @@ classify_population(
   exposure_icd10 = "",
   exposure_icd9 = "",
   exposure_icd8 = "",
-  exposure_src = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa"),
+  exposure_src = c(""),
   response_icd10 = NULL,
   response_icd9 = NULL,
   response_icd8 = NULL,
-  response_src = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa"),
+  response_src = c(""),
   data_population = population,
   data_diagnoses = diagnoses,
   runtime_shiny = FALSE
@@ -25,8 +25,7 @@ classify_population(
 
 \item{exposure_icd8}{A character vector of ICD-8 codes (regex-supported) to identify exposure group.}
 
-\item{exposure_src}{A character vector of registry sources used to search for exposure diagnoses.
-Defaults to all available sources.}
+\item{exposure_src}{A character vector of registry sources used to search for exposure diagnoses.}
 
 \item{response_icd10}{Optional character vector of ICD-10 codes for response group (default: NULL).}
 
@@ -34,8 +33,7 @@ Defaults to all available sources.}
 
 \item{response_icd8}{Optional character vector of ICD-8 codes for response group (default: NULL).}
 
-\item{response_src}{A character vector of registry sources used to search for response diagnoses.
-Defaults to all available sources.}
+\item{response_src}{A character vector of registry sources used to search for response diagnoses.}
 
 \item{data_population}{A data frame of the target population (default: `population`).}
 

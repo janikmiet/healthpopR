@@ -13,7 +13,7 @@ Function searches first diagnose date, which is given for exposure/response diag
 
     <a class="navbar-brand me-2" href="../index.html">healthpopR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,11 +51,11 @@ Function searches first diagnose date, which is given for exposure/response diag
 <span>  exposure_icd10 <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  exposure_icd9 <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  exposure_icd8 <span class="op">=</span> <span class="st">""</span>,</span>
-<span>  exposure_src <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"avohilmo"</span>, <span class="st">"erko"</span>, <span class="st">"hilmo"</span>, <span class="st">"local"</span>, <span class="st">"ksyy"</span>, <span class="st">"soshilmo"</span>, <span class="st">"syopa"</span><span class="op">)</span>,</span>
+<span>  exposure_src <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span>,</span>
 <span>  response_icd10 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  response_icd9 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  response_icd8 <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  response_src <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"avohilmo"</span>, <span class="st">"erko"</span>, <span class="st">"hilmo"</span>, <span class="st">"local"</span>, <span class="st">"ksyy"</span>, <span class="st">"soshilmo"</span>, <span class="st">"syopa"</span><span class="op">)</span>,</span>
+<span>  response_src <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span>,</span>
 <span>  data_population <span class="op">=</span> <span class="va">population</span>,</span>
 <span>  data_diagnoses <span class="op">=</span> <span class="va">diagnoses</span>,</span>
 <span>  runtime_shiny <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -79,8 +79,7 @@ Function searches first diagnose date, which is given for exposure/response diag
 
 
 <dt id="arg-exposure-src">exposure_src<a class="anchor" aria-label="anchor" href="#arg-exposure-src"></a></dt>
-<dd><p>A character vector of registry sources used to search for exposure diagnoses.
-Defaults to all available sources.</p></dd>
+<dd><p>A character vector of registry sources used to search for exposure diagnoses.</p></dd>
 
 
 <dt id="arg-response-icd-">response_icd10<a class="anchor" aria-label="anchor" href="#arg-response-icd-"></a></dt>
@@ -96,8 +95,7 @@ Defaults to all available sources.</p></dd>
 
 
 <dt id="arg-response-src">response_src<a class="anchor" aria-label="anchor" href="#arg-response-src"></a></dt>
-<dd><p>A character vector of registry sources used to search for response diagnoses.
-Defaults to all available sources.</p></dd>
+<dd><p>A character vector of registry sources used to search for response diagnoses.</p></dd>
 
 
 <dt id="arg-data-population">data_population<a class="anchor" aria-label="anchor" href="#arg-data-population"></a></dt>

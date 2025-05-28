@@ -64,18 +64,18 @@ reference:
       - recode_icd10_3letters
       - recode_icd10_class
       - categorize_bmi
-  - title: "Data sets"
+  - title: "Included Datasets"
     contents:
       - data_codes
 
 articles:
-  - title: "Getting Started"
-    contents:
-      - getting-started
   - title: "Data Model"
     contents:
       - data-model
-    - title: "Data Handling"
+  - title: "Data Handling"
     contents:
       - data-handling
+  - title: "Getting Started"
+    contents:
+      - getting-started
 

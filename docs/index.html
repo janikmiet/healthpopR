@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">healthpopR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,19 +68,32 @@
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Install healthpopR</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"janikmiet/healthpopR"</span><span class="op">)</span></span></code></pre>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"janikmiet/healthpopR"</span><span class="op">)</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="quick-example">Quick Example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
 </h2>
-<p>Package uses regex to search diagnoses. Here’s how to classify a population based on a sample dataset:</p>
+<p>Package uses regex to search diagnoses. Here’s how to classify a population to exposure and response groups, where</p>
+<ul>
+<li>Exposure is ICD-10 code E11 (<em>Type 2 diabetes mellitus</em>)</li>
+<li>Response is ICD-10 codes I20-I25 (<em>Ischemic heart diseases</em>)</li>
+</ul>
+<p>In diagnoses dataset we use only 2 registry sources <code>local</code> and <code>hilmo</code>.</p>
 <pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/janikmiet/healthpopR" class="external-link">healthpopR</a></span><span class="op">)</span></span>
 <span></span>
+<span><span class="co">## Load Datasets</span></span>
+<span><span class="va">population</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"your_population_data.csv"</span><span class="op">)</span></span>
 <span><span class="va">diagnoses</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"your_diagnoses_data.csv"</span><span class="op">)</span></span>
+<span><span class="co">## Classify population</span></span>
 <span><span class="va">dpop</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/classify_population.html">classify_population</a></span><span class="op">(</span><span class="va">diagnoses</span>,</span>
 <span>                    exposure_icd10 <span class="op">=</span> <span class="st">"^E11"</span>,</span>
-<span>                    response_icd10 <span class="op">=</span> <span class="st">"^I2[0-5]"</span><span class="op">)</span></span>
+<span>                    exposure_src <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"local"</span>, <span class="st">"hilmo"</span><span class="op">)</span>,</span>
+<span>                    response_icd10 <span class="op">=</span> <span class="st">"^I2[0-5]"</span>,</span>
+<span>                    response_src <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"local"</span>, <span class="st">"hilmo"</span><span class="op">)</span>,</span>
+<span>                    data_population <span class="op">=</span> <span class="va">population</span>,</span>
+<span>                    data_diagnoses <span class="op">=</span> <span class="va">diagnoses</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dpop</span><span class="op">)</span></span></code></pre>
+<p>Check <a href="articles/data-model.html"><code>data model</code></a> -vignette to view how you should arrange your <code>population</code> and <code>diagnoses</code> -datasets.</p>
 </div>
 <div class="section level2">
 <h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
@@ -100,9 +113,10 @@
 <h2 id="learn-more">Learn More<a class="anchor" aria-label="anchor" href="#learn-more"></a>
 </h2>
 <ul>
-<li><a href="reference/index.html">Reference Manual</a></li>
-<li><a href="articles/getting-started.html">Getting Started Guide</a></li>
 <li><a href="articles/data-model.html">Data Model</a></li>
+<li><a href="articles/data-handling.html">Data Handling</a></li>
+<li><a href="articles/getting-started.html">Getting Started Guide</a></li>
+<li><a href="reference/index.html">Functions Reference Manual</a></li>
 </ul>
 </div>
 </div>

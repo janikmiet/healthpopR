@@ -14,7 +14,7 @@ A data frame with columns:
 }
 }
 \source{
-Internal project curation / THL registry / etc.
+ICD8 Codes from https://www.julkari.fi/handle/10024/135324, ICD9 Codes from https://www.julkari.fi/handle/10024/131850, and ICD10 Codes from https://koodistopalvelu.kanta.fi/codeserver/pages/classification-view-page.xhtml?classificationKey=23
 }
 \usage{
 data_codes

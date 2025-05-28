@@ -13,9 +13,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Description
 
-Function uses follow up datasets, which have fixed variable names. This document describes variables and names. 
+`healthpopR` functions uses follow up datasets, which have fixed variable names. This document describes variables and names. Here you can get idea of the shape of the datasets needed.
+
 
 # population
+
+Population data should include only one row per ID and few DATE variables.
 
 | Variable Name | Description |
 | :------------ | :--------------------------------------------------------------------- |
@@ -27,6 +30,8 @@ Function uses follow up datasets, which have fixed variable names. This document
 
 
 # diagnoses
+
+Diagnoses data is follow-up of the patients diagnoses over the timeline.
 
 | Variable Name | Description |
 | :------------ | :--------------------------------------------------------------------- |
@@ -47,6 +52,8 @@ Function uses follow up datasets, which have fixed variable names. This document
 
 ## data_sosioeconomic
 
+Data Sosioeconomic includes few extra variables for the population data.
+
 | Variable Name | Description |
 | :------------ | :--------------------------------------------------------------------- |
 | ID | Patient identifier |
@@ -57,10 +64,12 @@ Function uses follow up datasets, which have fixed variable names. This document
 
 ## data_dates
 
+Data dates should include more date variables for the population.
+
 | Variable Name | Description |
 | :------------ | :--------------------------------------------------------------------- |
 | ID | Patient identifier |
-|vpvmbl  | Baseline answering date   |
-|spvm to mpvmfps3y| Multiple follow-up timepoints (exact definitions to be documented) |
+| vpvmbl  | Baseline answering date   |
+| spvm to mpvmfps3y| Multiple follow-up timepoints (exact definitions to be documented) |
 
 

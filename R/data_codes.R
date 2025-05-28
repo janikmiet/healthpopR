@@ -9,5 +9,5 @@
 #'   \item{CATEGORY}{Summary Level of Diagnose Category}
 #'   \item{DESC}{Description of the Diagnosis}
 #' }
-#' @source Internal project curation / THL registry / etc.
+#' @source ICD8 Codes from https://www.julkari.fi/handle/10024/135324, ICD9 Codes from https://www.julkari.fi/handle/10024/131850, and ICD10 Codes from https://koodistopalvelu.kanta.fi/codeserver/pages/classification-view-page.xhtml?classificationKey=23
 "data_codes"

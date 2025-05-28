@@ -23,7 +23,7 @@
 search_diagnoses <- function(regex_icd10="",
                              regex_icd9="",
                              regex_icd8="",
-                             registry_source=c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa"),
+                             registry_source=c(""),
                              regex_extra="",
                              src_extra="",
                              data_diagnoses=diagnoses
@@ -66,7 +66,7 @@ search_diagnoses <- function(regex_icd10="",
     if(regex_icd10 != ""){
       d1 <- data_diagnoses |>
         dplyr::filter(DGREG == "ICD10") |>
-        dplyr::filter(SRC %in% registry_source) |>
+        dplyr::filter(SRC %in% registry_source) |> ## TODO ifelse c("")
         dplyr::filter(grepl(pattern = regex_icd10, x = DG)) |>
         dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
     }

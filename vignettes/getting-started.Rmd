@@ -15,26 +15,28 @@ knitr::opts_chunk$set(
 )
 ```
 
+**This section is under development, because we don´t have a example data to show the results. Anyway, you can get idea of how functions are working.**
+
+This example shows deeper detail of the `healthpopR` functions after your datasets are in right shape. Check section [Data Handling](articles/data-handling.html) first to get your data in right shape.
+
 ```{r setup}
 library(healthpopR)
 ```
 
 
 # Load Data 
+
+Assuming that you have created datasets which are ready to use and analyzed. We can load datasets to use. 
+
 ```{r}
-## Testing and debugging functions with base ICD codes
-if(FALSE){
-  loc = "data/" # for OSTPRE
-  population <- arrow::read_parquet(file = paste0(loc, "population.parquet"))
-  diagnoses <- arrow::read_parquet(file = paste0(loc, "diagnoses.parquet"))
-  data_codes <- arrow::read_parquet(file = paste0(loc, "data_codes.parquet"))
-  ostpre_vastpaiv <- arrow::read_parquet(file = paste0(loc, "ostpre_vastpaiv.parquet"))
-  edumiage <- arrow::read_parquet(file = paste0(loc, "edumiage.parquet"))
-}
+loc = "data/" 
+population <- arrow::read_parquet(file = paste0(loc, "population.parquet"))
+diagnoses <- arrow::read_parquet(file = paste0(loc, "diagnoses.parquet"))
+data_dates <- arrow::read_parquet(file = paste0(loc, "data_dates.parquet"))
+population_variables <- arrow::read_parquet(file = paste0(loc, "population_variables.parquet"))
 ```
 
 Let's define some sample case of interest.
-
 
 ```{r}
 selected_exposure_icd10 = "^E11"
@@ -73,12 +75,14 @@ response_diagnoses <- search_diagnoses(
 )
 ```
 
-Checking what sources are found of the diagnoses
+Checking what registry sources are found of the diagnoses
 
 ```{r}
 plot_diagnoses_src(exposure_diagnoses)
 plot_diagnoses_src(response_diagnoses, per_source = TRUE)
 ```
+
+
 
 # Population Data 
 
@@ -103,9 +107,12 @@ dpop <- classify_population(exposure_icd10 = selected_exposure_icd10,
                      response_src = selected_response_regsrc)
 ```
 
+
+
 # Population Analytics 
 
 Exposure age distribution 
+
 ```{r}
 plot_age_distribution(dpop, group = "exposure")
 plot_age_distribution(dpop, group = "exposure", subgroups = TRUE)
@@ -137,6 +144,7 @@ summary_exp_resp_crosstabulation(dpop, output = "viewer")
 # Health Analytics
 
 Creating A ICD-10 profile of the group
+
 ```{r}
 health_profiles <- classify_icd10_profile(dpop, diagnoses = diagnoses, exposure_icd10 = selected_exposure_icd10, exposure_src = selected_exposure_regsrc)
 plot_health_icd10_profile(health_profiles)
@@ -164,7 +172,7 @@ plot_survival_cr(dsurv)
 
 # Cox Analysis
 
-*This under development and is currently relying on two extra datasets `data_dates` and `data_socioeconomic`*
+**This is under development and is currently relying on two extra datasets `data_dates` and `data_socioeconomic`, which are still under development of scaling to more universal format. **
 
 Creating a cox dataset
 
@@ -188,7 +196,10 @@ cox_plot_overall(cox_base, type = "event")
 Creating a model for Cox analysis
 
 ```{r}
-model1 <- create_cox_model(cox_base,  normal_vars = c("edu"), spline_vars = c("age_bs", "bmi") )
+model1 <- create_cox_model(cox_base,  
+                           normal_vars = c("edu"), 
+                           spline_vars = c("age_bs", "bmi") 
+                           )
 ```
 
 Checking spline variable
