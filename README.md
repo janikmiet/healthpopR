@@ -22,11 +22,8 @@ developing heart failure.
 
 Install the development version from GitHub:
 
-    # Install devtools if needed
-    install.packages("devtools")
-
     # Install healthpopR
-    devtools::install_github("janikmiet/healthpopR")
+    remotes::install_github("janikmiet/healthpopR")
 
 ## Key Features
 
@@ -38,3 +35,4 @@ Install the development version from GitHub:
   `cox_plot_spline()`
 - 📈 **Comparison tools**: `summary_exp_resp_order()`,
   `tbl_icd10_diff_by_exposure()`
+- 📊 **Incidence modeling tools**: `pirr_results()`

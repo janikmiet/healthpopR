@@ -55,7 +55,7 @@ Check [`data model`](articles/data-model.html) -vignette to view how you should 
 - 🧠 **ICD-10 diagnostics**: `plot_diagnoses_src()`, `plot_health_icd10_profile()`
 - ⏳ **Survival analysis**: `plot_survival_km()`, `cox_create_data()`, `cox_plot_spline()`
 - 📈 **Comparison tools**: `summary_exp_resp_order()`, `tbl_icd10_diff_by_exposure()`
-
+- 📊 **Incidence modeling tools**: `pirr_results()`
 
 ## Learn More
 

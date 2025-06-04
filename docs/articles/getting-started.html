@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthpopR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -220,6 +220,33 @@ scaling to more universal format. </strong></p>
 <span><span class="va">testmodel</span> <span class="op">&lt;-</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/deparse.html" class="external-link">deparse</a></span><span class="op">(</span><span class="va">model1</span><span class="op">$</span><span class="va">formula</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" "</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                   data <span class="op">=</span>  <span class="va">cox_base</span><span class="op">)</span></span>
 <span><span class="fu">survminer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survminer/man/ggforest.html" class="external-link">ggforest</a></span><span class="op">(</span><span class="va">testmodel</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="poisson-regression-model-sir">Poisson Regression Model (SIR)<a class="anchor" aria-label="anchor" href="#poisson-regression-model-sir"></a>
+</h2>
+<p><strong>These functions are still bit use case defined, and may not
+work properly, if data differs of how we have data in our
+dataset.</strong></p>
+<p>In case we have selected interested exposure and response diagnoses,
+we can calculate and plot SIR values. Analyzes is given in list format
+back.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dpirr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pirr_data.html">pirr_data</a></span><span class="op">(</span>d_exposure <span class="op">=</span> <span class="va">exposure_diagnoses</span>, </span>
+<span>                   d_response <span class="op">=</span> <span class="va">response_diagnoses</span>, </span>
+<span>                   d_population <span class="op">=</span> <span class="va">dpop</span>,</span>
+<span>                   var_age_start <span class="op">=</span> <span class="fl">50</span> <span class="op">)</span></span>
+<span><span class="va">results1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pirr_results.html">pirr_results</a></span><span class="op">(</span>adat <span class="op">=</span> <span class="va">dpirr</span><span class="op">)</span> <span class="co">## DG</span></span></code></pre></div>
+<p>Another example is that we can have a dataset which included
+fractures, and check same outcomes with fractures data. Analyzes is
+given in list format back.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dpirr2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pirr_data.html">pirr_data</a></span><span class="op">(</span>d_exposure <span class="op">=</span> <span class="va">exposure_diagnoses</span>, </span>
+<span>                    d_response <span class="op">=</span> <span class="va">diagnoses</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">DGREG</span> <span class="op">==</span> <span class="st">"FRACTURES"</span> <span class="op">)</span>, </span>
+<span>                    d_population <span class="op">=</span> <span class="va">dpop</span>,</span>
+<span>                    dg_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>any_fracture <span class="op">=</span> <span class="st">"ankle+forearm+hip+humerus+vertebral"</span>,</span>
+<span>                                   ostheoporotic <span class="op">=</span> <span class="st">"forearm+hip+humerus+vertebral"</span></span>
+<span>                    <span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">results2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pirr_results.html">pirr_results</a></span><span class="op">(</span>adat <span class="op">=</span> <span class="va">dpirr2</span><span class="op">)</span> </span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

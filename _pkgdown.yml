@@ -53,6 +53,10 @@ reference:
       - create_cox_model
       - cox_plot_overall
       - cox_plot_spline
+  - title: "Poisson Regression Model (SIR)"
+    contents:
+      - pirr_data
+      - pirr_results
   - title: "Helper functions"
     contents:
       - .regex_clean

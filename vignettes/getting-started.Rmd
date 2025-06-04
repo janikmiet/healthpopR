@@ -218,3 +218,32 @@ testmodel <- survival::coxph(as.formula(paste(deparse(model1$formula), collapse 
 survminer::ggforest(testmodel)
 ```
 
+
+# Poisson Regression Model (SIR)
+
+**These functions are still bit use case defined, and may not work properly, if data differs of how we have data in our dataset.**
+
+In case we have selected interested exposure and response diagnoses, we can calculate and plot SIR values. Analyzes is given in list format back.
+
+```{r}
+dpirr <- pirr_data(d_exposure = exposure_diagnoses, 
+                   d_response = response_diagnoses, 
+                   d_population = dpop,
+                   var_age_start = 50 )
+results1 <- pirr_results(adat = dpirr) ## DG
+```
+
+Another example is that we can have a dataset which included fractures, and check same outcomes with fractures data.  Analyzes is given in list format back.
+
+```{r}
+dpirr2 <- pirr_data(d_exposure = exposure_diagnoses, 
+                    d_response = diagnoses %>% filter(DGREG == "FRACTURES" ), 
+                    d_population = dpop,
+                    dg_list = list(any_fracture = "ankle+forearm+hip+humerus+vertebral",
+                                   ostheoporotic = "forearm+hip+humerus+vertebral"
+                    ))
+results2 <- pirr_results(adat = dpirr2) 
+```
+
+
+

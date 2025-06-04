@@ -28,11 +28,8 @@ The goal of healthpopR is to help analyze the connection between exposure diagno
 Install the development version from GitHub:
 
 ```
-# Install devtools if needed
-install.packages("devtools")
-
 # Install healthpopR
-devtools::install_github("janikmiet/healthpopR")
+remotes::install_github("janikmiet/healthpopR")
 ```
 
 
@@ -43,6 +40,7 @@ devtools::install_github("janikmiet/healthpopR")
 - 🧠 **ICD-10 diagnostics**: `plot_diagnoses_src()`, `plot_health_icd10_profile()`
 - ⏳ **Survival analysis**: `plot_survival_km()`, `cox_create_data()`, `cox_plot_spline()`
 - 📈 **Comparison tools**: `summary_exp_resp_order()`, `tbl_icd10_diff_by_exposure()`
+- 📊 **Incidence modeling tools**: `pirr_results()`
 
 
 
