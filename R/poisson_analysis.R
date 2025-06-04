@@ -1,5 +1,7 @@
 #' Prepare Person-Time and Event Data for SIR/IRR Calculations
 #'
+#' Function needs package 'heaven' installed. Check https://github.com/tagteam/heaven to install the package.
+#'
 #' This function merges exposure, response, and population-level data to produce
 #' an aggregated dataset for person-time and event rate analysis (e.g., Standardized
 #' Incidence Ratios or Incidence Rate Ratios). It allows comparison of disease occurrence
@@ -28,7 +30,6 @@
 #' @import dplyr
 #' @import lubridate
 #' @importFrom tidyr pivot_wider replace_na
-#' @importFrom haven lexisSeq lexisTwo
 #' @importFrom data.table as.data.table
 #' @importFrom shiny isRunning withProgress
 #' @importFrom rlang parse_expr
@@ -79,6 +80,11 @@ pirr_data <- function(
     d_response = diagnoses |>
       filter(DGREG == "FRACTURES")
   }
+
+  if (!requireNamespace("heaven", quietly = TRUE)) {
+    stop("The 'heaven' package is required. Please install it from GitHub: https://github.com/tagteam/heaven")
+  }
+
 
   all <- function(){
 

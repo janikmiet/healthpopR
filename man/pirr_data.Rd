@@ -33,12 +33,15 @@ pirr_data(
 A `data.frame` summarizing person-years (`pyrs`), event counts (`Death`), and optional diagnosis counts across exposure categories (`caika`) and age groups.
 }
 \description{
+Function needs package 'heaven' installed. Check https://github.com/tagteam/heaven to install the package.
+}
+\details{
 This function merges exposure, response, and population-level data to produce
 an aggregated dataset for person-time and event rate analysis (e.g., Standardized
 Incidence Ratios or Incidence Rate Ratios). It allows comparison of disease occurrence
 across different exposure time windows.
-}
-\details{
+
+
 The function:
 \itemize{
   \item Calculates first exposure and response dates per individual.
