@@ -216,14 +216,14 @@ pirr_data <- function(
 
     ## split functions
     dat2 <- dat1 |>
-      haven::lexisSeq(invars=c("ID","apvm","epvm","Death"),
+      heaven::lexisSeq(invars=c("ID","apvm","epvm","Death"),
                        varname="DATE_BIRTH",
                        splitvector=ages,
                        format="vector",
                        value="agec")
 
     dat3 <- dat2 |>
-      haven::lexisTwo(cdat,
+      heaven::lexisTwo(cdat,
                        c("ID","apvm","epvm","Death"),
                        c("ID","c00pvm","c01pvm","c05pvm","c10pvm","c15pvm")) |>
       dplyr::mutate(
