@@ -11,9 +11,6 @@ The package is designed for analyzing how exposure diagnoses affect response dia
 Install the development version from GitHub:
 
 ```
-# Install devtools if needed
-install.packages("devtools")
-
 # Install healthpopR
 remotes::install_github("janikmiet/healthpopR")
 ```
