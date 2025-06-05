@@ -109,7 +109,7 @@ cox_create_data <- function(data,
   }
 
   if (shiny::isRunning()) {
-    withProgress(message = paste("Table", .capitalize(group), "Age Distribution"), value = 0, {
+    withProgress(message = paste("Cox Data"), value = 0, {
       internal_function()
     })
   } else {
@@ -202,7 +202,7 @@ create_cox_model <- function(data,
   }
 
   if (shiny::isRunning()) {
-    withProgress(message = paste("Table", .capitalize(group), "Age Distribution"), value = 0, {
+    withProgress(message = paste("Cox Modelling"), value = 0, {
       internal_function()
     })
   } else {
