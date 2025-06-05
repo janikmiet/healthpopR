@@ -139,7 +139,8 @@ pirr_data <- function(
         )
 
       d1 <- d1 |>
-        dplyr::count(caika, AGE_RESPONSE)
+        dplyr::count(caika, AGE_RESPONSE) |>
+        rename(DG = n) ## naming diagnose freq to DG
 
       ## Seurannan aikarajojen muodostaminen
       dat1 <- d_population |>
