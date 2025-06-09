@@ -10,8 +10,6 @@ template:
     # navbar-dark-bg: "#3399CC"
 
 navbar:
-  # bg: light
-  # type: light
   title: "healthpopR"
   type: default
   left:
@@ -19,6 +17,8 @@ navbar:
       href: reference/index.html
     - text: "Articles"
       href: articles/index.html
+    - text: "Changelog"
+      href: news/index.html
 
 reference:
   - title: "Main functions"
@@ -82,4 +82,8 @@ articles:
   - title: "Getting Started"
     contents:
       - getting-started
+
+news:
+  one_page: true
+  title: "Changelog"
 
