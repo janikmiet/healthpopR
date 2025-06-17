@@ -2,26 +2,28 @@
 % Please edit documentation in R/population_analysis.R
 \name{summary_exp_resp_crosstabulation}
 \alias{summary_exp_resp_crosstabulation}
-\title{Summary Crosstabulation of Exposure and Response Diagnoses}
+\title{Generate Crosstabulation of Exposure and Response Variables}
 \usage{
 summary_exp_resp_crosstabulation(data, output = "viewer")
 }
 \arguments{
-\item{data}{A data frame containing at least two columns: `exposure` and `response`.}
+\item{data}{A data frame containing variables `exposure` and `response`.}
 
-\item{output}{Character string specifying the output format. Options are:
-\itemize{
-  \item `"viewer"` (default): Shows an interactive table in the RStudio Viewer.
-  \item `"docx"`: Returns a `flextable` object for use in Word document reporting.
-}}
+\item{output}{Character string indicating the output type.
+Use `"viewer"` to return an `sjPlot` table for interactive viewing, or `"docx"` to return a
+`flextable` object for Word reports.}
 }
 \value{
-If `output = "docx"`, returns a `flextable` object that can be passed to
-  [officer::body_add_flextable()]. Otherwise, prints the table in the RStudio Viewer.
+An object of class `sjTable` (if `output = "viewer"`) or a `flextable` (if `output = "docx"`).
 }
 \description{
-Generates a crosstabulation of exposure and response variables from a given dataset,
-formatted for either viewer display or Word document output.
+This function produces a cross-tabulation summary between two variables, `exposure` and `response`,
+from a given dataset. It returns either a styled HTML table for interactive viewing or a Word-compatible
+`flextable` for document output.
+}
+\details{
+- When `output = "viewer"`, the function returns a formatted HTML table with row percentages using `sjPlot::tab_xtab()`.
+- When `output = "docx"`, the cross-tabulation is converted to a data frame using `sjtable2df::xtab2df()` and formatted using `flextable` for inclusion in Word documents.
 }
 \examples{
 \dontrun{
