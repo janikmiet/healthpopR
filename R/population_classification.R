@@ -114,11 +114,8 @@
 #' classify_population(exposure_icd10 = "F32", response_icd10 = "I21")
 #'
 #' @export
-
-
-## Population exposure and response
-classify_population <- function(exposure_icd10 = "",
-                                exposure_icd9 = "",
+classify_population <- function(exposure_icd10 = "", # TODO oisko tähän funktioon attribuutti: response_other = list(DGREG = "FRACTURES", DG = "hip")
+                                exposure_icd9 = "", ## Population exposure and response
                                 exposure_icd8 = "",
                                 exposure_src = c(""),
                                 response_icd10 = NULL,

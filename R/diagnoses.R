@@ -175,6 +175,11 @@ plot_diagnoses_src <- function(data, per_source = FALSE) {
       return(temp)
     }
 
+    if (length(unique(dvenn$SRC)) < 2) {
+      message("Only one source found — skipping Venn plot.")
+      return(NULL)
+    }
+
     x <- split_tibble(dvenn, 'SRC')
 
     .safe_inc_progress(3/4)

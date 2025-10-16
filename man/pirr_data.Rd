@@ -5,72 +5,86 @@
 \title{Prepare Person-Time and Event Data for SIR/IRR Calculations}
 \usage{
 pirr_data(
-  d_exposure,
-  d_response,
-  d_population,
-  var_age_start = 50,
-  dg_list = NA,
-  censoring_date = as.Date("2022-12-31"),
-  limits = c(0.3, 3)
+  exposure_diagnoses,
+  response_diagnoses,
+  pop_dates,
+  all_cases = FALSE,
+  censoring_age = c(50, 90),
+  censoring_date = c(as.Date("1960-01-01"), as.Date("2023-12-31")),
+  custom_responses = list()
 )
 }
 \arguments{
-\item{d_exposure}{A `data.frame` of exposure diagnoses with at least `ID`, `DATE`, and `DG` columns. Created by function `search_diagnoses()`.}
+\item{exposure_diagnoses}{A `data.frame` containing exposure diagnoses. Must include
+columns `ID`, `DATE`, and `DG`. Typically created with `search_diagnoses()`.}
 
-\item{d_response}{A `data.frame` of response diagnoses with at least `ID`, `DATE`, and `DG` columns. Created by function `search_diagnoses()`. In case of parameter `dg_list` is given, give full list of diagnoses.}
+\item{response_diagnoses}{A `data.frame` containing response diagnoses. Must include
+columns `ID`, `DATE`, and `DG`. Typically created with `search_diagnoses()`.}
 
-\item{d_population}{A `data.frame` containing baseline population data, including `ID`, `DATE_BIRTH`, `DATE_DEATH`, and `DATE_MIGRATION`. Created by function `classify_population()`.}
+\item{pop_dates}{A `data.frame` with population registry information, including
+`ID`, `DATE_BIRTH`, `DATE_DEATH`, and `DATE_MIGRATION`. Usually from
+`classify_population()`.}
 
-\item{var_age_start}{Numeric. Age (in years) at which to start follow-up (e.g., 50).}
+\item{all_cases}{Logical; if `TRUE`, follow-up continues after the first response case.
+If `FALSE`, follow-up stops at the first response diagnosis.}
 
-\item{dg_list}{Optional named list. Each element is a string of diagnosis groupings (e.g., `"hip+forearm+humerus"`). If `NA`, the default "normal" procedure is applied.}
+\item{censoring_age}{Numeric vector (length 2) specifying the lower and upper ages
+for follow-up inclusion (e.g., `c(50, 90)`).}
 
-\item{censoring_date}{A `Date` object indicating administrative censoring (e.g., `"2022-12-31"`).}
+\item{censoring_date}{A `Date` vector (length 2) defining the administrative start
+and end of follow-up (e.g., `c(as.Date("1960-01-01"), as.Date("2022-12-31"))`).}
 
-\item{limits}{Numeric vector of length two. Optional plotting or analysis limits, default is `c(0.3, 3)`.}
+\item{custom_responses}{Optional named list defining custom response diagnosis
+groupings. For example:
+`list(Any_fracture = "ankle+forearm+hip+humerus+vertebral",
+      Osteoporotic = "forearm+hip+humerus+vertebral",
+      Hip = "hip")`.}
 }
 \value{
-A `data.frame` summarizing person-years (`pyrs`), event counts (`Death`), and optional diagnosis counts across exposure categories (`caika`) and age groups.
+A `data.frame` summarizing:
+\describe{
+  \item{pyrs}{Person-years within each exposure and age stratum.}
+  \item{Death}{Count of deaths within each stratum.}
+  \item{Diagnosis counts}{Optional columns for each response diagnosis or
+  custom grouping defined in `custom_responses`.}
+  \item{caika}{Exposure time category (e.g., `<1y`, `1–4y`, `5–9y`, etc.).}
+  \item{Age}{Age group at risk.}
+}
 }
 \description{
-Function needs package 'heaven' installed. Check https://github.com/tagteam/heaven to install the package.
-}
-\details{
 This function merges exposure, response, and population-level data to produce
 an aggregated dataset for person-time and event rate analysis (e.g., Standardized
-Incidence Ratios or Incidence Rate Ratios). It allows comparison of disease occurrence
-across different exposure time windows.
+Incidence Ratios [SIR] or Incidence Rate Ratios [IRR]). It compares disease occurrence
+across exposure time windows using registry-style longitudinal data.
+}
+\details{
+The function requires the **heaven** package for Lexis splitting utilities.
+See: [https://github.com/tagteam/heaven](https://github.com/tagteam/heaven)
 
 
-The function:
+The function performs the following steps:
 \itemize{
-  \item Calculates first exposure and response dates per individual.
-  \item Computes time intervals between exposure and response.
+  \item Extracts and merges first exposure and response diagnoses per individual.
+  \item Computes time differences between exposure and response dates.
   \item Splits follow-up time using `heaven::lexisSeq()` and `heaven::lexisTwo()`.
-  \item Categorizes person-time into pre-defined exposure windows (e.g., `<1y`, `1-4y`, `5-9y`, etc.).
-  \item Optionally aggregates response diagnoses using `dg_list` expressions.
-  \item Filters follow-up to start at `var_age_start` (e.g., 50 years).
+  \item Categorizes person-time into exposure windows (`<1y`, `1–4y`, `5–9y`, `10–14y`, `15+y`).
+  \item Optionally aggregates diagnoses using custom groupings from `custom_responses`.
+  \item Restricts follow-up to the age range specified in `censoring_age`.
 }
 }
 \examples{
 \dontrun{
 result <- pirr_data(
-  d_exposure = exposure_data,
-  d_response = response_data,
-  d_population = population_data,
-  var_age_start = 50,
-  censoring_date = as.Date("2023-12-31")
-)
-}
-\dontrun{
-result <- pirr_data(
-  d_exposure = exposure_data,
-  d_response = diagnoses \%>\% filter(DGREG == "FRACTURES" ),
-  d_population = dpop,
-  dg_list = list(any_fracture = "ankle+forearm+hip+humerus+vertebral",
-              ostheoporotic = "forearm+hip+humerus+vertebral"),
-  var_age_start = 50,
-  censoring_date = as.Date("2023-12-31")
+  exposure_diagnoses = exposure_data,
+  response_diagnoses = response_data,
+  pop_dates = population_data,
+  censoring_age = c(50, 90),
+  censoring_date = c(as.Date("1960-01-01"), as.Date("2023-12-31")),
+  custom_responses = list(
+    Any_fracture = "ankle+forearm+hip+humerus+vertebral",
+    Osteoporotic = "forearm+hip+humerus+vertebral",
+    Hip = "hip"
+  )
 )
 }
 }

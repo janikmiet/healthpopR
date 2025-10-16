@@ -1,30 +1,51 @@
 #' Prepare Person-Time and Event Data for SIR/IRR Calculations
 #'
-#' Function needs package 'heaven' installed. Check https://github.com/tagteam/heaven to install the package.
-#'
 #' This function merges exposure, response, and population-level data to produce
 #' an aggregated dataset for person-time and event rate analysis (e.g., Standardized
-#' Incidence Ratios or Incidence Rate Ratios). It allows comparison of disease occurrence
-#' across different exposure time windows.
+#' Incidence Ratios [SIR] or Incidence Rate Ratios [IRR]). It compares disease occurrence
+#' across exposure time windows using registry-style longitudinal data.
 #'
-#' @param d_exposure A `data.frame` of exposure diagnoses with at least `ID`, `DATE`, and `DG` columns. Created by function `search_diagnoses()`.
-#' @param d_response A `data.frame` of response diagnoses with at least `ID`, `DATE`, and `DG` columns. Created by function `search_diagnoses()`. In case of parameter `dg_list` is given, give full list of diagnoses.
-#' @param d_population A `data.frame` containing baseline population data, including `ID`, `DATE_BIRTH`, `DATE_DEATH`, and `DATE_MIGRATION`. Created by function `classify_population()`.
-#' @param var_age_start Numeric. Age (in years) at which to start follow-up (e.g., 50).
-#' @param dg_list Optional named list. Each element is a string of diagnosis groupings (e.g., `"hip+forearm+humerus"`). If `NA`, the default "normal" procedure is applied.
-#' @param censoring_date A `Date` object indicating administrative censoring (e.g., `"2022-12-31"`).
-#' @param limits Numeric vector of length two. Optional plotting or analysis limits, default is `c(0.3, 3)`.
+#' The function requires the **heaven** package for Lexis splitting utilities.
+#' See: [https://github.com/tagteam/heaven](https://github.com/tagteam/heaven)
 #'
-#' @return A `data.frame` summarizing person-years (`pyrs`), event counts (`Death`), and optional diagnosis counts across exposure categories (`caika`) and age groups.
+#' @param exposure_diagnoses A `data.frame` containing exposure diagnoses. Must include
+#'   columns `ID`, `DATE`, and `DG`. Typically created with `search_diagnoses()`.
+#' @param response_diagnoses A `data.frame` containing response diagnoses. Must include
+#'   columns `ID`, `DATE`, and `DG`. Typically created with `search_diagnoses()`.
+#' @param pop_dates A `data.frame` with population registry information, including
+#'   `ID`, `DATE_BIRTH`, `DATE_DEATH`, and `DATE_MIGRATION`. Usually from
+#'   `classify_population()`.
+#' @param all_cases Logical; if `TRUE`, follow-up continues after the first response case.
+#'   If `FALSE`, follow-up stops at the first response diagnosis.
+#' @param censoring_age Numeric vector (length 2) specifying the lower and upper ages
+#'   for follow-up inclusion (e.g., `c(50, 90)`).
+#' @param censoring_date A `Date` vector (length 2) defining the administrative start
+#'   and end of follow-up (e.g., `c(as.Date("1960-01-01"), as.Date("2022-12-31"))`).
+#' @param custom_responses Optional named list defining custom response diagnosis
+#'   groupings. For example:
+#'   `list(Any_fracture = "ankle+forearm+hip+humerus+vertebral",
+#'         Osteoporotic = "forearm+hip+humerus+vertebral",
+#'         Hip = "hip")`.
+#'
+#' @return A `data.frame` summarizing:
+#' \describe{
+#'   \item{pyrs}{Person-years within each exposure and age stratum.}
+#'   \item{Death}{Count of deaths within each stratum.}
+#'   \item{Diagnosis counts}{Optional columns for each response diagnosis or
+#'   custom grouping defined in `custom_responses`.}
+#'   \item{caika}{Exposure time category (e.g., `<1y`, `1–4y`, `5–9y`, etc.).}
+#'   \item{Age}{Age group at risk.}
+#' }
+#'
 #' @details
-#' The function:
+#' The function performs the following steps:
 #' \itemize{
-#'   \item Calculates first exposure and response dates per individual.
-#'   \item Computes time intervals between exposure and response.
+#'   \item Extracts and merges first exposure and response diagnoses per individual.
+#'   \item Computes time differences between exposure and response dates.
 #'   \item Splits follow-up time using `heaven::lexisSeq()` and `heaven::lexisTwo()`.
-#'   \item Categorizes person-time into pre-defined exposure windows (e.g., `<1y`, `1-4y`, `5-9y`, etc.).
-#'   \item Optionally aggregates response diagnoses using `dg_list` expressions.
-#'   \item Filters follow-up to start at `var_age_start` (e.g., 50 years).
+#'   \item Categorizes person-time into exposure windows (`<1y`, `1–4y`, `5–9y`, `10–14y`, `15+y`).
+#'   \item Optionally aggregates diagnoses using custom groupings from `custom_responses`.
+#'   \item Restricts follow-up to the age range specified in `censoring_age`.
 #' }
 #'
 #' @import dplyr
@@ -33,181 +54,149 @@
 #' @importFrom data.table as.data.table
 #' @importFrom shiny isRunning withProgress
 #' @importFrom rlang parse_expr
-#' @export
 #'
 #' @examples
 #' \dontrun{
 #' result <- pirr_data(
-#'   d_exposure = exposure_data,
-#'   d_response = response_data,
-#'   d_population = population_data,
-#'   var_age_start = 50,
-#'   censoring_date = as.Date("2023-12-31")
+#'   exposure_diagnoses = exposure_data,
+#'   response_diagnoses = response_data,
+#'   pop_dates = population_data,
+#'   censoring_age = c(50, 90),
+#'   censoring_date = c(as.Date("1960-01-01"), as.Date("2023-12-31")),
+#'   custom_responses = list(
+#'     Any_fracture = "ankle+forearm+hip+humerus+vertebral",
+#'     Osteoporotic = "forearm+hip+humerus+vertebral",
+#'     Hip = "hip"
+#'   )
 #' )
 #' }
-#' \dontrun{
-#' result <- pirr_data(
-#'   d_exposure = exposure_data,
-#'   d_response = diagnoses %>% filter(DGREG == "FRACTURES" ),
-#'   d_population = dpop,
-#'   dg_list = list(any_fracture = "ankle+forearm+hip+humerus+vertebral",
-#'               ostheoporotic = "forearm+hip+humerus+vertebral"),
-#'   var_age_start = 50,
-#'   censoring_date = as.Date("2023-12-31")
-#' )
-#' }
+#' @export
 pirr_data <- function(
-    d_exposure,
-    d_response,
-    d_population,
-    var_age_start = 50,
-    dg_list = NA,
-    censoring_date = as.Date("2022-12-31"),
-    limits=c(0.3,3) ) {
+    exposure_diagnoses,
+    response_diagnoses,
+    pop_dates,         ## Variables needed ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION
+    all_cases = FALSE, ## If you want to continue follow up after first response case.
+    censoring_age = c(50, 90),
+    censoring_date = c(as.Date("1960-01-01"), as.Date("2023-12-31")),
+    custom_responses = list() ## CUSTOM DG's. Ex. list(Any_fracture = "ankle+forearm+hip+humerus+vertebral", Osteoporotic = "forearm+hip+humerus+vertebral")
+) {
 
   ## DEBUG CHUNK
   if(FALSE){
-    d_exposure = exposure_diagnoses
-    d_response = response_diagnoses
-    d_population = dpop
-    censoring_date = as.Date("2023-12-31")
-    var_age_start = 50 # ikä jolloin seuranta alkaa
-    colors = unname(colors_groups[c("non-exposure", "exposure")])
-    limits=c(0.3,3)
-    # For Fractures test
-    dg_list = list(Any_fracture = "ankle+forearm+hip+humerus+vertebral",
-                   Osteoporotic = "forearm+hip+humerus+vertebral")
-    d_response = diagnoses |>
-      filter(DGREG == "FRACTURES")
+    exposure_diagnoses = exposure_diagnoses
+    response_diagnoses = response_diagnoses # diagnoses |> filter(DGREG == "FRACTURES")
+    pop_dates = dpop
+    all_cases = FALSE
+    censoring_date = c(as.Date("1969-01-01"), as.Date("2023-12-31"))
+    censoring_age = 50 # ikä jolloin seuranta alkaa
+    custom_responses = list()
+    custom_responses = list(Any_fracture = "ankle+forearm+hip+humerus+vertebral",
+                            Osteoporotic = "forearm+hip+humerus+vertebral",
+                            Hip = "hip")
   }
 
   if (!requireNamespace("heaven", quietly = TRUE)) {
     stop("The 'heaven' package is required. Please install it from GitHub: https://github.com/tagteam/heaven")
   }
 
-
+  ## Data Handling Function
   all <- function(){
 
-    # Diagnoses ----
     ## Exposure -----
-    dalt <- d_exposure |>
+    ##### Here we take only the first case of the exposure.
+    dalt <- exposure_diagnoses |>
       dplyr::arrange(ID, DATE) |>
-      dplyr::group_by(ID) |> ## TODO if taking FRACTURES or other diagnose sets, we will take full timeline
+      dplyr::group_by(ID) |>
       dplyr::summarise(DATE_EXPOSURE = first(DATE),
-                       DG = first(DG)
-      ) |>
+                       DG = first(DG)) |>
       dplyr::rename(DG_EXP = DG) |>
-      dplyr::left_join(d_population, by = "ID") |>
+      dplyr::left_join(pop_dates, by = "ID") |>
       dplyr::mutate(AGE_EXPOSURE = trunc(lubridate::`%--%`(DATE_BIRTH, DATE_EXPOSURE) / lubridate::years(1))) |>
       dplyr::select(ID, DATE_EXPOSURE, AGE_EXPOSURE, DG_EXP)
 
-    if(shiny::isRunning()) .safe_inc_progress(1/10)
+    if(shiny::isRunning()) .safe_inc_progress(1/5)
 
-    ## Choosing between "Normal" and "Fractures" Procedure
-    if(any(is.na(dg_list))){
-      ## "Normal" Procedure ------
-      ## Vaste
-      dvast <- d_response |>
-        dplyr::arrange(ID, DATE) |>
+    ## Response -------
+    ## Preparation and all cases
+    dvast <- response_diagnoses |>
+      dplyr::arrange(ID, DATE) |>
+      dplyr::rename(DG_RES = DG,
+                    DATE_RESPONSE = DATE,
+                    AGE_RESPONSE = AGE
+      ) |>
+      dplyr::select(ID, DATE_RESPONSE, AGE_RESPONSE, DG_RES)
+    ## Take only first case
+    if(!all_cases){
+      dvast <- dvast |>
+        dplyr::left_join(pop_dates, by = "ID") |>
         dplyr::group_by(ID) |>
-        dplyr::summarise(DATE_RESPONSE = first(DATE),
-                         DG = first(DG)
-        ) %>%
-        dplyr::rename(DG_RES = DG) |>
-        dplyr::left_join(d_population, by = "ID") |>
-        dplyr::mutate(AGE_RESPONSE = trunc(lubridate::`%--%`(DATE_BIRTH, DATE_RESPONSE) / lubridate::years(1))) |>
-        dplyr::select(ID, DATE_RESPONSE, AGE_RESPONSE, DG_RES)
-
-      if(shiny::isRunning()) .safe_inc_progress(2/10)
-
-      ### Further data wrangling
-      ## Altisteen ja vasteen yhdistys, ajallinen ero diagnoosien välillä
-      d1 <- dvast |>
-        dplyr::left_join(dalt, by=c("ID")) |>
-        dplyr::mutate(
-          ## Difference between response and exposure DATES
-          ero = as.numeric(lubridate::decimal_date(DATE_RESPONSE) - lubridate::decimal_date(DATE_EXPOSURE)),
-          ## Response and Exposure Time as Factor Variable. This is in future classifyin variable.
-          caika = factor(dplyr::case_when(
-            is.na(ero) | ero<0 ~ "0 No exposure",
-            ero < 1 ~ "1 exposure < 1y",
-            ero < 5 ~ "2 exposure 1-4y",
-            ero < 10 ~ "3 exposure 5-9y",
-            ero < 15 ~ "4 exposure 10-14y",
-            TRUE ~ "5 exposure 15+y",
-          ))
-        )
-
-      d1 <- d1 |>
-        dplyr::count(caika, AGE_RESPONSE) |>
-        rename(DG = n) ## naming diagnose freq to DG
-
-      ## Seurannan aikarajojen muodostaminen
-      dat1 <- d_population |>
-        dplyr::left_join(dvast %>% select(ID, DATE_RESPONSE), by = "ID") |>
-        dplyr::mutate(
-          Death = as.integer(!is.na(DATE_DEATH)),
-          apvm = pmax(DATE_BIRTH, as.Date("1953-01-01"), na.rm="TRUE"), ## Start Date
-          epvm = pmin(DATE_DEATH, DATE_MIGRATION, censoring_date, DATE_RESPONSE, na.rm = TRUE)
-        )
-
-    }else{
-      ## "Fractures" Procedure ------
-      # Build expressions from dg_list
-      exprs <- lapply(dg_list, function(x) rlang::parse_expr(x))
-      # Convert to named list of expressions
-      names(exprs) <- names(dg_list)
-
-      # (Duplicate of normal handling)
-      ## Vaste
-      dvast <- d_response |>
-        dplyr::arrange(ID, DATE) |>
-        dplyr::rename(DG_RES = DG,
-                      DATE_RESPONSE = DATE) |>
-        dplyr::mutate(AGE_RESPONSE = trunc(lubridate::`%--%`(DATE_BIRTH, DATE_RESPONSE) / lubridate::years(1))) |>
-        dplyr::select(ID, DATE_RESPONSE, AGE_RESPONSE, DG_RES)
-
-      ### Further data wrangling
-      ## Altisteen ja vasteen yhdistys, ajallinen ero diagnoosien välillä
-      d1 <- dvast |>
-        dplyr::left_join(dalt, by=c("ID")) |>
-        dplyr::mutate(
-          ## Difference between response and exposure DATES
-          ero = as.numeric(lubridate::decimal_date(DATE_RESPONSE) - lubridate::decimal_date(DATE_EXPOSURE)),
-          ## Response and Exposure Time as Factor Variable. This is in future classifyin variable.
-          caika = factor(dplyr::case_when(
-            is.na(ero) | ero<0 ~ "0 No exposure",
-            ero < 1 ~ "1 exposure < 1y",
-            ero < 5 ~ "2 exposure 1-4y",
-            ero < 10 ~ "3 exposure 5-9y",
-            ero < 15 ~ "4 exposure 10-14y",
-            TRUE ~ "5 exposure 15+y",
-          ))
-        )
-      # (This is end of duplicate of normal handling)
-
-      d1 <- d1 |>
-        dplyr::count(DG_RES, AGE_RESPONSE, caika) |>
-        tidyr::pivot_wider(names_from=DG_RES, values_from=n, values_fill=0) |>
-        dplyr::mutate(!!!exprs)
-
-      ## Seurannan aikarajojen muodostaminen
-      dat1 <- d_population |>
-        dplyr::mutate(
-          Death = as.integer(!is.na(DATE_DEATH)),
-          apvm = pmax(DATE_BIRTH, as.Date("1953-01-01"), na.rm="TRUE"), ## Start Date
-          epvm = pmin(DATE_DEATH, DATE_MIGRATION, censoring_date, na.rm = TRUE)
+        dplyr::summarise(DATE_RESPONSE = first(DATE_RESPONSE),
+                         DG_RES = first(DG_RES),
+                         DATE_BIRTH = first(DATE_BIRTH),
+                         AGE_RESPONSE = first(AGE_RESPONSE)
         )
     }
 
-    if(shiny::isRunning()) .safe_inc_progress(3/10)
+    ## Calculate time differences between exp-resp -------
+    d1 <- dvast |>
+      dplyr::left_join(dalt, by=c("ID")) |>
+      dplyr::mutate(
+        ## Difference between response and exposure DATES
+        ero = as.numeric(lubridate::decimal_date(DATE_RESPONSE) - lubridate::decimal_date(DATE_EXPOSURE)),
+        ## Response and Exposure Time as Factor Variable. This is in future classifyin variable.
+        caika = factor(dplyr::case_when(
+          is.na(ero) | ero<0 ~ "0 No exposure",
+          ero < 1 ~ "1 exposure < 1y",
+          ero < 5 ~ "2 exposure 1-4y",
+          ero < 10 ~ "3 exposure 5-9y",
+          ero < 15 ~ "4 exposure 10-14y",
+          TRUE ~ "5 exposure 15+y",
+        ))
+      )
 
-    ages <- c(20, 50:90)*365.25 ## TODO tämä vaikuttaa olevan sidoksissa var_age_start
+    if(shiny::isRunning()) .safe_inc_progress(2/5)
 
-    ## Perustiedot (päivämäärät) ja altisteen päivämäärät
-    cdat <- data.table::as.data.table(d_population) |>
-      dplyr::left_join(dalt |>
-                         dplyr::select(ID, c00pvm=DATE_EXPOSURE), by=c("ID")) |> # c00pvm on altistediagnoosi aika
+    ## Custom DG list -------
+    exprs <- lapply(custom_responses, function(x) rlang::parse_expr(x)) # Build expressions from dg_list
+    names(exprs) <- names(custom_responses) # Convert to named list of expressions
+    ## No Custom Response Classes / Custom Response Classes
+    if(length(custom_responses) == 0){
+      d1 <- d1 |>
+        dplyr::count(caika, AGE_RESPONSE) |>
+        dplyr::rename(DG = n) ## naming diagnose freq to DG
+    }else{
+      ## Make new custom response dg classes
+      d1 <- d1 |>
+        dplyr::count(DG_RES, AGE_RESPONSE, caika) |>
+        tidyr::pivot_wider(names_from=DG_RES, values_from=n, values_fill=0) |>
+        dplyr::mutate(!!!exprs) ## tässä tehdään custom dg classes
+    }
+
+    ## Calculate follow up start and end dates ---------
+    if(all_cases){
+      dat1 <- pop_dates |>
+        dplyr::mutate(
+          Death = as.integer(!is.na(DATE_DEATH)),
+          apvm = pmax(DATE_BIRTH, censoring_date[1], na.rm="TRUE"),
+          epvm = pmin(DATE_DEATH, DATE_MIGRATION, censoring_date[2], na.rm = TRUE)
+        )
+    }else{
+      dat1 <- pop_dates |>
+        dplyr::left_join(dvast %>% select(ID, DATE_RESPONSE), by = "ID") |>
+        dplyr::mutate(
+          Death = as.integer(!is.na(DATE_DEATH)),
+          apvm = pmax(DATE_BIRTH, censoring_date[1], na.rm="TRUE"),
+          epvm = pmin(DATE_DEATH, DATE_MIGRATION, censoring_date[2], DATE_RESPONSE, na.rm = TRUE)
+        )
+    }
+
+    if(shiny::isRunning()) .safe_inc_progress(3/5)
+
+    ages <- c(20, censoring_age[1]:censoring_age[2])*365.25 ## TODO tämä vaikuttaa olevan sidoksissa censoring_age / also age_end?
+
+    ## Dates and time --------
+    cdat <- data.table::as.data.table(pop_dates) |>
+      dplyr::left_join(dalt |> dplyr::select(ID, c00pvm=DATE_EXPOSURE), by=c("ID")) |> # c00pvm on altistediagnoosi aika
       dplyr::mutate(
         c01pvm=lubridate::add_with_rollback(c00pvm,lubridate::years(1)),
         c05pvm=lubridate::add_with_rollback(c00pvm,lubridate::years(5)),
@@ -215,14 +204,13 @@ pirr_data <- function(
         c15pvm=lubridate::add_with_rollback(c00pvm,lubridate::years(15))
       )
 
-    ## split functions
+    ## split functions ----------
     dat2 <- dat1 |>
       heaven::lexisSeq(invars=c("ID","apvm","epvm","Death"),
                        varname="DATE_BIRTH",
                        splitvector=ages,
                        format="vector",
                        value="agec")
-
     dat3 <- dat2 |>
       heaven::lexisTwo(cdat,
                        c("ID","apvm","epvm","Death"),
@@ -231,8 +219,9 @@ pirr_data <- function(
         Age =  round( as.numeric((apvm - DATE_BIRTH) / 365.25), 0)
       )
 
-    if(shiny::isRunning()) .safe_inc_progress(4/10)
+    if(shiny::isRunning()) .safe_inc_progress(4/5)
 
+    ## Finalizing ---------
     adat <- dat3 |>
       dplyr::mutate(
         caika=factor(case_when(
@@ -243,14 +232,13 @@ pirr_data <- function(
           c00pvm==1 ~ "1 exposure < 1y",
           TRUE ~ "0 No exposure"
         )),
-        ikar=case_when( ## TODO nämä vaikuttaa olevan sidoksissa var_age_start
+        ikar=case_when( ## TODO nämä vaikuttaa olevan sidoksissa var_age_start / censoring_age
           agec<2 ~ 20,
           TRUE ~ agec+48
         ),
         kesto=as.numeric(lubridate::decimal_date(epvm)-lubridate::decimal_date(apvm))
       ) |>
-      # seuranta alkaa kun henkilö täyttää 50v (cancer-/murtuma-aineisto) / OSTPRE Pelkkä ICD10 filt >= 65
-      dplyr::filter(Age >= var_age_start) |>
+      dplyr::filter(Age >= censoring_age[1]) |> # seuranta alkaa kun henkilö täyttää 50v (cancer-/murtuma-aineisto) / OSTPRE Pelkkä ICD10 filt >= 65
       dplyr::group_by(Age, caika) |>
       dplyr::summarise(
         pyrs=sum(kesto),
@@ -265,7 +253,9 @@ pirr_data <- function(
         ))
       ) |>
       dplyr::filter(pyrs>0.01) ## altistusajan filtteri
-    if(shiny::isRunning()) .safe_inc_progress(5/10)
+
+    if(shiny::isRunning()) .safe_inc_progress(5/5)
+
     return(adat)
   }
 
@@ -277,6 +267,7 @@ pirr_data <- function(
     return(all())
   }
 }
+
 
 
 #' Run PIRR-style modeling and summary plots for multiple binary outcomes
