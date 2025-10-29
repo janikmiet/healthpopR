@@ -128,6 +128,7 @@ pirr_data <- function(
     ## Take only first case
     if(!all_cases){
       dvast <- dvast |>
+        dplyr::arrange(ID, DATE_RESPONSE) |>
         dplyr::left_join(pop_dates, by = "ID") |>
         dplyr::group_by(ID) |>
         dplyr::summarise(DATE_RESPONSE = first(DATE_RESPONSE),
@@ -177,7 +178,7 @@ pirr_data <- function(
       dat1 <- pop_dates |>
         dplyr::mutate(
           Death = as.integer(!is.na(DATE_DEATH)),
-          apvm = pmax(DATE_BIRTH, censoring_date[1], na.rm="TRUE"),
+          apvm = pmax(DATE_BIRTH, censoring_date[1], na.rm=TRUE),
           epvm = pmin(DATE_DEATH, DATE_MIGRATION, censoring_date[2], na.rm = TRUE)
         )
     }else{
@@ -185,7 +186,7 @@ pirr_data <- function(
         dplyr::left_join(dvast %>% select(ID, DATE_RESPONSE), by = "ID") |>
         dplyr::mutate(
           Death = as.integer(!is.na(DATE_DEATH)),
-          apvm = pmax(DATE_BIRTH, censoring_date[1], na.rm="TRUE"),
+          apvm = pmax(DATE_BIRTH, censoring_date[1], na.rm=TRUE),
           epvm = pmin(DATE_DEATH, DATE_MIGRATION, censoring_date[2], DATE_RESPONSE, na.rm = TRUE)
         )
     }
