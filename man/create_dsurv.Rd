@@ -6,8 +6,9 @@
 \usage{
 create_dsurv(
   data,
-  censoring_date = as.Date("2023-12-21"),
-  filter_early_responses = FALSE
+  censoring_date = as.Date("2024-12-21"),
+  filter_early_responses = FALSE,
+  type = c("exp_to_resp", "resp_to_death")
 )
 }
 \arguments{
@@ -18,6 +19,8 @@ create_dsurv(
 
 \item{filter_early_responses}{Logical; if `TRUE`, responses occurring before the exposure date (negative time)
 are filtered out. If `FALSE`, they are included and recoded to 0. Default is `FALSE`.}
+
+\item{type}{character. Options: "exp_to_resp" or "resp_to_death"}
 }
 \value{
 A data frame in long format with columns:

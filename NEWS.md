@@ -1,3 +1,17 @@
+# healthpopR 0.2.2
+
+## Breaking changes
+
+* Survival and Poisson regression functions updated
+
+## New features
+
+* Poisson function pirr_data() now works a bit differently. This is due to upcoming changes to create report. 
+
+* Survival data creation function 'create_dsurv' creates now either exposure to response or response to death models.
+
+## Minor bug fixes and improvements
+
 # healthpopR 0.1.8
 
 ## Breaking changes

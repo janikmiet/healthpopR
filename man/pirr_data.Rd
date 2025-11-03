@@ -10,7 +10,7 @@ pirr_data(
   pop_dates,
   all_cases = FALSE,
   censoring_age = c(50, 90),
-  censoring_date = c(as.Date("1960-01-01"), as.Date("2023-12-31")),
+  censoring_date = c(as.Date("1953-01-01"), as.Date("2024-12-31")),
   custom_responses = list()
 )
 }

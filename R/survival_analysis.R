@@ -7,6 +7,7 @@
 #' @param censoring_date A `Date` object specifying the administrative censoring date. Default is `"2023-12-21"`.
 #' @param filter_early_responses Logical; if `TRUE`, responses occurring before the exposure date (negative time)
 #'        are filtered out. If `FALSE`, they are included and recoded to 0. Default is `FALSE`.
+#' @param type character. Options: "exp_to_resp" or "resp_to_death"
 #'
 #' @return A data frame in long format with columns:
 #' \describe{
@@ -35,52 +36,88 @@
 #'
 #' @export
 create_dsurv <- function(data,
-                         censoring_date = as.Date("2023-12-21"),
-                         filter_early_responses = FALSE
-){
-  internal_function <- function(){
+                         censoring_date = as.Date("2024-12-21"),
+                         filter_early_responses = FALSE,
+                         type = c("exp_to_resp", "resp_to_death")) {
+  type <- match.arg(type)
 
+  internal_function <- function() {
     .safe_inc_progress(1/3)
 
-    exposure_to_response <- data |>
-      dplyr::filter(exp.GROUP == "exposure") |>
-      dplyr::mutate(
-        epvm=pmin(DATE_MIGRATION, censoring_date, na.rm = TRUE)
-      ) |>
-      dplyr::mutate(diagnose =  trunc((exp.DATE %--% resp.DATE) / days(1) ),
-             dead = ifelse(!is.na(DATE_DEATH), trunc((exp.DATE %--% DATE_DEATH) / days(1) ) , NA),
-             censoring = trunc((exp.DATE %--% epvm) / days(1))
-      ) |>
-      dplyr::mutate(censoring = ifelse(is.na(dead), censoring, NA))
+    if (type == "exp_to_resp") {
+      exposure_to_response <- data |>
+        dplyr::filter(exp.GROUP == "exposure") |>
+        dplyr::mutate(
+          epvm = pmin(DATE_MIGRATION, censoring_date, na.rm = TRUE),
+          diagnose = trunc((exp.DATE %--% resp.DATE) / days(1)),
+          dead = ifelse(!is.na(DATE_DEATH),
+                        trunc((exp.DATE %--% DATE_DEATH) / days(1)), NA),
+          censoring = trunc((exp.DATE %--% epvm) / days(1)),
+          censoring = ifelse(is.na(dead), censoring, NA)
+        )
 
-    .safe_inc_progress(2/3)
+      .safe_inc_progress(2/3)
 
-    d <- exposure_to_response |>
-      dplyr::select(ID, resp.DATE, diagnose, dead, censoring) |>
-      dplyr::arrange(ID, resp.DATE) |>
-      ## FILTER , take response cases before 0 timepoint, yes/no. This is going to be recoded as 0.
-      dplyr::filter(if(filter_early_responses){diagnose >= 0 }else{is.numeric(diagnose)}) |>
-      dplyr::arrange(ID, resp.DATE) |>
-      dplyr::group_by(ID) |>
-      dplyr::summarise(diagnose = dplyr::first(diagnose),
-                dead = dplyr::first(dead),
-                censoring = dplyr::first(censoring)) |>
-      dplyr::mutate(diagnose = ifelse(diagnose < 0, 0 , diagnose)) |> # Recoding possible before 0 timepoints for response dg
-      tidyr::pivot_longer(cols = c(diagnose, dead, censoring)) |>
-      dplyr::filter(!is.na(value))
+      d <- exposure_to_response |>
+        dplyr::select(ID, resp.DATE, diagnose, dead, censoring) |>
+        dplyr::arrange(ID, resp.DATE) |>
+        dplyr::filter(if (filter_early_responses) diagnose >= 0 else is.numeric(diagnose)) |>
+        dplyr::group_by(ID) |>
+        dplyr::summarise(
+          diagnose = dplyr::first(diagnose),
+          dead = dplyr::first(dead),
+          censoring = dplyr::first(censoring),
+          .groups = "drop"
+        ) |>
+        dplyr::mutate(diagnose = ifelse(diagnose < 0, 0, diagnose)) |>
+        tidyr::pivot_longer(cols = c(diagnose, dead, censoring)) |>
+        dplyr::filter(!is.na(value))
+    }
+
+    if (type == "resp_to_death") {
+      response_to_death <- data |>
+        dplyr::filter(resp.GROUP == "response") |>
+        dplyr::filter(if (filter_early_responses) resp.DATE >= exp.DATE else is.numeric(ID)) |>
+        dplyr::select(ID, DATE_MIGRATION, DATE_DEATH, resp.DATE, exp.GROUP, exp.DATE) |>
+        dplyr::rename(GROUP = exp.GROUP) |>
+        dplyr::mutate(
+          epvm = pmin(DATE_MIGRATION, censoring_date, na.rm = TRUE),
+          dead = ifelse(!is.na(DATE_DEATH),
+                        trunc((resp.DATE %--% DATE_DEATH) / days(1)), NA),
+          censoring = trunc((resp.DATE %--% epvm) / days(1)),
+          censoring = ifelse(is.na(dead), censoring, NA)
+        )
+
+      .safe_inc_progress(2/3)
+
+      d <- response_to_death |>
+        dplyr::group_by(ID) |>
+        tidyr::pivot_longer(cols = c(dead, censoring)) |>
+        dplyr::filter(!is.na(value)) |>
+        dplyr::mutate(
+          status = dplyr::case_when(
+            name == "censoring" ~ 0,
+            name == "dead" ~ 1,
+            TRUE ~ NA_real_
+          )
+        ) |>
+        dplyr::select(ID, GROUP, value, status)
+    }
 
     .safe_inc_progress(3/3)
-
     return(d)
   }
-  if(shiny::isRunning()){
+
+  # Run with or without shiny progress
+  if (shiny::isRunning()) {
     withProgress(message = "Creating Survival Data", value = 0, {
       return(internal_function())
     })
-  }else{
+  } else {
     return(internal_function())
   }
 }
+
 
 
 #' @title Plot Kaplan-Meier Survival Curve (Overall)

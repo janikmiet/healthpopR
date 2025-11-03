@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthpopR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,8 +44,9 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_dsurv</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  censoring_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-12-21"</span><span class="op">)</span>,</span>
-<span>  filter_early_responses <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  censoring_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-12-21"</span><span class="op">)</span>,</span>
+<span>  filter_early_responses <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exp_to_resp"</span>, <span class="st">"resp_to_death"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -65,6 +66,10 @@
 <dt id="arg-filter-early-responses">filter_early_responses<a class="anchor" aria-label="anchor" href="#arg-filter-early-responses"></a></dt>
 <dd><p>Logical; if `TRUE`, responses occurring before the exposure date (negative time)
 are filtered out. If `FALSE`, they are included and recoded to 0. Default is `FALSE`.</p></dd>
+
+
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
+<dd><p>character. Options: "exp_to_resp" or "resp_to_death"</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -77,8 +77,8 @@ pirr_data <- function(
     pop_dates,         ## Variables needed ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION
     all_cases = FALSE, ## If you want to continue follow up after first response case.
     censoring_age = c(50, 90),
-    censoring_date = c(as.Date("1960-01-01"), as.Date("2023-12-31")),
-    custom_responses = list() ## CUSTOM DG's. Ex. list(Any_fracture = "ankle+forearm+hip+humerus+vertebral", Osteoporotic = "forearm+hip+humerus+vertebral")
+    censoring_date = c(as.Date("1953-01-01"), as.Date("2024-12-31")),
+    custom_responses = list() ## EMPTY if non, otherwise list(Any_fracture = "ankle+forearm+hip+humerus+vertebral", Osteoporotic = "forearm+hip+humerus+vertebral")
 ) {
 
   ## DEBUG CHUNK

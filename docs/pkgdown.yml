@@ -1,11 +1,11 @@
-pandoc: '3.4'
+pandoc: 3.6.3
 pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   data-handling: data-handling.html
   data-model: data-model.html
   getting-started: getting-started.html
-last_built: 2025-10-29T07:26Z
+last_built: 2025-11-03T08:29Z
 urls:
   reference: https://janikmiet.github.io/healthpopR/reference
   article: https://janikmiet.github.io/healthpopR/articles
