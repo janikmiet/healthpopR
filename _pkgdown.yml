@@ -47,6 +47,7 @@ reference:
       - create_dsurv
       - plot_survival_cr
       - plot_survival_km
+      - plot_survival_death
   - title: "Cox Model Analysis"
     contents:
       - cox_create_data

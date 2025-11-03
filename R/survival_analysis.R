@@ -147,7 +147,7 @@ create_dsurv <- function(data,
 #' @importFrom shiny isRunning withProgress
 #'
 #' @export
-plot_survival_km <- function(data){
+plot_survival_km <- function(data, color = "#D9534F"){
   internal_function <- function(){
     .safe_inc_progress(1/3)
 
@@ -164,8 +164,22 @@ plot_survival_km <- function(data){
 
     .safe_inc_progress(3/3)
 
-    plot <- plot(fit1)
-    return(plot)
+    # Plot with base
+    # p <- plot(fit1)
+    # Plot with survminer
+    p <- survminer::ggsurvplot(
+      fit1,
+      data = dsurv,
+      conf.int = TRUE,             # Show confidence interval
+      surv.median.line = "hv",     # Horizontal and vertical median lines
+      palette = color,            # Customize color
+      xlab = "Time (days)",
+      ylab = "Survival probability",
+      ggtheme = ggplot2::theme_minimal(),
+      risk.table = TRUE,           # Optional: show risk table
+      risk.table.title = "Number at risk"
+    )
+    return(p)
   }
   if(shiny::isRunning()){
     withProgress(message = "Plot Kaplan Meier", value = 0, {
@@ -232,9 +246,9 @@ plot_survival_cr <- function(data,
 
     plt <- survminer::ggcompetingrisks(fit = CR,
                             multiple_panels = F,
-                            xlab = "Days",
-                            ylab = "Cumulative incidence of event",
-                            title = "Competing Risks Analysis") +
+                            xlab = "Time (days)",
+                            ylab = "Cumulative incidence",
+                            title = "Competing Risks: Response vs. Death") +
       ggplot2::scale_color_manual(name="",
                          values=colors,
                          labels=c("Response Diagnose", "Dead"))
@@ -251,3 +265,60 @@ plot_survival_cr <- function(data,
     return(internal_function())
   }
 }
+
+#' Plot Survival Curve for Mortality Analysis
+#'
+#' This function generates a Kaplan–Meier survival plot comparing groups based on
+#' survival or mortality data. It uses the `survival` and `survminer` packages to
+#' fit the model and visualize survival probabilities over time.
+#'
+#' @param data A data frame containing at least the following variables:
+#'   \describe{
+#'     \item{value}{Numeric; time to event or censoring in days.}
+#'     \item{status}{Binary; event indicator (1 = event occurred, 0 = censored).}
+#'     \item{GROUP}{Factor or character; grouping variable for comparison.}
+#'   }
+#' @param colors A character vector of color hex codes to use for plotting.
+#'   Default is \code{c("#D9534F", "#5BC0DE")}.
+#'
+#' @return A `ggsurvplot` object from the \pkg{survminer} package, containing
+#'   the Kaplan–Meier plot with survival probabilities, confidence intervals,
+#'   p-value, and risk table.
+#'
+#' @details
+#' The function fits a survival model using \code{survival::survfit()} and
+#' visualizes it with \code{survminer::ggsurvplot()}. It is typically used to
+#' analyze mortality data between exposure and non-exposure groups.
+#'
+#' @examples
+#' \dontrun{
+#' data <- data.frame(
+#'   value = c(10, 20, 30, 40, 50, 60),
+#'   status = c(1, 0, 1, 1, 0, 0),
+#'   GROUP = c("Exposure", "No Exposure", "Exposure", "No Exposure", "Exposure", "No Exposure")
+#' )
+#'
+#' plot_survival_death(data)
+#' }
+#'
+#' @importFrom survival Surv survfit
+#' @importFrom survminer ggsurvplot
+#' @export
+plot_survival_death <- function(data, colors = c("#D9534F", "#5BC0DE") ){
+  fit <- survival::survfit(survival::Surv(time = value, event = status) ~ GROUP, data = data)
+  p <- survminer::ggsurvplot(
+    fit,
+    data = data,
+    pval = TRUE,              # adds p-value from log-rank test
+    conf.int = TRUE,          # adds confidence intervals
+    risk.table = TRUE,        # shows number at risk table
+    surv.median.line = "hv",  # shows median survival
+    palette = colors,
+    legend.title = "Group",
+    legend.labs = c("Exposure", "No Exposure"),
+    xlab = "Time (days)",
+    ylab = "Survival probability"
+  )
+  return(p)
+}
+
