@@ -159,8 +159,8 @@ plot_survival_km <- function(data, color = "#D9534F"){
 
     ## Mallinnetaan elinaika-analyysi
     # library(survival)
-    surv_object <- survival::Surv(time = dsurv$value, event = dsurv$event)
-    fit1 <- survival::survfit(surv_object ~ 1, data = dsurv, id = ID)
+    # surv_object <- survival::Surv(time = dsurv$value, event = dsurv$event) # delete
+    fit1 <- survival::survfit(survival::Surv(time = dsurv$value, event = dsurv$event) ~ 1, data = dsurv, id = ID)
 
     .safe_inc_progress(3/3)
 
