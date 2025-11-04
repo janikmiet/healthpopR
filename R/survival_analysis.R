@@ -77,7 +77,7 @@ create_dsurv <- function(data,
     if (type == "resp_to_death") {
       response_to_death <- data |>
         dplyr::filter(resp.GROUP == "response") |>
-        dplyr::filter(if (filter_early_responses) resp.DATE >= exp.DATE else is.numeric(ID)) |>
+        dplyr::filter(if (filter_early_responses) resp.DATE >= exp.DATE | is.na(exp.DATE) else is.numeric(ID)) |>
         dplyr::select(ID, DATE_MIGRATION, DATE_DEATH, resp.DATE, exp.GROUP, exp.DATE) |>
         dplyr::rename(GROUP = exp.GROUP) |>
         dplyr::mutate(
@@ -320,7 +320,7 @@ plot_survival_death <- function(data, colors = c("#D9534F", "#5BC0DE") ){
     surv.median.line = "hv",  # shows median survival
     palette = colors,
     legend.title = "Group",
-    legend.labs = c("Exposure", "No Exposure"),
+    # legend.labs = c("Exposure", "No Exposure"),
     xlab = "Time (days)",
     ylab = "Survival probability"
   )
