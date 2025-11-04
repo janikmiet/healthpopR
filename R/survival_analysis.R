@@ -147,7 +147,7 @@ create_dsurv <- function(data,
 #' @importFrom shiny isRunning withProgress
 #'
 #' @export
-plot_survival_km <- function(data, color = "#D9534F"){
+plot_survival_km <- function(data, color = "#D9534F", plot = c("base", "survminer")){
   internal_function <- function(){
     .safe_inc_progress(1/3)
 
@@ -165,20 +165,25 @@ plot_survival_km <- function(data, color = "#D9534F"){
     .safe_inc_progress(3/3)
 
     # Plot with base
-    # p <- plot(fit1)
+    if(plot == "base"){
+      p <- plot(fit1)
+    }
     # Plot with survminer
-    p <- survminer::ggsurvplot(
-      fit1,
-      data = dsurv,
-      conf.int = TRUE,             # Show confidence interval
-      surv.median.line = "hv",     # Horizontal and vertical median lines
-      palette = color,            # Customize color
-      xlab = "Time (days)",
-      ylab = "Survival probability",
-      ggtheme = ggplot2::theme_minimal(),
-      risk.table = TRUE,           # Optional: show risk table
-      risk.table.title = "Number at risk"
-    )
+    else if(plot == "survminer"){
+      p <- survminer::ggsurvplot(
+        fit1,
+        data = dsurv,
+        conf.int = TRUE,             # Show confidence interval
+        surv.median.line = "hv",     # Horizontal and vertical median lines
+        palette = color,            # Customize color
+        xlab = "Time (days)",
+        ylab = "Survival probability",
+        ggtheme = ggplot2::theme_minimal(),
+        risk.table = TRUE,           # Optional: show risk table
+        risk.table.title = "Number at risk"
+      )
+    }
+
     return(p)
   }
   if(shiny::isRunning()){

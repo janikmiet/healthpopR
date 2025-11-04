@@ -4,7 +4,7 @@
 \alias{plot_survival_km}
 \title{Plot Kaplan-Meier Survival Curve (Overall)}
 \usage{
-plot_survival_km(data, color = "#D9534F")
+plot_survival_km(data, color = "#D9534F", plot = c("base", "survminer"))
 }
 \arguments{
 \item{data}{A data frame in long format with the following required columns:
