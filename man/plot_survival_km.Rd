@@ -2,7 +2,7 @@
 % Please edit documentation in R/survival_analysis.R
 \name{plot_survival_km}
 \alias{plot_survival_km}
-\title{Plot Kaplan-Meier Survival Curve (Overall)}
+\title{Plot Kaplan-Meier Survival Curve (Exposure to Response)}
 \usage{
 plot_survival_km(data, color = "#D9534F", plot = c("base", "survminer"))
 }

@@ -4,7 +4,12 @@
 \alias{plot_survival_death}
 \title{Plot Survival Curve for Mortality Analysis}
 \usage{
-plot_survival_death(data, colors = c("#D9534F", "#5BC0DE"))
+plot_survival_death(
+  data,
+  scale = c("days", "years"),
+  surv.median.line = "v",
+  colors = c("#D9534F", "#5BC0DE")
+)
 }
 \arguments{
 \item{data}{A data frame containing at least the following variables:

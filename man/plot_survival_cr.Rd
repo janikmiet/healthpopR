@@ -2,9 +2,13 @@
 % Please edit documentation in R/survival_analysis.R
 \name{plot_survival_cr}
 \alias{plot_survival_cr}
-\title{Plot Competing Risks Survival Curve}
+\title{Plot Competing Risks Survival Curve (Exposure to Response or Death)}
 \usage{
-plot_survival_cr(data, colors = c("#5CB85C", "#343A40"))
+plot_survival_cr(
+  data,
+  scale = c("days", "years"),
+  colors = c("#5CB85C", "#343A40")
+)
 }
 \arguments{
 \item{data}{A data frame in long format with the following required columns:

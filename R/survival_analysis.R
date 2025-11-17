@@ -77,7 +77,7 @@ create_dsurv <- function(data,
     if (type == "resp_to_death") {
       response_to_death <- data |>
         dplyr::filter(resp.GROUP == "response") |>
-        dplyr::filter(if (filter_early_responses) resp.DATE >= exp.DATE | is.na(exp.DATE) else is.numeric(ID)) |>
+        dplyr::filter(if (filter_early_responses) (resp.DATE >= exp.DATE) | is.na(exp.DATE) else is.numeric(ID)) |>
         dplyr::select(ID, DATE_MIGRATION, DATE_DEATH, resp.DATE, exp.GROUP, exp.DATE) |>
         dplyr::rename(GROUP = exp.GROUP) |>
         dplyr::mutate(
@@ -120,7 +120,7 @@ create_dsurv <- function(data,
 
 
 
-#' @title Plot Kaplan-Meier Survival Curve (Overall)
+#' @title Plot Kaplan-Meier Survival Curve (Exposure to Response)
 #' @description Plots an overall Kaplan-Meier survival curve from a long-format survival dataset
 #'              containing response, censoring, and death events.
 #'
@@ -148,12 +148,30 @@ create_dsurv <- function(data,
 #'
 #' @export
 plot_survival_km <- function(data, color = "#D9534F", plot = c("base", "survminer")){
+  #DEBUG
+  if(FALSE){
+    data = d
+    scale = "years"
+    color = "#D9534F"
+    plot = c("base")
+  }
+
   internal_function <- function(){
     .safe_inc_progress(1/3)
 
     ## Event: 0 = censoring/kuollut, 1 = diagnose
     dsurv <- data |>
       dplyr::mutate(event = ifelse(name == "diagnose", 1, 0) )
+
+    ## scale
+    if(scale == "years"){
+      dsurv <- dsurv %>%
+        mutate(value = value / 365.25)
+      xlab <- "Time (years)"
+    }
+    if(scale == "days"){
+      xlab <- "Time (days)"
+    }
 
     .safe_inc_progress(2/3)
 
@@ -195,7 +213,7 @@ plot_survival_km <- function(data, color = "#D9534F", plot = c("base", "survmine
   }
 }
 
-#' @title Plot Competing Risks Survival Curve
+#' @title Plot Competing Risks Survival Curve (Exposure to Response or Death)
 #' @description Plots a cumulative incidence function from a long-format dataset using a competing risks model.
 #'
 #' @param data A data frame in long format with the following required columns:
@@ -230,8 +248,16 @@ plot_survival_km <- function(data, color = "#D9534F", plot = c("base", "survmine
 #'
 #' @export
 plot_survival_cr <- function(data,
+                             scale=c("days", "years"),
                              colors = c("#5CB85C", "#343A40")
 ){
+  ## DEBUG
+  if(FALSE){
+    data=d
+    scale = "years"
+    colors = c("#5CB85C", "#343A40")
+  }
+
   internal_function <- function(){
 
     .safe_inc_progress(1/3)
@@ -242,21 +268,31 @@ plot_survival_cr <- function(data,
         event = ifelse(name == "diagnose", 1, ifelse(name == "dead", 2, 3))
       )
 
+    ## scale
+    if(scale == "years"){
+      dsurv <- dsurv %>%
+        mutate(value = value / 365.25)
+      xlab <- "Time (years)"
+    }
+    if(scale == "days"){
+      xlab <- "Time (days)"
+    }
+
     ## fitting a competing risks model
     CR <- cmprsk::cuminc(ftime = dsurv$value,
-                 fstatus = dsurv$event,
-                 cencode = 3)
+                         fstatus = dsurv$event,
+                         cencode = 3)
 
     .safe_inc_progress(2/3)
 
     plt <- survminer::ggcompetingrisks(fit = CR,
-                            multiple_panels = F,
-                            xlab = "Time (days)",
-                            ylab = "Cumulative incidence",
-                            title = "Competing Risks: Response vs. Death") +
+                                       multiple_panels = F,
+                                       xlab = xlab,
+                                       ylab = "Cumulative incidence",
+                                       title = "Competing Risks: Response vs. Death") +
       ggplot2::scale_color_manual(name="",
-                         values=colors,
-                         labels=c("Response Diagnose", "Dead"))
+                                  values=colors,
+                                  labels=c("Response Diagnose", "Dead"))
 
     .safe_inc_progress(3/3)
 
@@ -309,7 +345,27 @@ plot_survival_cr <- function(data,
 #' @importFrom survival Surv survfit
 #' @importFrom survminer ggsurvplot
 #' @export
-plot_survival_death <- function(data, colors = c("#D9534F", "#5BC0DE") ){
+plot_survival_death <- function(data, scale = c("days", "years"), surv.median.line = "v" ,colors = c("#D9534F", "#5BC0DE") ){
+  ##DEBUG
+  if(FALSE){
+    data = d
+    colors = c("#D9534F", "#5BC0DE")
+    scale = "years"
+    surv.median.line = "v"
+  }
+
+  ## scale: year conversion
+  if(scale == "years"){
+    data <- data %>%
+      mutate(
+        value = value / 365.25
+      )
+    xlab <- "Time (years)"
+  }
+  else if(scale == "days"){
+    xlab <- "Time (days)"
+  }
+
   fit <- survival::survfit(survival::Surv(time = value, event = status) ~ GROUP, data = data)
   p <- survminer::ggsurvplot(
     fit,
@@ -317,11 +373,11 @@ plot_survival_death <- function(data, colors = c("#D9534F", "#5BC0DE") ){
     pval = TRUE,              # adds p-value from log-rank test
     conf.int = TRUE,          # adds confidence intervals
     risk.table = TRUE,        # shows number at risk table
-    surv.median.line = "hv",  # shows median survival
+    surv.median.line = surv.median.line,  # shows median survival
     palette = colors,
     legend.title = "Group",
     # legend.labs = c("Exposure", "No Exposure"),
-    xlab = "Time (days)",
+    xlab = xlab,
     ylab = "Survival probability"
   )
   return(p)
