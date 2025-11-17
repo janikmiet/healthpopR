@@ -130,6 +130,7 @@ create_dsurv <- function(data,
 #'   \item{name}{Type of event: must include `"diagnose"` for response; other values are treated as censored}
 #'   \item{value}{Time (in days) from exposure to event}
 #' }
+#' @param scale years or days (timeline)
 #'
 #' @return A Kaplan-Meier survival curve plotted using the base R `plot()` function.
 #'
@@ -147,7 +148,7 @@ create_dsurv <- function(data,
 #' @importFrom shiny isRunning withProgress
 #'
 #' @export
-plot_survival_km <- function(data, color = "#D9534F", plot = c("base", "survminer")){
+plot_survival_km <- function(data, color = "#D9534F", scale = "years", plot = c("base", "survminer")){
   #DEBUG
   if(FALSE){
     data = d
@@ -222,6 +223,7 @@ plot_survival_km <- function(data, color = "#D9534F", plot = c("base", "survmine
 #'   \item{name}{Type of event: must include `"diagnose"` for response, `"dead"` for death, and others are treated as censoring}
 #'   \item{value}{Time (in days) from exposure to event}
 #' }
+#' @param scale years or days (timeline)
 #' @param colors A character vector of color hex codes to use for the plotted event types. Default is `c("#5CB85C", "#343A40")`.
 #'
 #' @return A `ggplot2` object showing the cumulative incidence curves for competing risks.
@@ -319,6 +321,7 @@ plot_survival_cr <- function(data,
 #'     \item{status}{Binary; event indicator (1 = event occurred, 0 = censored).}
 #'     \item{GROUP}{Factor or character; grouping variable for comparison.}
 #'   }
+#' @param scale years or days (timeline)
 #' @param colors A character vector of color hex codes to use for plotting.
 #'   Default is \code{c("#D9534F", "#5BC0DE")}.
 #'

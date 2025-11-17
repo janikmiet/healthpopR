@@ -18,6 +18,8 @@ plot_survival_cr(
   \item{value}{Time (in days) from exposure to event}
 }}
 
+\item{scale}{years or days (timeline)}
+
 \item{colors}{A character vector of color hex codes to use for the plotted event types. Default is `c("#5CB85C", "#343A40")`.}
 }
 \value{

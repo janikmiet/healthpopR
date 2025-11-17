@@ -19,6 +19,8 @@ plot_survival_death(
   \item{GROUP}{Factor or character; grouping variable for comparison.}
 }}
 
+\item{scale}{years or days (timeline)}
+
 \item{colors}{A character vector of color hex codes to use for plotting.
 Default is \code{c("#D9534F", "#5BC0DE")}.}
 }

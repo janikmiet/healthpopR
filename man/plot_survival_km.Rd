@@ -4,7 +4,12 @@
 \alias{plot_survival_km}
 \title{Plot Kaplan-Meier Survival Curve (Exposure to Response)}
 \usage{
-plot_survival_km(data, color = "#D9534F", plot = c("base", "survminer"))
+plot_survival_km(
+  data,
+  color = "#D9534F",
+  scale = "years",
+  plot = c("base", "survminer")
+)
 }
 \arguments{
 \item{data}{A data frame in long format with the following required columns:
@@ -13,6 +18,8 @@ plot_survival_km(data, color = "#D9534F", plot = c("base", "survminer"))
   \item{name}{Type of event: must include `"diagnose"` for response; other values are treated as censored}
   \item{value}{Time (in days) from exposure to event}
 }}
+
+\item{scale}{years or days (timeline)}
 }
 \value{
 A Kaplan-Meier survival curve plotted using the base R `plot()` function.
