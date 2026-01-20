@@ -1,0 +1,75 @@
+# Summary Table of Diagnoses by Group
+
+Generates a summary table of diagnoses within a specified group
+(\`"exposure"\` or \`"response"\`), including counts of unique patients,
+total diagnosis cases, percentage of the group, and diagnosis
+descriptions. Diagnoses with fewer than a threshold number of patients
+are combined into a single "Rest of the diagnoses" row to comply with
+data protection principles.
+
+## Usage
+
+``` r
+table_summary_diagnoses(data, group = "exposure", sum_small_groups = 6)
+```
+
+## Arguments
+
+- data:
+
+  A data frame containing at least the columns: \`ID\`, \`DG\`,
+  \`DGREG\`.
+
+- group:
+
+  Character string. Either \`"exposure"\` or \`"response"\`. Determines
+  the diagnosis group to summarize. Defaults to \`"exposure"\`.
+
+- sum_small_groups:
+
+  Integer. Diagnoses with fewer patients than this threshold are grouped
+  into a single summary row. Must be between 2 and 9999. Default is 6.
+
+## Value
+
+A data frame with the following columns:
+
+- DG:
+
+  Diagnosis group code
+
+- DGREG:
+
+  Diagnosis registry group
+
+- patients:
+
+  Number of unique patients in the group with the diagnosis
+
+- cases:
+
+  Total number of diagnosis entries
+
+- group_pct:
+
+  Percentage of the group with the diagnosis
+
+- DESC:
+
+  Diagnosis description
+
+## Details
+
+If called within a Shiny app, progress indicators will be displayed
+using \`withProgress()\`. The function uses \`.safe_inc_progress()\` and
+\`.capitalize()\`, which must be defined elsewhere in the package. The
+lookup table \`data_codes\` must be available in the environment and
+must include columns \`DG\` and \`DESC\`.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+table_summary_diagnoses(data = exposure_diagnoses, group = "exposure", sum_small_groups = 6)
+} # }
+```

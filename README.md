@@ -18,6 +18,13 @@ exposure diagnoses and response diagnoses. A real-life example would be
 investigating how a diagnosis of diabetes influences the risk of
 developing heart failure.
 
+## Limitations
+
+Currently functions are developed so that they fit our specific dataset
+correctly. Which means that analyses are limited to only one gender and
+follow up starts at when population is 50 years old. Theses limitations
+can be removed later, when we use same functions to another datasets.
+
 ## Installation
 
 Install the development version from GitHub:

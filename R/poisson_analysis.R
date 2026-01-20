@@ -48,12 +48,6 @@
 #'   \item Restricts follow-up to the age range specified in `censoring_age`.
 #' }
 #'
-#' @import dplyr
-#' @import lubridate
-#' @importFrom tidyr pivot_wider replace_na
-#' @importFrom data.table as.data.table
-#' @importFrom shiny isRunning withProgress
-#' @importFrom rlang parse_expr
 #'
 #' @examples
 #' \dontrun{
@@ -303,14 +297,6 @@ pirr_data <- function(
 #' Standard errors are heteroskedasticity-consistent (HC0). Predictions are made at Age = 70
 #' and a base rate of 10,000 person-years.
 #'
-#' @importFrom dplyr group_by summarise mutate row_number bind_rows filter select left_join
-#' @importFrom ggeffects predict_response
-#' @importFrom ggplot2 labs scale_y_continuous theme
-#' @importFrom tibble tibble
-#' @importFrom lmtest coeftest
-#' @importFrom sandwich vcovHC
-#' @importFrom stats glm
-#' @importFrom splines bs
 #'
 #' @examples
 #' # Example usage with simulated data

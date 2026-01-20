@@ -36,7 +36,6 @@
 #' plot_age_distribution(data = my_data, group = "response", subgroups = TRUE)
 #' }
 #'
-#' @import ggplot2 dplyr hrbrthemes
 #' @export
 plot_age_distribution <- function(
     data,

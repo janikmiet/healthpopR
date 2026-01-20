@@ -6,6 +6,13 @@ The package is designed for analyzing how exposure diagnoses affect response dia
 
 <!-- <img src="man/figures/ueflogo.jpg" align="right" alt="" width="120" /> -->
 
+## Dataset Limitations
+
+Currently functions are developed so that they fit our specific dataset
+correctly. Which means that analyses are limited to only one gender and
+follow up starts at when population is 50 years old. Theses limitations
+can be removed later, when we use same functions to another datasets.
+
 ## Installation
 
 Install the development version from GitHub:

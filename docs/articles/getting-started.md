@@ -1,0 +1,237 @@
+# getting-started
+
+**This section is under development, because we don´t have a example
+data to show the results. Anyway, you can get idea of how functions are
+working.**
+
+This example shows deeper detail of the `healthpopR` functions after
+your datasets are in right shape. Check section [Data
+Handling](https://janikmiet.github.io/healthpopR/articles/articles/data-handling.md)
+first to get your data in right shape.
+
+``` r
+library(healthpopR)
+```
+
+## Load Data
+
+Assuming that you have created datasets which are ready to use and
+analyzed. We can load datasets to use.
+
+``` r
+loc = "data/" 
+population <- arrow::read_parquet(file = paste0(loc, "population.parquet"))
+diagnoses <- arrow::read_parquet(file = paste0(loc, "diagnoses.parquet"))
+data_dates <- arrow::read_parquet(file = paste0(loc, "data_dates.parquet"))
+population_variables <- arrow::read_parquet(file = paste0(loc, "population_variables.parquet"))
+```
+
+Let’s define some sample case of interest.
+
+``` r
+selected_exposure_icd10 = "^E11"
+selected_exposure_icd9 = "^250A"
+selected_exposure_icd8 = "^250"
+selected_exposure_regsrc = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa")
+selected_response_icd10 = "^I2[0-5]"
+selected_response_icd9 = "^41[0-4]"
+selected_response_icd8 = "^41[0-4]"
+selected_response_regsrc = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa")
+```
+
+## Diagnoses data
+
+Creating exposure diagnosis data
+
+``` r
+exposure_diagnoses <- search_diagnoses(
+  regex_icd10 = selected_exposure_icd10,
+  regex_icd9 = selected_exposure_icd9,
+  regex_icd8 = selected_exposure_icd8,
+  registry_source = selected_exposure_regsrc,
+  data_diagnoses = diagnoses
+)
+```
+
+Creating response diagnosis data
+
+``` r
+response_diagnoses <- search_diagnoses(
+  regex_icd10 = selected_response_icd10,
+  regex_icd9 = selected_response_icd9,
+  regex_icd8 = selected_response_icd8,
+  registry_source = selected_response_regsrc,
+  data_diagnoses = diagnoses
+)
+```
+
+Checking what registry sources are found of the diagnoses
+
+``` r
+plot_diagnoses_src(exposure_diagnoses)
+plot_diagnoses_src(response_diagnoses, per_source = TRUE)
+```
+
+## Population Data
+
+Just exposure population without all the exposure codes
+
+``` r
+dpop_exposure <- classify_population(
+  exposure_icd10 = selected_exposure_icd10,
+  exposure_src = selected_exposure_regsrc)
+```
+
+Both, exposure and response population in one
+
+``` r
+dpop <- classify_population(exposure_icd10 = selected_exposure_icd10,
+                     exposure_icd9 = selected_exposure_icd9,
+                     exposure_icd8 = selected_exposure_icd8,
+                     exposure_src = selected_exposure_regsrc,
+                     response_icd10 = selected_response_icd10,
+                     response_icd9 = selected_response_icd9,
+                     response_icd8 = selected_response_icd8,
+                     response_src = selected_response_regsrc)
+```
+
+## Population Analytics
+
+Exposure age distribution
+
+``` r
+plot_age_distribution(dpop, group = "exposure")
+plot_age_distribution(dpop, group = "exposure", subgroups = TRUE)
+```
+
+Response age distribution
+
+``` r
+plot_age_distribution(dpop, group = "response")
+plot_age_distribution(dpop, group = "response", subgroups = TRUE)
+```
+
+Age Distribution Tables
+
+``` r
+table_age_distribution(dpop, group = "exposure")
+table_age_distribution(dpop, group = "response")
+table_age_distribution(dpop, group = "response", subgroups = TRUE)
+table_age_distribution(dpop, group = "exposure", subgroups = TRUE)
+```
+
+Summaries of Exposure Response Diagnoses
+
+``` r
+summary_exp_resp_order(dpop)
+summary_exp_resp_crosstabulation(dpop, output = "viewer")
+```
+
+## Health Analytics
+
+Creating A ICD-10 profile of the group
+
+``` r
+health_profiles <- classify_icd10_profile(dpop, diagnoses = diagnoses, exposure_icd10 = selected_exposure_icd10, exposure_src = selected_exposure_regsrc)
+plot_health_icd10_profile(health_profiles)
+```
+
+Finding top ICD-10 diagnoses on exposure group (compared to no-exposure
+group)
+
+``` r
+tbl_health <- tbl_icd10_diff_by_exposure(dpop, diagnoses = diagnoses, exposure_icd10 = selected_exposure_icd10, exposure_src = selected_exposure_regsrc)
+plot_icd10_diff_by_exposure(tbl_health)
+```
+
+## Survival Analysis
+
+Creating a survival object and plotting Kaplan Meier and Competing Risk
+
+``` r
+dsurv <- create_dsurv(dpop, 
+                      censoring_date = as.Date("2023-12-21"), 
+                      filter_early_responses = FALSE)
+plot_survival_km(dsurv)
+plot_survival_cr(dsurv)
+```
+
+## Cox Analysis
+
+**This is under development and is currently relying on two extra
+datasets `data_dates` and `data_socioeconomic`, which are still under
+development of scaling to more universal format.**
+
+Creating a cox dataset
+
+``` r
+cox_base <- cox_create_data(dpop, 
+                            data_dates = ostpre_vastpaiv, 
+                            data_socioeconomic = edumiage,
+                            reference_values = list("bmi_cat1" = "Healthy Weight", 
+                                                    "bmi_cat2" = "Healthy Weight", 
+                                                    "edu" = "3 - High"),
+                            censoring_date = as.Date("2023-12-31"))
+```
+
+Plotting a survival element
+
+``` r
+cox_plot_overall(cox_base, type = "event")
+```
+
+Creating a model for Cox analysis
+
+``` r
+model1 <- create_cox_model(cox_base,  
+                           normal_vars = c("edu"), 
+                           spline_vars = c("age_bs", "bmi") 
+                           )
+```
+
+Checking spline variable
+
+``` r
+cox_plot_spline(model1, spline_var = "age_bs")
+```
+
+Other packages has some good functions to create plots
+
+``` r
+ftest <- survival::cox.zph(model1)
+survminer::ggcoxzph(ftest)
+testmodel <- survival::coxph(as.formula(paste(deparse(model1$formula), collapse = " ")),
+                   data =  cox_base)
+survminer::ggforest(testmodel)
+```
+
+## Poisson Regression Model (SIR)
+
+**These functions are still bit use case defined, and may not work
+properly, if data differs of how we have data in our dataset.**
+
+In case we have selected interested exposure and response diagnoses, we
+can calculate and plot SIR values. Analyzes is given in list format
+back.
+
+``` r
+dpirr <- pirr_data(d_exposure = exposure_diagnoses, 
+                   d_response = response_diagnoses, 
+                   d_population = dpop,
+                   var_age_start = 50 )
+results1 <- pirr_results(adat = dpirr) ## DG
+```
+
+Another example is that we can have a dataset which included fractures,
+and check same outcomes with fractures data. Analyzes is given in list
+format back.
+
+``` r
+dpirr2 <- pirr_data(d_exposure = exposure_diagnoses, 
+                    d_response = diagnoses %>% filter(DGREG == "FRACTURES" ), 
+                    d_population = dpop,
+                    dg_list = list(any_fracture = "ankle+forearm+hip+humerus+vertebral",
+                                   ostheoporotic = "forearm+hip+humerus+vertebral"
+                    ))
+results2 <- pirr_results(adat = dpirr2) 
+```

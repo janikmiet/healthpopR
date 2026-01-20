@@ -48,6 +48,9 @@ reference:
       - plot_survival_cr
       - plot_survival_km
       - plot_survival_death
+      - df_dates_per_id
+      - df_dates_ftime
+      - .extract_ci_all
   - title: "Cox Model Analysis"
     contents:
       - cox_create_data
@@ -74,15 +77,15 @@ reference:
       - data_codes
 
 articles:
-  - title: "Data Model"
+  - title: "Data Model and Basics"
     contents:
-      - data-model
-  - title: "Data Handling"
-    contents:
-      - data-handling
+      - data-model-basics
   - title: "Getting Started"
     contents:
       - getting-started
+  - title: "Survival Analysis"
+    contents:
+      - survival
 
 news:
   one_page: true

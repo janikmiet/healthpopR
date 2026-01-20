@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">healthpopR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,6 +61,11 @@
 <p><strong>healthpopR</strong> helps researchers and analysts classify populations into exposure and response groups, visualize ICD-10-based health profiles, and perform survival and Cox regression analysis using tidy workflows.</p>
 <p>The package is designed for analyzing how exposure diagnoses affect response diagnoses in population health data research. Package uses regex code for identifying ICD-10/9/8 codes. Check Quick Example for motivation.</p>
 <!-- <img src="man/figures/ueflogo.jpg" align="right" alt="" width="120" /> -->
+<div class="section level2">
+<h2 id="dataset-limitations">Dataset Limitations<a class="anchor" aria-label="anchor" href="#dataset-limitations"></a>
+</h2>
+<p>Currently functions are developed so that they fit our specific dataset correctly. Which means that analyses are limited to only one gender and follow up starts at when population is 50 years old. Theses limitations can be removed later, when we use same functions to another datasets.</p>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -162,7 +167,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

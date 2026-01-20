@@ -3,9 +3,11 @@
 <url><loc>https://janikmiet.github.io/healthpopR/LICENSE-text.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/LICENSE.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/articles/data-handling.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/articles/data-model-basics.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/articles/data-model.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/articles/getting-started.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/articles/index.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/articles/survival.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/authors.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/index.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/news/index.html</loc></url>
@@ -18,7 +20,10 @@
 <url><loc>https://janikmiet.github.io/healthpopR/reference/create_cox_model.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/create_dsurv.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/data_codes.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/reference/df_dates_ftime.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/reference/df_dates_per_id.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/dot-capitalize.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/reference/dot-extract_ci_all.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/dot-regex_clean.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/dot-relevel_by_reference.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/dot-safe_inc_progress.html</loc></url>
