@@ -60,7 +60,7 @@
 - [`df_dates_ftime()`](https://janikmiet.github.io/healthpopR/reference/df_dates_ftime.md)
   : Calculate follow-up time and event status from age 50
 
-- [`.extract_ci_all()`](https://janikmiet.github.io/healthpopR/reference/dot-extract_ci_all.md)
+- [`extract_ci_all()`](https://janikmiet.github.io/healthpopR/reference/extract_ci_all.md)
   :
 
   Extract all cumulative incidence curves from a `cuminc` object

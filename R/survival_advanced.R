@@ -162,8 +162,7 @@ df_dates_ftime <- function(df,
 #'     \item{event}{Event label}
 #'   }
 #'
-#' @keywords internal
-.extract_ci_all <- function(ci_obj, main_label) {
+extract_ci_all <- function(ci_obj, main_label) {
 # Generic function to extract all curves from cuminc object
   dplyr::bind_rows(lapply(names(ci_obj), function(nm) {
     comp <- ci_obj[[nm]]

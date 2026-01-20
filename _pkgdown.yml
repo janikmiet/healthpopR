@@ -50,7 +50,7 @@ reference:
       - plot_survival_death
       - df_dates_per_id
       - df_dates_ftime
-      - .extract_ci_all
+      - extract_ci_all
   - title: "Cox Model Analysis"
     contents:
       - cox_create_data
