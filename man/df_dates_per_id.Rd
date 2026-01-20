@@ -4,7 +4,12 @@
 \alias{df_dates_per_id}
 \title{Construct per-ID date dataset with follow-up starting at age 50}
 \usage{
-df_dates_per_id(exposure_diagnoses, response_diagnoses, dpop)
+df_dates_per_id(
+  exposure_diagnoses,
+  response_diagnoses,
+  dpop,
+  admin_censor = as.Date("2023-12-31")
+)
 }
 \arguments{
 \item{exposure_diagnoses}{A data frame containing exposure diagnoses with

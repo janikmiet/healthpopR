@@ -25,7 +25,7 @@
 #'
 #' @seealso \code{\link{df_dates_ftime}}
 #' @export
-df_dates_per_id <- function(exposure_diagnoses, response_diagnoses, dpop){
+df_dates_per_id <- function(exposure_diagnoses, response_diagnoses, dpop, admin_censor = as.Date("2023-12-31")){
   ## df per id aineisto, jossa päivämäärät ja seuranta alkaa kun 50v
   ### Aineisto pvm per ID
   d1 <- exposure_diagnoses |>

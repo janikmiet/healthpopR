@@ -8,7 +8,12 @@ intended to start from the 50th birthday.
 ## Usage
 
 ``` r
-df_dates_per_id(exposure_diagnoses, response_diagnoses, dpop)
+df_dates_per_id(
+  exposure_diagnoses,
+  response_diagnoses,
+  dpop,
+  admin_censor = as.Date("2023-12-31")
+)
 ```
 
 ## Arguments
