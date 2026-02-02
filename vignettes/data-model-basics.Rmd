@@ -21,7 +21,7 @@ The `healthpopR` package uses a simple common data model (CDM) with predefined v
 
 The expected datasets, variables, and their definitions are presented.
 
-![](figures/cdm.png)
+![Data model showing relationships between tables](figures/cdm.png)
 
 
 ## population

@@ -48,9 +48,7 @@ reference:
       - plot_survival_cr
       - plot_survival_km
       - plot_survival_death
-      - df_dates_per_id
-      - df_dates_ftime
-      - extract_ci_all
+      - survival_analysis
   - title: "Cox Model Analysis"
     contents:
       - cox_create_data

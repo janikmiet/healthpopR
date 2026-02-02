@@ -128,26 +128,15 @@ Check
 
 - [`create_dsurv()`](https://janikmiet.github.io/healthpopR/reference/create_dsurv.md)
   : Create Long-Format Survival Data from Exposure-Response Events
-
 - [`plot_survival_cr()`](https://janikmiet.github.io/healthpopR/reference/plot_survival_cr.md)
   : Plot Competing Risks Survival Curve (Exposure to Response or Death)
-
 - [`plot_survival_km()`](https://janikmiet.github.io/healthpopR/reference/plot_survival_km.md)
   : Plot Kaplan-Meier Survival Curve (Exposure to Response)
-
 - [`plot_survival_death()`](https://janikmiet.github.io/healthpopR/reference/plot_survival_death.md)
   : Plot Survival Curve for Mortality Analysis
-
-- [`df_dates_per_id()`](https://janikmiet.github.io/healthpopR/reference/df_dates_per_id.md)
-  : Construct per-ID date dataset with follow-up starting at age 50
-
-- [`df_dates_ftime()`](https://janikmiet.github.io/healthpopR/reference/df_dates_ftime.md)
-  : Calculate follow-up time and event status from age 50
-
-- [`extract_ci_all()`](https://janikmiet.github.io/healthpopR/reference/extract_ci_all.md)
-  :
-
-  Extract all cumulative incidence curves from a `cuminc` object
+- [`survival_analysis()`](https://janikmiet.github.io/healthpopR/reference/survival_analysis.md)
+  : Competing risks survival analysis between exposure and response
+  diagnoses
 
 ## Cox Model Analysis
 
