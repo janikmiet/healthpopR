@@ -93,8 +93,6 @@ survival_analysis <- function(exposure_diagnoses,
       "dead"         = "#292B2C"
     )
 
-
-
     ## PHASE 0 - MUODOSTETAAN PVM DATA
     ### Aineisto pvm per ID
     if(TRUE){
@@ -102,14 +100,17 @@ survival_analysis <- function(exposure_diagnoses,
       d0 <- dpop |>
         dplyr::mutate(
           DATE_BIRTH = as.Date(DATE_BIRTH),
-          DATE_DEATH = as.Date(DATE_DEATH),
-          DATE_MIGRATION = as.Date(DATE_MIGRATION),
+          # DATE_DEATH = as.Date(DATE_DEATH),
+          DATE_DEATH = as.Date(ifelse(DATE_DEATH > censoring_date, NA, DATE_DEATH), origin = "1970-01-01"),
+          # DATE_MIGRATION = as.Date(DATE_MIGRATION),
+          DATE_MIGRATION = as.Date(ifelse(DATE_MIGRATION > censoring_date, NA, DATE_MIGRATION), origin = "1970-01-01"),
           DATE_50 = DATE_BIRTH + 50 * 365.25 ## TODO this should be in dpop, and named as DATE_START
         ) |>
         select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_50)
 
       ## EXPOSURE DIAGNOSES
       d1 <- exposure_diagnoses |>
+        dplyr::filter(DATE <= censoring_date) |>
         dplyr::left_join(d0, by = "ID") |>
         dplyr::select(ID, DATE, DATE_50) |>
         dplyr::rename(DATE_EXPOSURE = DATE) |>
@@ -132,6 +133,7 @@ survival_analysis <- function(exposure_diagnoses,
 
       ## RESPONSE_DIAGNOSES
       d2 <- response_diagnoses |>
+        dplyr::filter(DATE <= censoring_date) |>
         dplyr::left_join(d0, by = "ID") |>
         dplyr::select(ID, DATE, DATE_50) |>
         dplyr::rename(DATE_RESPONSE = DATE) |>
