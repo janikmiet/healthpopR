@@ -12,7 +12,9 @@ predefined variable names.
 
 The expected datasets, variables, and their definitions are presented.
 
-![](figures/cdm.png)
+![Data model showing relationships between tables](figures/cdm.png)
+
+Data model showing relationships between tables
 
 ### population
 

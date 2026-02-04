@@ -41,8 +41,7 @@ search_diagnoses <- function(regex_icd10="",
                  DATE = as.Date(x = integer(0), origin = "1970-01-01"),
                  DG = character(),
                  ICD10_CLASS = character(),
-                 ICD10_3LETTERS = character(),
-                 AGE = numeric()
+                 ICD10_3LETTERS = character()
     ) # ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE
     d2 <- tibble(ID = numeric(),
                  DGREG = character(),
@@ -50,8 +49,7 @@ search_diagnoses <- function(regex_icd10="",
                  DATE = as.Date(x = integer(0), origin = "1970-01-01"),
                  DG = character(),
                  ICD10_CLASS = character(),
-                 ICD10_3LETTERS = character(),
-                 AGE = numeric()
+                 ICD10_3LETTERS = character()
     ) # ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE
     d3 <- tibble(ID = numeric(),
                  DGREG = character(),
@@ -59,8 +57,7 @@ search_diagnoses <- function(regex_icd10="",
                  DATE = as.Date(x = integer(0), origin = "1970-01-01"),
                  DG = character(),
                  ICD10_CLASS = character(),
-                 ICD10_3LETTERS = character(),
-                 AGE = numeric()
+                 ICD10_3LETTERS = character()
     ) # ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE
     .safe_inc_progress(1/6)
     if(regex_icd10 != ""){
@@ -68,7 +65,7 @@ search_diagnoses <- function(regex_icd10="",
         dplyr::filter(DGREG == "ICD10") |>
         dplyr::filter(SRC %in% registry_source) |> ## TODO ifelse c("")
         dplyr::filter(grepl(pattern = regex_icd10, x = DG)) |>
-        dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
+        dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS)
     }
     .safe_inc_progress(2/6)
     if(regex_icd9 != ""){
@@ -76,7 +73,7 @@ search_diagnoses <- function(regex_icd10="",
         dplyr::filter(DGREG == "ICD9") |>
         dplyr::filter(SRC %in% registry_source) |>
         dplyr::filter(grepl(pattern = regex_icd9, x = DG))|>
-        dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
+        dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS)
     }
     .safe_inc_progress(3/6)
     if(regex_icd8 != ""){
@@ -84,7 +81,7 @@ search_diagnoses <- function(regex_icd10="",
         dplyr::filter(DGREG == "ICD8") |>
         dplyr::filter(SRC %in% registry_source) |>
         dplyr::filter(grepl(pattern = regex_icd8, x = DG))|>
-        dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS, AGE)
+        dplyr::select(ID, DGREG, SRC, DATE, DG, ICD10_CLASS, ICD10_3LETTERS)
     }
     .safe_inc_progress(4/6)
     #TODO kun src extra mukaan
