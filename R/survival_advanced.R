@@ -76,7 +76,7 @@ survival_analysis <- function(exposure_diagnoses,
   internal_function <- function() {
     .safe_inc_progress(1/3)
     ## ESIMERKKI CASE
-    # start = "DATE_50"
+    # start = "DATE_RESPONSE"
     # censoring_date = as.Date("2023-12-01")
     # pre_entry_handling = "truncate" #c("truncate", "skip", "asis")
     colors_groups <- c(
@@ -225,29 +225,12 @@ survival_analysis <- function(exposure_diagnoses,
 
 
 
-    ## PHASE 3a - MODEL FILTER EVENTS AND SET CODING -------------------
+    ## PHASE 3A - NORMAL: FILTER EVENTS, CODING & CREATE RESULTS -------------------
     if(TRUE){
       ## Limiting results only from starting point
       dphase3a <- dphase2 |> filter(value >=0)
 
-      ## Otetaan vain ensimmäinen tapaus
       dphase3a <- dphase3a |>
-        filter(!is.na(name)) |> ## Tyhjät tapausrivit pois
-        dplyr::group_by(ID) |>
-        dplyr::slice_min(value, with_ties = FALSE) |>
-        dplyr::ungroup()
-
-      ## Aikamääre päivä ja vuosi
-      dphase3a <- dphase3a %>%
-        mutate(
-          days = value,
-          years = value / 365.25
-        )
-    }
-
-    ## PHASE 4a - MODEL SET CODING -------------------
-    if(TRUE){
-      dphase4a <- dphase3a |>
         dplyr::mutate(
           event = case_when(
             ## Start == DATE_EXPOSURE
@@ -276,37 +259,45 @@ survival_analysis <- function(exposure_diagnoses,
           )
         )
 
+      ## Otetaan vain ensimmäinen tapaus
+      dphase3a <- dphase3a |>
+        filter(!is.na(event)) |> ## Tyhjät tapausrivit pois
+        dplyr::group_by(ID) |>
+        dplyr::slice_min(value, with_ties = FALSE) |>
+        dplyr::ungroup()
+
+      ## Aikamääre päivä ja vuosi
+      dphase3a <- dphase3a %>%
+        mutate(
+          days = value,
+          years = value / 365.25
+        )
 
 
-
-    }
-
-    ## PHASE 5a - MODEL CREATE SURV MODEL AND RESULTS ------------
-    if(TRUE){
-
+      ## MODEL CREATE SURV MODEL AND RESULTS
       ## CR MALLI
       ## Sensuroinnin koodaus (sensurointi joko 3 tai 4)
       if(start == "DATE_EXPOSURE" | start == "DATE_RESPONSE") {
         CR_days <- cmprsk::cuminc(
-          ftime   = dphase4a$days,
-          fstatus = dphase4a$event,
+          ftime   = dphase3a$days,
+          fstatus = dphase3a$event,
           cencode = 3
         )
         CR_years <- cmprsk::cuminc(
-          ftime   = dphase4a$years,
-          fstatus = dphase4a$event,
+          ftime   = dphase3a$years,
+          fstatus = dphase3a$event,
           cencode = 3
         )
       }
       if(start == "DATE_50") {
         CR_days <- cmprsk::cuminc(
-          ftime   = dphase4a$value,
-          fstatus = dphase4a$event,
+          ftime   = dphase3a$value,
+          fstatus = dphase3a$event,
           cencode = 4
         )
         CR_years <- cmprsk::cuminc(
-          ftime   = dphase4a$years,
-          fstatus = dphase4a$event,
+          ftime   = dphase3a$years,
+          fstatus = dphase3a$event,
           cencode = 4
         )
       }
@@ -425,7 +416,7 @@ survival_analysis <- function(exposure_diagnoses,
     }
 
 
-    ## PHASE 3b - MORTALITY FILTER EVENTS AND SET CODING -------------------
+    ## PHASE 3B - MORTALITY: FILTER EVENTS, CODING & RESULTS -------------------
     ## dsurv aineisto DEATH
     if(TRUE){
       ## Limiting results
@@ -447,10 +438,7 @@ survival_analysis <- function(exposure_diagnoses,
 
       ## TODO testaa: Eli tässä per ID joko DEATH tai CENSOR rivi. DEATH määrä pitää matchata siihen freq kuinka monta kuolee.
 
-    }
-
-    ## PHASE 4b - MORTALITY SET CODING -------------------
-    if(TRUE){
+      ## PHASE 4b - MORTALITY SET CODING
       ## TODO check this out
       ## Coding var status
       dphase4b <- dphase3b |>
@@ -478,65 +466,67 @@ survival_analysis <- function(exposure_diagnoses,
           )
         )
 
-    }
 
 
-    ## PHASE 5b - MORTALITY MODEL AND RESULTS ------------
-    ## TODO  Testaus matchaa groups number at risk lukemat
-    ## TODO Add colors for 4 groups
-    ## Create surv and plot
-    # colors_groups <- c(
-    #   "non-exposure" = "#5BC0DE",
-    #   "exposure"     = "#D9534F",
-    #   "non-response" = "#F0AD4E",
-    #   "response"     = "#5CB85C",
-    #   "dead"         = "#292B2C"
-    # )
-    # c(colors_groups[["exposure"]], colors_groups[["non-exposure"]])
-    # c(colors_groups[["response"]], colors_groups[["non-response"]])
-    # c(colors_groups[["exposure"]], colors_groups[["response"]], colors_groups[["exposure & response"]], colors_groups[["no condition"]])
+
+      ## PHASE 5b - MORTALITY MODEL AND RESULTS
+      ## TODO  Testaus matchaa groups number at risk lukemat
+      ## TODO Add colors for 4 groups
+      ## Create surv and plot
+      # colors_groups <- c(
+      #   "non-exposure" = "#5BC0DE",
+      #   "exposure"     = "#D9534F",
+      #   "non-response" = "#F0AD4E",
+      #   "response"     = "#5CB85C",
+      #   "dead"         = "#292B2C"
+      # )
+      # c(colors_groups[["exposure"]], colors_groups[["non-exposure"]])
+      # c(colors_groups[["response"]], colors_groups[["non-response"]])
+      # c(colors_groups[["exposure"]], colors_groups[["response"]], colors_groups[["exposure & response"]], colors_groups[["no condition"]])
 
 
-    fit <- survival::survfit(survival::Surv(time = years, event = event) ~ GROUP, data = dphase4b)
-    p_mortality <- survminer::ggsurvplot(
-      fit,
-      data = dphase4b,
-      pval = TRUE,              # adds p-value from log-rank test
-      conf.int = TRUE,          # adds confidence intervals
-      risk.table = TRUE,        # shows number at risk table
-      surv.median.line = "v",  # shows median survival
-      # palette = colors,
-      legend.title = "Group",
-      # legend.labs = c("Exposure", "No Exposure"),
-      xlab = "Years",
-      ylab = "Survival probability"
-    )
-
-
-    ## PHASE 6 COLLECT RESULTS ------
-    if(TRUE){
-      ## Kootaan kaikki tulokset listaan, joka palautetaan
-      d <- list(plot_days = p_days,
-                plot_years = p_years,
-                plot_mortality = p_mortality,
-                CR_days = CR_days,
-                CR_years = CR_years,
-                dmodel = dphase4a,
-                dmortality = dphase4b
+      fit <- survival::survfit(survival::Surv(time = years, event = event) ~ GROUP, data = dphase4b)
+      p_mortality <- survminer::ggsurvplot(
+        fit,
+        data = dphase4b,
+        pval = TRUE,              # adds p-value from log-rank test
+        conf.int = TRUE,          # adds confidence intervals
+        risk.table = TRUE,        # shows number at risk table
+        surv.median.line = "v",  # shows median survival
+        # palette = colors,
+        legend.title = "Group",
+        # legend.labs = c("Exposure", "No Exposure"),
+        xlab = "Years",
+        ylab = "Survival probability"
       )
-      .safe_inc_progress(3/3)
+
+
+      ## PHASE 6 COLLECT RESULTS ------
+      if(TRUE){
+        ## Kootaan kaikki tulokset listaan, joka palautetaan
+        d <- list(plot_days = p_days,
+                  plot_years = p_years,
+                  plot_mortality = p_mortality,
+                  CR_days = CR_days,
+                  CR_years = CR_years,
+                  dmodel = dphase3a,
+                  dmortality = dphase4b
+        )
+        .safe_inc_progress(3/3)
+      }
+      return(d)
     }
-    return(d)
+
+    # Run with or without shiny progress
+    if (shiny::isRunning()) {
+      withProgress(message = "Creating Survival Analysis", value = 0, {
+        return(internal_function())
+      })
+    } else {
+      return(internal_function())
+    }
   }
 
-  # Run with or without shiny progress
-  if (shiny::isRunning()) {
-    withProgress(message = "Creating Survival Analysis", value = 0, {
-      return(internal_function())
-    })
-  } else {
-    return(internal_function())
-  }
 }
 
 
