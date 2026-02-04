@@ -65,6 +65,7 @@
 #' @importFrom survminer ggcompetingrisks
 #'
 #' @export
+
 survival_analysis <- function(exposure_diagnoses,
                               response_diagnoses,
                               dpop,
@@ -499,34 +500,36 @@ survival_analysis <- function(exposure_diagnoses,
         xlab = "Years",
         ylab = "Survival probability"
       )
-
-
-      ## PHASE 6 COLLECT RESULTS ------
-      if(TRUE){
-        ## Kootaan kaikki tulokset listaan, joka palautetaan
-        d <- list(plot_days = p_days,
-                  plot_years = p_years,
-                  plot_mortality = p_mortality,
-                  CR_days = CR_days,
-                  CR_years = CR_years,
-                  dmodel = dphase3a,
-                  dmortality = dphase4b
-        )
-        .safe_inc_progress(3/3)
-      }
-      return(d)
     }
 
-    # Run with or without shiny progress
-    if (shiny::isRunning()) {
-      withProgress(message = "Creating Survival Analysis", value = 0, {
-        return(internal_function())
-      })
-    } else {
-      return(internal_function())
+    ## PHASE 6 COLLECT RESULTS ------
+    if(TRUE){
+      ## Kootaan kaikki tulokset listaan, joka palautetaan
+      d <- list(plot_days = p_days,
+                plot_years = p_years,
+                plot_mortality = p_mortality,
+                CR_days = CR_days,
+                CR_years = CR_years,
+                dmodel = dphase3a,
+                dmortality = dphase4b
+      )
+      .safe_inc_progress(3/3)
     }
+    return(d)
   }
 
+  # Run with or without shiny progress
+  if (shiny::isRunning()) {
+    withProgress(message = "Creating Survival Analysis", value = 0, {
+      return(internal_function())
+    })
+  } else {
+    return(internal_function())
+  }
 }
+
+
+
+
 
 
