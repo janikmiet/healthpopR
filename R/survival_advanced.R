@@ -247,7 +247,7 @@ survival_analysis <- function(exposure_diagnoses,
 
     ## PHASE 4a - MODEL SET CODING -------------------
     if(TRUE){
-      dphase4a <- dphase3 |>
+      dphase4a <- dphase3a |>
         dplyr::mutate(
           event = case_when(
             ## Start == DATE_EXPOSURE
