@@ -26,7 +26,7 @@ Must include columns \code{ID} and \code{DATE}.}
 \item{start}{Character string defining the start of follow-up.
 One of \code{"DATE_EXPOSURE"}, \code{"DATE_RESPONSE"}, or \code{"DATE_50"}.}
 
-\item{censoring_date}{Date defining administrative censoring
+\item{censoring_date}{Date defining administrative censoring. This affects to DATE_DEATH, DATE_MIGRATION and DATE (diagnoses).
 (default: \code{2024-12-21}).}
 
 \item{pre_entry_handling}{Strategy for handling diagnoses occurring before

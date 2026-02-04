@@ -48,8 +48,6 @@
   : Plot Competing Risks Survival Curve (Exposure to Response or Death)
 - [`plot_survival_km()`](https://janikmiet.github.io/healthpopR/reference/plot_survival_km.md)
   : Plot Kaplan-Meier Survival Curve (Exposure to Response)
-- [`plot_survival_death()`](https://janikmiet.github.io/healthpopR/reference/plot_survival_death.md)
-  : Plot Survival Curve for Mortality Analysis
 - [`survival_analysis()`](https://janikmiet.github.io/healthpopR/reference/survival_analysis.md)
   : Competing risks survival analysis between exposure and response
   diagnoses

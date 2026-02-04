@@ -43,7 +43,8 @@ survival_analysis(
 
 - censoring_date:
 
-  Date defining administrative censoring (default: `2024-12-21`).
+  Date defining administrative censoring. This affects to DATE_DEATH,
+  DATE_MIGRATION and DATE (diagnoses). (default: `2024-12-21`).
 
 - pre_entry_handling:
 
