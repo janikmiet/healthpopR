@@ -116,6 +116,7 @@ pirr_data <- function(
       dplyr::arrange(ID, DATE) |>
       dplyr::rename(DG_RES = DG,
                     DATE_RESPONSE = DATE) |>
+      dplyr::left_join(pop_dates, by = "ID") |>
       dplyr::mutate(AGE_RESPONSE = trunc(lubridate::`%--%`(DATE_BIRTH, DATE_RESPONSE) / lubridate::years(1))) |>
       dplyr::select(ID, DATE_RESPONSE, AGE_RESPONSE, DG_RES)
     ## Take only first case
