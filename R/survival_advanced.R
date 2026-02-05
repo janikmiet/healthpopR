@@ -73,22 +73,36 @@ survival_analysis <- function(exposure_diagnoses,
                               censoring_date = as.Date("2024-12-21"),
                               pre_entry_handling = c("truncate", "skip", "asis")
 ) {
+
+
   # type <- match.arg(type)
+  ## ESIMERKKI CASE
+  # start = "DATE_50"
+  # censoring_date = as.Date("2023-12-01")
+  # pre_entry_handling = "truncate" #c("truncate", "skip", "asis")
+  # colors_groups <- c(
+  #   "non-exposure" = "#5BC0DE",
+  #   "exposure"     = "#D9534F",
+  #   "non-response" = "#F0AD4E",
+  #   "response"     = "#5CB85C",
+  #   "dead"         = "#292B2C"
+  # )
+
   internal_function <- function() {
     .safe_inc_progress(1/3)
-    ## ESIMERKKI CASE
-    # start = "DATE_RESPONSE"
-    # censoring_date = as.Date("2023-12-01")
-    # pre_entry_handling = "truncate" #c("truncate", "skip", "asis")
+
+    ## Colors for groups
     colors_groups <- c(
-      "non-exposure" = "#5BC0DE",
-      "exposure"     = "#D9534F",
-      "non-response" = "#F0AD4E",
-      "response"     = "#5CB85C",
-      "dead"         = "#292B2C"
+      "non-exposure"          = "#5BC0DE",  # blue
+      "exposure"              = "#D9534F",  # red
+      "non-response"          = "#F0AD4E",  # orange
+      "response"              = "#5CB85C",  # green
+      "dead"                  = "#292B2C",  # dark gray
+      "no condition"          = "#ADB5BD",  # neutral gray
+      "exposure & response"   = "#6F42C1"   # purple
     )
 
-    ## PHASE 1 - COLLECT DATES AND SET DATES ACCORDING TO START PRE-ENTRY HANDLING -------
+    ## PHASE 1: COLLECT DATES AND SET DATES ACCORDING TO START PRE-ENTRY HANDLING -------
     if(TRUE){
       ## Population essential DATEs
       d0 <- dpop |>
@@ -175,7 +189,8 @@ survival_analysis <- function(exposure_diagnoses,
       # df %>% filter(DATE_DEATH < DATE_50)
       # df$DATE_EXPOSURE <- as.Date(df$DATE_EXPOSURE, origin = "1970-01-01")
       # df$DATE_RESPONSE <- as.Date(df$DATE_RESPONSE, origin = "1970-01-01")
-      ## DEBUG
+
+      ### DEBUG -----
       if(FALSE){
         ## Katsotaan kuinka monta tapausta joissa expsure ennen response
         df %>% filter(DATE_EXPOSURE <= DATE_RESPONSE) %>% count()
@@ -184,9 +199,7 @@ survival_analysis <- function(exposure_diagnoses,
     }
 
 
-
-
-    # PHASE 2 - CALCULATE TIMES -----------------
+    ## PHASE 2: CALCULATE TIMES -----------------
     if(TRUE){
       dphase2 <- df |>
         dplyr::mutate(
@@ -209,7 +222,8 @@ survival_analysis <- function(exposure_diagnoses,
         tidyr::pivot_longer(cols = c(time_exposure, time_response, time_dead, time_censoring)) |>
         dplyr::filter(!is.na(value)) |>
         select(ID, name, value, GROUP)
-      ## DEBUG
+
+      ### DEBUG -----
       if(FALSE){
         ## Katsotaan kuinka monta tapausta exp<=resp
         dsurv_uusi2 %>% filter(name == "time_response") %>% count()
@@ -224,13 +238,12 @@ survival_analysis <- function(exposure_diagnoses,
     }
 
 
-
-
-    ## PHASE 3A - NORMAL: FILTER EVENTS, CODING & CREATE RESULTS -------------------
+    ## PHASE 3A: NORMAL-------------------
+    ### FILTER EVENTS & CODING  --------
     if(TRUE){
       ## Limiting results only from starting point
       dphase3a <- dphase2 |> filter(value >=0)
-
+      ## Coding
       dphase3a <- dphase3a |>
         dplyr::mutate(
           event = case_when(
@@ -271,12 +284,9 @@ survival_analysis <- function(exposure_diagnoses,
       dphase3a <- dphase3a %>%
         mutate(
           days = value,
-          years = value / 365.25
-        )
+          years = value / 365.25)
 
-
-      ## MODEL CREATE SURV MODEL AND RESULTS
-      ## CR MALLI
+      ### CREATE SURV MODEL AND RESULTS -------
       ## Sensuroinnin koodaus (sensurointi joko 3 tai 4)
       if(start == "DATE_EXPOSURE" | start == "DATE_RESPONSE") {
         CR_days <- cmprsk::cuminc(
@@ -314,8 +324,7 @@ survival_analysis <- function(exposure_diagnoses,
           xlab = "Time after Exposure (days)",
           ylab = "Cumulative incidence",
           title = "Competing Risk Model: Exposure to Response/Death",
-          subtitle = paste0("pre_entry_handling=", pre_entry_handling)
-        ) +
+          subtitle = paste0("pre_entry_handling=", pre_entry_handling)) +
           ggplot2::scale_color_manual(
             values = c("1" = colors_groups[["response"]],
                        "2" = colors_groups[["dead"]]),
@@ -330,8 +339,7 @@ survival_analysis <- function(exposure_diagnoses,
           xlab = "Time after Exposure (years)",
           ylab = "Cumulative incidence",
           title = "Competing Risk Model: Exposure to Response/Death",
-          subtitle = paste0("pre_entry_handling=", pre_entry_handling)
-        ) +
+          subtitle = paste0("pre_entry_handling=", pre_entry_handling)) +
           ggplot2::scale_color_manual(
             values = c("1" = colors_groups[["response"]],
                        "2" = colors_groups[["dead"]]),
@@ -417,11 +425,10 @@ survival_analysis <- function(exposure_diagnoses,
     }
 
 
-    ## PHASE 3B - MORTALITY: FILTER EVENTS, CODING & RESULTS -------------------
-    ## dsurv aineisto DEATH
+    ## PHASE 3B: MORTALITY -------------------
+    ### FILTER EVENTS, CODING & RESULTS -------
     if(TRUE){
-      ## Limiting results
-      ## TODO tässä kohtaa malli: DATE_RESPONSE -> DEAD / CENSORING
+      ## Limiting results: tässä kohtaa malli: DATE_RESPONSE -> DEAD / CENSORING
       dphase3b <- dphase2 |> filter(name == "time_dead" | name == "time_censoring")
 
       ## Otetaan vain ensimmäinen tapaus per ID
@@ -440,8 +447,6 @@ survival_analysis <- function(exposure_diagnoses,
       ## TODO testaa: Eli tässä per ID joko DEATH tai CENSOR rivi. DEATH määrä pitää matchata siihen freq kuinka monta kuolee.
 
       ## PHASE 4b - MORTALITY SET CODING
-      ## TODO check this out
-      ## Coding var status
       dphase4b <- dphase3b |>
         dplyr::mutate(
           event = case_when(
@@ -467,24 +472,23 @@ survival_analysis <- function(exposure_diagnoses,
           )
         )
 
-
-
-
-      ## PHASE 5b - MORTALITY MODEL AND RESULTS
-      ## TODO  Testaus matchaa groups number at risk lukemat
-      ## TODO Add colors for 4 groups
-      ## Create surv and plot
-      # colors_groups <- c(
-      #   "non-exposure" = "#5BC0DE",
-      #   "exposure"     = "#D9534F",
-      #   "non-response" = "#F0AD4E",
-      #   "response"     = "#5CB85C",
-      #   "dead"         = "#292B2C"
-      # )
-      # c(colors_groups[["exposure"]], colors_groups[["non-exposure"]])
-      # c(colors_groups[["response"]], colors_groups[["non-response"]])
-      # c(colors_groups[["exposure"]], colors_groups[["response"]], colors_groups[["exposure & response"]], colors_groups[["no condition"]])
-
+      ### CREATE MODEL AND RESULTS ----
+      if(start == "DATE_EXPOSURE"){
+        leglabs <- c("Response", "No Response")
+        custom_colors <- c(colors_groups[["response"]], colors_groups[["non-response"]])
+        xlab <- "From Exposure Condition, Years"
+      }
+      if(start == "DATE_RESPONSE"){
+        leglabs <- c("Exposure", "No Exposure")
+        custom_colors <- c(colors_groups[["exposure"]], colors_groups[["non-exposure"]])
+        xlab <- "From Response Condition, Years"
+      }
+      # TODO this
+      if(start == "DATE_50"){
+        leglabs <- c("Exposure", "Exposure & Response", "No Condition", "Response")
+        custom_colors <- c(colors_groups[["exposure"]], colors_groups[["exposure & response"]], colors_groups[["no condition"]], colors_groups[["response"]])
+        xlab <- "From Follow Up Start, Years"
+      }
 
       fit <- survival::survfit(survival::Surv(time = years, event = event) ~ GROUP, data = dphase4b)
       p_mortality <- survminer::ggsurvplot(
@@ -494,13 +498,14 @@ survival_analysis <- function(exposure_diagnoses,
         conf.int = TRUE,          # adds confidence intervals
         risk.table = TRUE,        # shows number at risk table
         surv.median.line = "v",  # shows median survival
-        # palette = colors,
+        palette = custom_colors,
         legend.title = "Group",
-        # legend.labs = c("Exposure", "No Exposure"),
-        xlab = "Years",
+        legend.labs = leglabs,
+        xlab = xlab,
         ylab = "Survival probability"
       )
     }
+
 
     ## PHASE 6 COLLECT RESULTS ------
     if(TRUE){
@@ -511,14 +516,13 @@ survival_analysis <- function(exposure_diagnoses,
                 CR_days = CR_days,
                 CR_years = CR_years,
                 dmodel = dphase3a,
-                dmortality = dphase4b
-      )
+                dmortality = dphase4b)
       .safe_inc_progress(3/3)
     }
     return(d)
   }
 
-  # Run with or without shiny progress
+  # Run with or without shiny progress -----
   if (shiny::isRunning()) {
     withProgress(message = "Creating Survival Analysis", value = 0, {
       return(internal_function())
@@ -527,9 +531,6 @@ survival_analysis <- function(exposure_diagnoses,
     return(internal_function())
   }
 }
-
-
-
 
 
 
