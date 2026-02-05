@@ -115,9 +115,8 @@ pirr_data <- function(
     dvast <- response_diagnoses |>
       dplyr::arrange(ID, DATE) |>
       dplyr::rename(DG_RES = DG,
-                    DATE_RESPONSE = DATE,
-                    AGE_RESPONSE = AGE
-      ) |>
+                    DATE_RESPONSE = DATE) |>
+      dplyr::mutate(AGE_RESPONSE = trunc(lubridate::`%--%`(DATE_BIRTH, DATE_RESPONSE) / lubridate::years(1))) |>
       dplyr::select(ID, DATE_RESPONSE, AGE_RESPONSE, DG_RES)
     ## Take only first case
     if(!all_cases){
