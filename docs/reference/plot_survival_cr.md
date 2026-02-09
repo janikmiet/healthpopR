@@ -1,7 +1,7 @@
 # Plot Competing Risks Survival Curve (Exposure to Response or Death)
 
-Plots a cumulative incidence function from a long-format dataset using a
-competing risks model.
+THIS FUNCTION WILL BE DEPRICATED IN FUTURE. Plots a cumulative incidence
+function from a long-format dataset using a competing risks model.
 
 ## Usage
 

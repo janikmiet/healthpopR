@@ -31,7 +31,7 @@ A data frame in long format with columns:
 }
 }
 \description{
-Processes raw exposure-response data into a long-format dataset suitable for survival analysis,
+THIS FUNCTION WILL BE DEPRICATED IN FUTURE. Processes raw exposure-response data into a long-format dataset suitable for survival analysis,
              including response, death, and censoring times. Supports use in Shiny with progress tracking.
 }
 \details{

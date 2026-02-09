@@ -76,6 +76,10 @@ A named list with the following elements:
 
   `ggplot` object of cumulative incidence (years).
 
+- plot_mortality:
+
+  `ggplot` object of cumulative incidence of death (years).
+
 - CR_days:
 
   `cuminc` object with time in days.
@@ -84,9 +88,13 @@ A named list with the following elements:
 
   `cuminc` object with time in years.
 
-- dsurv:
+- dmodel:
 
-  Final individual-level survival data used in the analysis.
+  Final individual-level survival data used in the main analysis.
+
+- dmortality:
+
+  Final individual-level survival data used in the death analysis.
 
 ## Details
 
@@ -110,6 +118,9 @@ The analysis workflow consists of:
 Time is internally calculated in days and additionally expressed in
 years (365.25 days). Individuals who die before follow-up start are
 excluded.
+
+Censoring affects inviduals date of death, immigration date and
+diagnosis dates.
 
 ## See also
 

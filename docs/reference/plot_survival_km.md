@@ -1,7 +1,8 @@
 # Plot Kaplan-Meier Survival Curve (Exposure to Response)
 
-Plots an overall Kaplan-Meier survival curve from a long-format survival
-dataset containing response, censoring, and death events.
+THIS FUNCTION WILL BE DEPRICATED IN FUTURE. Plots an overall
+Kaplan-Meier survival curve from a long-format survival dataset
+containing response, censoring, and death events.
 
 ## Usage
 

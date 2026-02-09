@@ -1,8 +1,114 @@
 # Survival Analysis from 50 years forward
 
+## Pre-analysis
+
+Create first `exposure_diagnoses` and `response_diagnoses` -datasets.
+Also we need to have a dataset of population including dates
+`DATE_BIRTH`, `DATE_DEATH`, `DATE_MIGRATION` and `DATE_50`. This can be
+created by
+[`classify_population()`](https://janikmiet.github.io/healthpopR/reference/classify_population.md)-function.
+
+First let’s define a case
+
 ``` r
-# this must be 
-# - not using data
-# - simplest method to get results
-# - outline of what we want to achieve
+exposure_icd9 = ""
+exposure_icd8 = ""
+exposure_src = c("")
+response_icd10 = ""
+response_icd9 = ""
+response_icd8 = ""
+response_src = c("")
+```
+
+Then we create study population
+
+``` r
+dpop <- healthpopR::classify_population(exposure_icd10 = exposure_icd10,
+                                exposure_icd9 = exposure_icd9,
+                                exposure_icd8 = exposure_icd8,
+                                exposure_src = exposure_src,
+                                response_icd10 = response_icd10,
+                                response_icd9 = response_icd9,
+                                response_icd8 = response_icd8,
+                                response_src = response_src,
+                                data_population = population,
+                                data_diagnoses = diagnoses)
+```
+
+Next we create datasets `exposure_diagnoses` and `response_diagnoses`
+respectly:
+
+``` r
+exposure_diagnoses <- healthpopR::search_diagnoses(regex_icd10 = exposure_icd10,
+                                                   regex_icd9 = exposure_icd9,
+                                                   regex_icd8 = exposure_icd8,
+                                                   registry_source = exposure_src)
+response_diagnoses <- healthpopR::search_diagnoses(regex_icd10 = response_icd10,
+                                                   regex_icd9 = response_icd9,
+                                                   regex_icd8 = response_icd8,
+                                                   registry_source = response_src)
+```
+
+## Survival Analysis Function
+
+We can define which is starting point to analysis. Choices are Exposure,
+Response or Follow up start date (DATE_50). This defined by argument
+`start`:
+
+``` r
+start = "DATE_EXPOSURE"
+start = "DATE_RESPONSE"
+start = "DATE_50"
+```
+
+We can define how to handle pre entry diagnoses by argument
+`pre_entry_handling`.
+
+- truncate: Diagnosis date is set to entry date.
+- skip: Diagnoses before entry are ignored; first post-entry diagnosis
+  is used.
+- asis: Diagnosis date is used as recorded.
+
+In this example we choose to start survival analysis from Exposure date
+and we truncate dates before this entry date:
+
+``` r
+surv_results <- healthpopR::survival_analysis(exposure_diagnoses = exposure_diagnoses, 
+                              response_diagnoses = exposure_diagnoses,
+                              dpop = dpop,
+                              start = "DATE_EXPOSURE",
+                              censoring_date = as.Date("2024-12-31"),
+                              pre_entry_handling = "truncate")
+```
+
+We can access the plots and data by created object:
+
+``` r
+surv_results$plot_years
+surv_results$plot_mortality
+```
+
+## Case of starting DATE_50
+
+Actually, you can redefien starting date by mutating “DATE_50”. DATE_50
+is picked as variable name, because we used that for our specific
+dataset.
+
+- In future maybe we change this variable name to `DATE_CUSTOM`. But
+  this needs to tested first.
+
+``` r
+dpop <- dpop %>% 
+  mutate(DATE_50 = as.Date("2001-03-15"))
+```
+
+And then create results from this date:
+
+``` r
+surv_results <- healthpopR::survival_analysis(exposure_diagnoses = exposure_diagnoses, 
+                              response_diagnoses = exposure_diagnoses,
+                              dpop = dpop,
+                              start = "DATE_50",
+                              censoring_date = as.Date("2024-12-31"),
+                              pre_entry_handling = "truncate")
 ```

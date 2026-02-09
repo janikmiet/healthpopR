@@ -26,7 +26,7 @@ plot_survival_cr(
 A `ggplot2` object showing the cumulative incidence curves for competing risks.
 }
 \description{
-Plots a cumulative incidence function from a long-format dataset using a competing risks model.
+THIS FUNCTION WILL BE DEPRICATED IN FUTURE. Plots a cumulative incidence function from a long-format dataset using a competing risks model.
 }
 \details{
 Internally converts event types into status codes for competing risks analysis:

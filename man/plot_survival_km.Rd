@@ -25,7 +25,7 @@ plot_survival_km(
 A Kaplan-Meier survival curve plotted using the base R `plot()` function.
 }
 \description{
-Plots an overall Kaplan-Meier survival curve from a long-format survival dataset
+THIS FUNCTION WILL BE DEPRICATED IN FUTURE. Plots an overall Kaplan-Meier survival curve from a long-format survival dataset
              containing response, censoring, and death events.
 }
 \details{

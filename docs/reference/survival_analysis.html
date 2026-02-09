@@ -15,7 +15,7 @@ incidence estimates and ready-made ggplot visualizations."><meta property="og:im
 
     <a class="navbar-brand me-2" href="../index.html">healthpopR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,14 +113,20 @@ cohort entry (age 50):</p><dl><dt>truncate</dt>
   <dt>plot_years</dt>
 <dd><p><code>ggplot</code> object of cumulative incidence (years).</p></dd>
 
+  <dt>plot_mortality</dt>
+<dd><p><code>ggplot</code> object of cumulative incidence of death (years).</p></dd>
+
   <dt>CR_days</dt>
 <dd><p><code>cuminc</code> object with time in days.</p></dd>
 
   <dt>CR_years</dt>
 <dd><p><code>cuminc</code> object with time in years.</p></dd>
 
-  <dt>dsurv</dt>
-<dd><p>Final individual-level survival data used in the analysis.</p></dd>
+  <dt>dmodel</dt>
+<dd><p>Final individual-level survival data used in the main analysis.</p></dd>
+
+  <dt>dmortality</dt>
+<dd><p>Final individual-level survival data used in the death analysis.</p></dd>
 
 
 </dl></div>
@@ -136,6 +142,7 @@ cohort entry (age 50):</p><dl><dt>truncate</dt>
   <code><a href="https://rdrr.io/pkg/cmprsk/man/cuminc.html" class="external-link">cuminc</a></code>.</p></li>
 </ol><p>Time is internally calculated in days and additionally expressed in years
 (365.25 days). Individuals who die before follow-up start are excluded.</p>
+<p>Censoring affects inviduals date of death, immigration date and diagnosis dates.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

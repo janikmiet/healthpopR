@@ -1,8 +1,9 @@
 # Create Long-Format Survival Data from Exposure-Response Events
 
-Processes raw exposure-response data into a long-format dataset suitable
-for survival analysis, including response, death, and censoring times.
-Supports use in Shiny with progress tracking.
+THIS FUNCTION WILL BE DEPRICATED IN FUTURE. Processes raw
+exposure-response data into a long-format dataset suitable for survival
+analysis, including response, death, and censoring times. Supports use
+in Shiny with progress tracking.
 
 ## Usage
 

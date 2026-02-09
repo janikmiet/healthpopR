@@ -1,5 +1,5 @@
 #' @title Create Long-Format Survival Data from Exposure-Response Events
-#' @description Processes raw exposure-response data into a long-format dataset suitable for survival analysis,
+#' @description THIS FUNCTION WILL BE DEPRICATED IN FUTURE. Processes raw exposure-response data into a long-format dataset suitable for survival analysis,
 #'              including response, death, and censoring times. Supports use in Shiny with progress tracking.
 #'
 #' @param data A data frame that must include columns: `ID`, `exp.GROUP`, `exp.DATE`, `resp.DATE`, `DATE_DEATH`,
@@ -121,7 +121,7 @@ create_dsurv <- function(data,
 
 
 #' @title Plot Kaplan-Meier Survival Curve (Exposure to Response)
-#' @description Plots an overall Kaplan-Meier survival curve from a long-format survival dataset
+#' @description THIS FUNCTION WILL BE DEPRICATED IN FUTURE. Plots an overall Kaplan-Meier survival curve from a long-format survival dataset
 #'              containing response, censoring, and death events.
 #'
 #' @param data A data frame in long format with the following required columns:
@@ -215,7 +215,7 @@ plot_survival_km <- function(data, color = "#D9534F", scale = "years", plot = c(
 }
 
 #' @title Plot Competing Risks Survival Curve (Exposure to Response or Death)
-#' @description Plots a cumulative incidence function from a long-format dataset using a competing risks model.
+#' @description THIS FUNCTION WILL BE DEPRICATED IN FUTURE. Plots a cumulative incidence function from a long-format dataset using a competing risks model.
 #'
 #' @param data A data frame in long format with the following required columns:
 #' \describe{

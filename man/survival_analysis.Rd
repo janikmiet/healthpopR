@@ -42,9 +42,11 @@ A named list with the following elements:
 \describe{
   \item{plot_days}{\code{ggplot} object of cumulative incidence (days).}
   \item{plot_years}{\code{ggplot} object of cumulative incidence (years).}
+  \item{plot_mortality}{\code{ggplot} object of cumulative incidence of death (years).}
   \item{CR_days}{\code{cuminc} object with time in days.}
   \item{CR_years}{\code{cuminc} object with time in years.}
-  \item{dsurv}{Final individual-level survival data used in the analysis.}
+  \item{dmodel}{Final individual-level survival data used in the main analysis.}
+  \item{dmortality}{Final individual-level survival data used in the death analysis.}
 }
 }
 \description{
@@ -69,6 +71,8 @@ The analysis workflow consists of:
 
 Time is internally calculated in days and additionally expressed in years
 (365.25 days). Individuals who die before follow-up start are excluded.
+
+Censoring affects inviduals date of death, immigration date and diagnosis dates.
 }
 \seealso{
 \code{\link[cmprsk]{cuminc}},

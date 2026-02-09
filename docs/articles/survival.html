@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthpopR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,12 +64,104 @@
 
     
     
+<div class="section level2">
+<h2 id="pre-analysis">Pre-analysis<a class="anchor" aria-label="anchor" href="#pre-analysis"></a>
+</h2>
+<p>Create first <code>exposure_diagnoses</code> and
+<code>response_diagnoses</code> -datasets. Also we need to have a
+dataset of population including dates <code>DATE_BIRTH</code>,
+<code>DATE_DEATH</code>, <code>DATE_MIGRATION</code> and
+<code>DATE_50</code>. This can be created by
+<code><a href="../reference/classify_population.html">classify_population()</a></code>-function.</p>
+<p>First let’s define a case</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># this must be </span></span>
-<span><span class="co"># - not using data</span></span>
-<span><span class="co"># - simplest method to get results</span></span>
-<span><span class="co"># - outline of what we want to achieve</span></span></code></pre></div>
-  </main>
+<code class="sourceCode R"><span><span class="va">exposure_icd9</span> <span class="op">=</span> <span class="st">""</span></span>
+<span><span class="va">exposure_icd8</span> <span class="op">=</span> <span class="st">""</span></span>
+<span><span class="va">exposure_src</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span></span>
+<span><span class="va">response_icd10</span> <span class="op">=</span> <span class="st">""</span></span>
+<span><span class="va">response_icd9</span> <span class="op">=</span> <span class="st">""</span></span>
+<span><span class="va">response_icd8</span> <span class="op">=</span> <span class="st">""</span></span>
+<span><span class="va">response_src</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span></span></code></pre></div>
+<p>Then we create study population</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dpop</span> <span class="op">&lt;-</span> <span class="fu">healthpopR</span><span class="fu">::</span><span class="fu"><a href="../reference/classify_population.html">classify_population</a></span><span class="op">(</span>exposure_icd10 <span class="op">=</span> <span class="va">exposure_icd10</span>,</span>
+<span>                                exposure_icd9 <span class="op">=</span> <span class="va">exposure_icd9</span>,</span>
+<span>                                exposure_icd8 <span class="op">=</span> <span class="va">exposure_icd8</span>,</span>
+<span>                                exposure_src <span class="op">=</span> <span class="va">exposure_src</span>,</span>
+<span>                                response_icd10 <span class="op">=</span> <span class="va">response_icd10</span>,</span>
+<span>                                response_icd9 <span class="op">=</span> <span class="va">response_icd9</span>,</span>
+<span>                                response_icd8 <span class="op">=</span> <span class="va">response_icd8</span>,</span>
+<span>                                response_src <span class="op">=</span> <span class="va">response_src</span>,</span>
+<span>                                data_population <span class="op">=</span> <span class="va">population</span>,</span>
+<span>                                data_diagnoses <span class="op">=</span> <span class="va">diagnoses</span><span class="op">)</span></span></code></pre></div>
+<p>Next we create datasets <code>exposure_diagnoses</code> and
+<code>response_diagnoses</code> respectly:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exposure_diagnoses</span> <span class="op">&lt;-</span> <span class="fu">healthpopR</span><span class="fu">::</span><span class="fu"><a href="../reference/search_diagnoses.html">search_diagnoses</a></span><span class="op">(</span>regex_icd10 <span class="op">=</span> <span class="va">exposure_icd10</span>,</span>
+<span>                                                   regex_icd9 <span class="op">=</span> <span class="va">exposure_icd9</span>,</span>
+<span>                                                   regex_icd8 <span class="op">=</span> <span class="va">exposure_icd8</span>,</span>
+<span>                                                   registry_source <span class="op">=</span> <span class="va">exposure_src</span><span class="op">)</span></span>
+<span><span class="va">response_diagnoses</span> <span class="op">&lt;-</span> <span class="fu">healthpopR</span><span class="fu">::</span><span class="fu"><a href="../reference/search_diagnoses.html">search_diagnoses</a></span><span class="op">(</span>regex_icd10 <span class="op">=</span> <span class="va">response_icd10</span>,</span>
+<span>                                                   regex_icd9 <span class="op">=</span> <span class="va">response_icd9</span>,</span>
+<span>                                                   regex_icd8 <span class="op">=</span> <span class="va">response_icd8</span>,</span>
+<span>                                                   registry_source <span class="op">=</span> <span class="va">response_src</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="survival-analysis-function">Survival Analysis Function<a class="anchor" aria-label="anchor" href="#survival-analysis-function"></a>
+</h2>
+<p>We can define which is starting point to analysis. Choices are
+Exposure, Response or Follow up start date (DATE_50). This defined by
+argument <code>start</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">start</span> <span class="op">=</span> <span class="st">"DATE_EXPOSURE"</span></span>
+<span><span class="va">start</span> <span class="op">=</span> <span class="st">"DATE_RESPONSE"</span></span>
+<span><span class="va">start</span> <span class="op">=</span> <span class="st">"DATE_50"</span></span></code></pre></div>
+<p>We can define how to handle pre entry diagnoses by argument
+<code>pre_entry_handling</code>.</p>
+<ul>
+<li>truncate: Diagnosis date is set to entry date.</li>
+<li>skip: Diagnoses before entry are ignored; first post-entry diagnosis
+is used.</li>
+<li>asis: Diagnosis date is used as recorded.</li>
+</ul>
+<p>In this example we choose to start survival analysis from Exposure
+date and we truncate dates before this entry date:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">surv_results</span> <span class="op">&lt;-</span> <span class="fu">healthpopR</span><span class="fu">::</span><span class="fu"><a href="../reference/survival_analysis.html">survival_analysis</a></span><span class="op">(</span>exposure_diagnoses <span class="op">=</span> <span class="va">exposure_diagnoses</span>, </span>
+<span>                              response_diagnoses <span class="op">=</span> <span class="va">exposure_diagnoses</span>,</span>
+<span>                              dpop <span class="op">=</span> <span class="va">dpop</span>,</span>
+<span>                              start <span class="op">=</span> <span class="st">"DATE_EXPOSURE"</span>,</span>
+<span>                              censoring_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-12-31"</span><span class="op">)</span>,</span>
+<span>                              pre_entry_handling <span class="op">=</span> <span class="st">"truncate"</span><span class="op">)</span></span></code></pre></div>
+<p>We can access the plots and data by created object:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">surv_results</span><span class="op">$</span><span class="va">plot_years</span></span>
+<span><span class="va">surv_results</span><span class="op">$</span><span class="va">plot_mortality</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="case-of-starting-date_50">Case of starting DATE_50<a class="anchor" aria-label="anchor" href="#case-of-starting-date_50"></a>
+</h2>
+<p>Actually, you can redefien starting date by mutating “DATE_50”.
+DATE_50 is picked as variable name, because we used that for our
+specific dataset.</p>
+<ul>
+<li>In future maybe we change this variable name to
+<code>DATE_CUSTOM</code>. But this needs to tested first.</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dpop</span> <span class="op">&lt;-</span> <span class="va">dpop</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>DATE_50 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2001-03-15"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>And then create results from this date:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">surv_results</span> <span class="op">&lt;-</span> <span class="fu">healthpopR</span><span class="fu">::</span><span class="fu"><a href="../reference/survival_analysis.html">survival_analysis</a></span><span class="op">(</span>exposure_diagnoses <span class="op">=</span> <span class="va">exposure_diagnoses</span>, </span>
+<span>                              response_diagnoses <span class="op">=</span> <span class="va">exposure_diagnoses</span>,</span>
+<span>                              dpop <span class="op">=</span> <span class="va">dpop</span>,</span>
+<span>                              start <span class="op">=</span> <span class="st">"DATE_50"</span>,</span>
+<span>                              censoring_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-12-31"</span><span class="op">)</span>,</span>
+<span>                              pre_entry_handling <span class="op">=</span> <span class="st">"truncate"</span><span class="op">)</span></span></code></pre></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

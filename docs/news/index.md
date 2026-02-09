@@ -1,5 +1,22 @@
 # Changelog
 
+## healthpopR 0.2.5
+
+### Breaking changes
+
+- New Survival Analysis Function
+
+- Old survival Analysis Functions will be depricated in future
+
+### New features
+
+- Survival Analysis function creates survival analysis according
+  start-date. Function returns a plots and data in a list.
+
+### Minor bug fixes and improvements
+
+- AGE-variable is not anymore used from the diagnoses-dataset.
+
 ## healthpopR 0.2.2
 
 ### Breaking changes
