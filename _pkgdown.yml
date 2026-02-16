@@ -50,8 +50,9 @@ reference:
       - survival_analysis
   - title: "Cox Model Analysis"
     contents:
+      - analysis_cox
       - cox_create_data
-      - create_cox_model
+      - cox_create_model
       - cox_plot_overall
       - cox_plot_spline
   - title: "Poisson Regression Model (SIR)"

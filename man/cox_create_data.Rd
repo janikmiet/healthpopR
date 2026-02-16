@@ -2,49 +2,83 @@
 % Please edit documentation in R/cox_analysis.R
 \name{cox_create_data}
 \alias{cox_create_data}
-\title{Create Time-to-Event Data for Cox Proportional Hazards Modeling}
+\title{Create counting-process dataset for time-dependent Cox model}
 \usage{
 cox_create_data(
-  data,
+  dpop,
   data_dates,
   data_socioeconomic,
   reference_values = list(bmi_cat1 = "Healthy Weight", bmi_cat2 = "Healthy Weight", edu =
     "1 - Low"),
-  censoring_date = as.Date("2023-12-31")
+  censoring_date = as.Date("2024-12-31")
 )
 }
 \arguments{
-\item{data}{A data frame with baseline population information, including dates like `DATE_BIRTH`, `DATE_DEATH`, `DATE_MIGRATION`, `exp.DATE`, and `resp.DATE`.}
+\item{dpop}{A data frame containing population-level variables. Must include
+\code{ID}, \code{DATE_BIRTH}, \code{DATE_MIGRATION}, \code{DATE_DEATH},
+and diagnosis dates \code{exp.DATE} and \code{resp.DATE}.}
 
-\item{data_dates}{A data frame containing answering dates per individual. Must include `ID`, `spvm` (start date), and `vpvmbl` (baseline date).}
+\item{data_dates}{A data frame containing baseline dates. Must include
+\code{ID} and baseline date variable \code{vpvmbl}.}
 
-\item{data_socioeconomic}{A data frame containing socioeconomic variables such as education level. Must include `ID` and covariates to be relevelled (e.g., `edu`, `bmi_cat1`, `bmi_cat2`).}
+\item{data_socioeconomic}{A data frame containing socioeconomic and baseline
+questionnaire variables. Must include \code{ID} and covariates such as
+\code{edu}, \code{bmi}, \code{bmi_cat1}, and \code{bmi_cat2}.}
 
-\item{reference_values}{A named list specifying the reference level for factor variables (e.g., `list("bmi_cat1" = "Healthy Weight", "edu" = "1 - Low")`). Used to relevel factors for Cox regression.}
+\item{reference_values}{A named list defining reference levels for factor
+variables (e.g., education or BMI categories). Passed internally to
+\code{healthpopR:::.relevel_by_reference()}.}
 
-\item{censoring_date}{A `Date` object indicating the end of follow-up for censoring. Default is `"2023-12-31"`.}
+\item{censoring_date}{Administrative censoring date. Default is
+\code{as.Date("2024-12-31")}.}
 }
 \value{
-A data frame formatted for survival analysis, containing time-dependent covariates,
-        `tstart`, `tstop`, event indicators (`diagnose`, `exposure`), and a `Surv` object
-        ready for use with `coxph`.
-}
-\description{
-Prepares a dataset for survival analysis with time-dependent covariates using `tmerge`.
-This function computes baseline age, time variables for exposure and response,
-and creates a survival object with appropriate censoring.
-}
-\details{
-- The function internally computes time-to-event and censoring variables.
-- Uses `tmerge` to incorporate time-dependent covariates for exposure and outcome.
-- Applies reference level adjustments via `.relevel_by_reference()` (must be defined elsewhere).
-}
-\examples{
-\dontrun{
-# Example usage
-result <- cox_create_data(data = dpop,
-                          data_dates = ostpre_vastpaiv,
-                          data_socioeconomic = edumiage)
+A long-format data frame with the following variables:
+\describe{
+  \item{ID}{Individual identifier}
+  \item{tstart}{Start of interval (days since baseline)}
+  \item{tstop}{End of interval (days since baseline)}
+  \item{event}{Event indicator (1 = response diagnosis, 0 = censored)}
+  \item{exposure_td}{Time-dependent exposure indicator (0/1)}
+  \item{age_bs}{Age at baseline (years)}
+  \item{edu}{Education level (factor)}
+  \item{bmi}{Baseline BMI}
 }
 
+The output is ready for use in:
+\preformatted{
+coxph(Surv(tstart, tstop, event) ~ exposure_td + ..., data = output)
+}
+}
+\description{
+Constructs a long-format dataset suitable for \code{survival::coxph()}
+using counting-process notation \code{Surv(tstart, tstop, event)}.
+The function prepares a follow-up cohort starting at baseline and models
+a time-dependent exposure diagnosis affecting the hazard of a response
+diagnosis.
+}
+\details{
+Baseline covariates (e.g., age, education, BMI) are treated as fixed.
+Exposure is handled as a time-dependent variable that switches from 0 to 1
+at the exposure diagnosis date, if it occurs before the end of follow-up.
+
+
+The function performs the following steps:
+\enumerate{
+  \item Filters individuals with a valid baseline date.
+  \item Computes age at baseline.
+  \item Recodes exposure and response diagnoses occurring before baseline
+        to the baseline date.
+  \item Defines follow-up end as the minimum of migration, death,
+        administrative censoring, or response diagnosis.
+  \item Computes follow-up times (in days) from baseline.
+  \item Splits follow-up into one or two intervals depending on whether
+        exposure occurs before the end of follow-up.
+}
+
+Each row in the output represents a time interval during which exposure
+status is constant.
+}
+\seealso{
+\code{\link[survival]{coxph}}, \code{\link[survival]{Surv}}
 }

@@ -11,10 +11,12 @@
 <url><loc>https://janikmiet.github.io/healthpopR/authors.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/index.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/news/index.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/reference/analysis_cox.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/categorize_bmi.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/classify_icd10_profile.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/classify_population.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/cox_create_data.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/reference/cox_create_model.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/cox_plot_overall.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/cox_plot_spline.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/create_cox_model.html</loc></url>

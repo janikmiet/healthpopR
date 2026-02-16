@@ -54,9 +54,12 @@
 
 ## Cox Model Analysis
 
+- [`analysis_cox()`](https://janikmiet.github.io/healthpopR/reference/analysis_cox.md)
+  : Time-dependent Cox Proportional Hazards Analysis with Splines and
+  Diagnostics
 - [`cox_create_data()`](https://janikmiet.github.io/healthpopR/reference/cox_create_data.md)
-  : Create Time-to-Event Data for Cox Proportional Hazards Modeling
-- [`create_cox_model()`](https://janikmiet.github.io/healthpopR/reference/create_cox_model.md)
+  : Create counting-process dataset for time-dependent Cox model
+- [`cox_create_model()`](https://janikmiet.github.io/healthpopR/reference/cox_create_model.md)
   : Create a Cox Proportional Hazards Model with Splines and Covariates
 - [`cox_plot_overall()`](https://janikmiet.github.io/healthpopR/reference/cox_plot_overall.md)
   : Plot Survival Curves from Cox Model Data

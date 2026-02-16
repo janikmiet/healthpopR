@@ -1,73 +1,122 @@
-# Create Time-to-Event Data for Cox Proportional Hazards Modeling
+# Create counting-process dataset for time-dependent Cox model
 
-Prepares a dataset for survival analysis with time-dependent covariates
-using \`tmerge\`. This function computes baseline age, time variables
-for exposure and response, and creates a survival object with
-appropriate censoring.
+Constructs a long-format dataset suitable for
+[`survival::coxph()`](https://rdrr.io/pkg/survival/man/coxph.html) using
+counting-process notation `Surv(tstart, tstop, event)`. The function
+prepares a follow-up cohort starting at baseline and models a
+time-dependent exposure diagnosis affecting the hazard of a response
+diagnosis.
 
 ## Usage
 
 ``` r
 cox_create_data(
-  data,
+  dpop,
   data_dates,
   data_socioeconomic,
   reference_values = list(bmi_cat1 = "Healthy Weight", bmi_cat2 = "Healthy Weight", edu =
     "1 - Low"),
-  censoring_date = as.Date("2023-12-31")
+  censoring_date = as.Date("2024-12-31")
 )
 ```
 
 ## Arguments
 
-- data:
+- dpop:
 
-  A data frame with baseline population information, including dates
-  like \`DATE_BIRTH\`, \`DATE_DEATH\`, \`DATE_MIGRATION\`, \`exp.DATE\`,
-  and \`resp.DATE\`.
+  A data frame containing population-level variables. Must include `ID`,
+  `DATE_BIRTH`, `DATE_MIGRATION`, `DATE_DEATH`, and diagnosis dates
+  `exp.DATE` and `resp.DATE`.
 
 - data_dates:
 
-  A data frame containing answering dates per individual. Must include
-  \`ID\`, \`spvm\` (start date), and \`vpvmbl\` (baseline date).
+  A data frame containing baseline dates. Must include `ID` and baseline
+  date variable `vpvmbl`.
 
 - data_socioeconomic:
 
-  A data frame containing socioeconomic variables such as education
-  level. Must include \`ID\` and covariates to be relevelled (e.g.,
-  \`edu\`, \`bmi_cat1\`, \`bmi_cat2\`).
+  A data frame containing socioeconomic and baseline questionnaire
+  variables. Must include `ID` and covariates such as `edu`, `bmi`,
+  `bmi_cat1`, and `bmi_cat2`.
 
 - reference_values:
 
-  A named list specifying the reference level for factor variables
-  (e.g., \`list("bmi_cat1" = "Healthy Weight", "edu" = "1 - Low")\`).
-  Used to relevel factors for Cox regression.
+  A named list defining reference levels for factor variables (e.g.,
+  education or BMI categories). Passed internally to
+  `healthpopR:::.relevel_by_reference()`.
 
 - censoring_date:
 
-  A \`Date\` object indicating the end of follow-up for censoring.
-  Default is \`"2023-12-31"\`.
+  Administrative censoring date. Default is `as.Date("2024-12-31")`.
 
 ## Value
 
-A data frame formatted for survival analysis, containing time-dependent
-covariates, \`tstart\`, \`tstop\`, event indicators (\`diagnose\`,
-\`exposure\`), and a \`Surv\` object ready for use with \`coxph\`.
+A long-format data frame with the following variables:
+
+- ID:
+
+  Individual identifier
+
+- tstart:
+
+  Start of interval (days since baseline)
+
+- tstop:
+
+  End of interval (days since baseline)
+
+- event:
+
+  Event indicator (1 = response diagnosis, 0 = censored)
+
+- exposure_td:
+
+  Time-dependent exposure indicator (0/1)
+
+- age_bs:
+
+  Age at baseline (years)
+
+- edu:
+
+  Education level (factor)
+
+- bmi:
+
+  Baseline BMI
+
+The output is ready for use in:
+
+    coxph(Surv(tstart, tstop, event) ~ exposure_td + ..., data = output)
 
 ## Details
 
-\- The function internally computes time-to-event and censoring
-variables. - Uses \`tmerge\` to incorporate time-dependent covariates
-for exposure and outcome. - Applies reference level adjustments via
-\`.relevel_by_reference()\` (must be defined elsewhere).
+Baseline covariates (e.g., age, education, BMI) are treated as fixed.
+Exposure is handled as a time-dependent variable that switches from 0 to
+1 at the exposure diagnosis date, if it occurs before the end of
+follow-up.
 
-## Examples
+The function performs the following steps:
 
-``` r
-if (FALSE) { # \dontrun{
-# Example usage
-result <- cox_create_data(data = dpop,
-                          data_dates = ostpre_vastpaiv,
-                          data_socioeconomic = edumiage)
-} # }
-```
+1.  Filters individuals with a valid baseline date.
+
+2.  Computes age at baseline.
+
+3.  Recodes exposure and response diagnoses occurring before baseline to
+    the baseline date.
+
+4.  Defines follow-up end as the minimum of migration, death,
+    administrative censoring, or response diagnosis.
+
+5.  Computes follow-up times (in days) from baseline.
+
+6.  Splits follow-up into one or two intervals depending on whether
+    exposure occurs before the end of follow-up.
+
+Each row in the output represents a time interval during which exposure
+status is constant.
+
+## See also
+
+[`coxph`](https://rdrr.io/pkg/survival/man/coxph.html),
+[`Surv`](https://rdrr.io/pkg/survival/man/Surv.html)
