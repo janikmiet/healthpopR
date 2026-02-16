@@ -77,6 +77,7 @@
 #'   \code{\link[survminer]{ggcoxzph}}
 #'
 #' @export
+
 analysis_cox <- function(dpop,
                          data_dates,
                          data_socioeconomic,
@@ -154,44 +155,65 @@ analysis_cox <- function(dpop,
             t_response2  = ifelse(is.na(t_response), Inf, t_response),
             t_end        = pmin(t_response2, t_censoring, na.rm = TRUE),
             event        = ifelse(!is.na(t_response) & t_response <= t_censoring, 1, 0)
+          ) %>%
+          # Determine which rows need splitting
+          mutate(
+            split_needed = !is.na(t_exposure) &
+              t_exposure > 0 &
+              t_exposure < t_end
           )
+
         ### 1.4.2 Long dataset ----
-        cox_model_data <- d4 %>%
-          rowwise() %>%
-          do({
-            row <- .
-            # Does exposure happen before end of follow-up?
-            split_needed <- !is.na(row$t_exposure) &&
-              row$t_exposure > 0 &&
-              row$t_exposure < row$t_end
-            ## Splitting or not
-            if (!split_needed) {
-              # Single interval
-              tibble(
-                ID = row$ID,
-                tstart = 0,
-                tstop  = row$t_end,
-                event  = row$event,
-                exposure_td = 0,
-                age_bs = row$age_bs,
-                edu = row$edu,
-                bmi = row$bmi
-              )
-            } else {
-              # Two intervals
-              tibble(
-                ID = row$ID,
-                tstart = c(0, row$t_exposure),
-                tstop  = c(row$t_exposure, row$t_end),
-                event  = c(0, row$event),
-                exposure_td = c(0, 1),
-                age_bs = row$age_bs,
-                edu = row$edu,
-                bmi = row$bmi
-              )
-            }
-          }) %>%
-          ungroup()
+
+        # Rows without split (single interval)
+        no_split <- d4 %>%
+          filter(!split_needed) %>%
+          transmute(
+            ID,
+            tstart = 0,
+            tstop  = t_end,
+            event,
+            exposure_td = 0,
+            age_bs,
+            edu,
+            bmi
+          )
+
+        # Rows with split (two intervals)
+        split_rows <- d4 %>%
+          filter(split_needed)
+
+        split_part1 <- split_rows %>%
+          transmute(
+            ID,
+            tstart = 0,
+            tstop  = t_exposure,
+            event  = 0,
+            exposure_td = 0,
+            age_bs,
+            edu,
+            bmi
+          )
+
+        split_part2 <- split_rows %>%
+          transmute(
+            ID,
+            tstart = t_exposure,
+            tstop  = t_end,
+            event,
+            exposure_td = 1,
+            age_bs,
+            edu,
+            bmi
+          )
+
+        # Combine everything
+        cox_model_data <- bind_rows(
+          no_split,
+          split_part1,
+          split_part2
+        ) %>%
+          arrange(ID, tstart)
       }
 
       ## 1.5 Sanity checks -------
@@ -215,7 +237,7 @@ analysis_cox <- function(dpop,
 
       ## 1.6 Cleaning and result ----
       healthpopR:::.safe_inc_progress(5/12)
-      rm(list = c("d1", "d2", "d3", "d4"))
+      rm(list = c("d1", "d2", "d3", "d4", "split_rows", "split_part1", "split_part2"))
     }
 
     # Part 2: Model ----------
@@ -338,6 +360,7 @@ analysis_cox <- function(dpop,
     internal_function()
   }
 }
+
 
 
 
