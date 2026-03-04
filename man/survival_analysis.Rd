@@ -10,7 +10,7 @@ survival_analysis(
   dpop,
   start = c("DATE_EXPOSURE", "DATE_RESPONSE", "DATE_50"),
   censoring_date = as.Date("2024-12-21"),
-  pre_entry_handling = c("truncate", "skip", "asis")
+  pre_entry_handling = c("intialize", "skip", "asis")
 )
 }
 \arguments{

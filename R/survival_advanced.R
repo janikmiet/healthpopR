@@ -75,22 +75,15 @@ survival_analysis <- function(exposure_diagnoses,
                               dpop,
                               start = c("DATE_EXPOSURE", "DATE_RESPONSE", "DATE_50"),
                               censoring_date = as.Date("2024-12-21"),
-                              pre_entry_handling = c("truncate", "skip", "asis")
+                              pre_entry_handling = c("intialize", "skip", "asis")
 ) {
 
 
   # type <- match.arg(type)
   ## ESIMERKKI CASE
-  # start = "DATE_50"
-  # censoring_date = as.Date("2023-12-01")
-  # pre_entry_handling = "truncate" #c("truncate", "skip", "asis")
-  # colors_groups <- c(
-  #   "non-exposure" = "#5BC0DE",
-  #   "exposure"     = "#D9534F",
-  #   "non-response" = "#F0AD4E",
-  #   "response"     = "#5CB85C",
-  #   "dead"         = "#292B2C"
-  # )
+  # start = "DATE_EXPOSURE"
+  # censoring_date = as.Date("2024-12-01")
+  # pre_entry_handling = "intialize" #c("intialize", "skip", "asis")
 
   internal_function <- function() {
     .safe_inc_progress(1/6)
@@ -114,24 +107,32 @@ survival_analysis <- function(exposure_diagnoses,
           DATE_BIRTH = as.Date(DATE_BIRTH),
           DATE_DEATH = as.Date(ifelse(DATE_DEATH > censoring_date, NA, DATE_DEATH), origin = "1970-01-01"),
           DATE_MIGRATION = as.Date(ifelse(DATE_MIGRATION > censoring_date, NA, DATE_MIGRATION), origin = "1970-01-01"),
-          DATE_50 = DATE_BIRTH + 50 * 365.25 ## TODO this should be in dpop, and named as DATE_START
+          DATE_50 = DATE_BIRTH + 50 * 365.25, ## TODO this should be in dpop, and named as DATE_START
+          ## Onko DATE_START loppujen lopuksi eka dg
+          DATE_START = case_when(
+            start == "DATE_EXPOSURE" ~ exp.DATE,
+            start == "DATE_RESPONSE" ~ resp.DATE,
+            start == "DATE_EXPOSURE" ~ DATE_50,
+            TRUE ~ NA
+          )
         ) |>
-        select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_50)
+        select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_50, DATE_START)
+      # select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_50, DATE_START, exp.DATE, resp.DATE)
 
       ## EXPOSURE DIAGNOSES
       d1 <- exposure_diagnoses |>
         dplyr::filter(DATE <= censoring_date) |>
         dplyr::left_join(d0, by = "ID") |>
-        dplyr::select(ID, DATE, DATE_50) |>
+        dplyr::select(ID, DATE, DATE_50, DATE_START) |>
         dplyr::rename(DATE_EXPOSURE = DATE) |>
         dplyr::mutate(DATE_EXPOSURE_ORIGINAL = DATE_EXPOSURE)
-      if (pre_entry_handling == "truncate") {
+      if (pre_entry_handling == "intialize") {
         d1 <- d1 |> mutate(
-          DATE_EXPOSURE = as.Date(ifelse(DATE_EXPOSURE < DATE_50, DATE_50, DATE_EXPOSURE), origin = "1970-01-01")
+          DATE_EXPOSURE = as.Date(ifelse(DATE_EXPOSURE < DATE_START, DATE_START, DATE_EXPOSURE), origin = "1970-01-01")
         )
       }
       if (pre_entry_handling == "skip") {
-        d1 <- dplyr::filter(d1, DATE_EXPOSURE >= DATE_50)
+        d1 <- dplyr::filter(d1, DATE_EXPOSURE >= DATE_START)
       }
       ### Take first diagnose row per ID
       d1 <- d1 |>
@@ -144,17 +145,17 @@ survival_analysis <- function(exposure_diagnoses,
       d2 <- response_diagnoses |>
         dplyr::filter(DATE <= censoring_date) |>
         dplyr::left_join(d0, by = "ID") |>
-        dplyr::select(ID, DATE, DATE_50) |>
+        dplyr::select(ID, DATE, DATE_50, DATE_START) |>
         dplyr::rename(DATE_RESPONSE = DATE) |>
         dplyr::mutate(DATE_RESPONSE_ORIGINAL = DATE_RESPONSE)
-      if (pre_entry_handling == "truncate") {
+      if (pre_entry_handling == "intialize") {
         d2 <- d2 |> mutate(
           DATE_RESPONSE_ORIGINAL = DATE_RESPONSE,
-          DATE_RESPONSE = as.Date(ifelse(DATE_RESPONSE < DATE_50, DATE_50, DATE_RESPONSE) , origin = "1970-01-01")
+          DATE_RESPONSE = as.Date(ifelse(DATE_RESPONSE < DATE_START, DATE_START, DATE_RESPONSE) , origin = "1970-01-01")
         )
       }
       if (pre_entry_handling == "skip") {
-        d2 <- dplyr::filter(d2, DATE_RESPONSE >= DATE_50)
+        d2 <- dplyr::filter(d2, DATE_RESPONSE >= DATE_START)
       }
       ### Take first diagnose row per ID
       d2 <- d2 |>
@@ -333,6 +334,7 @@ survival_analysis <- function(exposure_diagnoses,
           ylab = "Cumulative incidence",
           title = "Competing Risk Model: Exposure to Response/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)) +
+          scale_x_continuous(limits = c(0.0001, NA)) +
           ggplot2::scale_color_manual(
             values = c("1" = colors_groups[["response"]],
                        "2" = colors_groups[["dead"]]),
@@ -348,6 +350,7 @@ survival_analysis <- function(exposure_diagnoses,
           ylab = "Cumulative incidence",
           title = "Competing Risk Model: Exposure to Response/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)) +
+          scale_x_continuous(limits = c(0.0001, NA)) +
           ggplot2::scale_color_manual(
             values = c("1" = colors_groups[["response"]],
                        "2" = colors_groups[["dead"]]),
@@ -367,6 +370,7 @@ survival_analysis <- function(exposure_diagnoses,
           title = "Competing Risk Model: Response to Exposure/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)
         )  +
+          scale_x_continuous(limits = c(0.0001, NA)) +
           scale_color_manual(
             values = c("1" = colors_groups[["exposure"]],
                        "2" = colors_groups[["dead"]]),
@@ -383,6 +387,7 @@ survival_analysis <- function(exposure_diagnoses,
           title = "Competing Risk Model: Response to Exposure/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)
         )  +
+          scale_x_continuous(limits = c(0.0001, NA)) +
           scale_color_manual(
             values = c("1" = colors_groups[["exposure"]],
                        "2" = colors_groups[["dead"]]),
@@ -402,6 +407,7 @@ survival_analysis <- function(exposure_diagnoses,
           title = "Competing Risk Model: From Follow up to Exposure/Response/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)
         )  +
+          scale_x_continuous(limits = c(0.0001, NA)) +
           scale_color_manual(
             values = c("1" = colors_groups[["exposure"]],
                        "2" = colors_groups[["response"]],
@@ -420,6 +426,7 @@ survival_analysis <- function(exposure_diagnoses,
           title = "Competing Risk Model: From Follow up to Exposure/Response/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)
         )  +
+          scale_x_continuous(limits = c(0.0001, NA)) +
           scale_color_manual(
             values = c("1" = colors_groups[["exposure"]],
                        "2" = colors_groups[["response"]],
@@ -543,6 +550,8 @@ survival_analysis <- function(exposure_diagnoses,
     return(internal_function())
   }
 }
+
+
 
 
 
