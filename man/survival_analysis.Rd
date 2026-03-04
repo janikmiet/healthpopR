@@ -32,7 +32,7 @@ One of \code{"DATE_EXPOSURE"}, \code{"DATE_RESPONSE"}, or \code{"DATE_50"}.}
 \item{pre_entry_handling}{Strategy for handling diagnoses occurring before
 cohort entry (age 50):
 \describe{
-  \item{truncate}{Diagnosis date is set to entry date.}
+  \item{intialize}{Diagnosis date is set to entry date.}
   \item{skip}{Diagnoses before entry are ignored; first post-entry diagnosis is used.}
   \item{asis}{Diagnosis date is used as recorded.}
 }}

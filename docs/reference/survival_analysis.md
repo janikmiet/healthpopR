@@ -51,7 +51,7 @@ survival_analysis(
   Strategy for handling diagnoses occurring before cohort entry (age
   50):
 
-  truncate
+  intialize
 
   :   Diagnosis date is set to entry date.
 
