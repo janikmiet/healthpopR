@@ -85,7 +85,7 @@ survival_analysis <- function(exposure_diagnoses,
   # censoring_date = as.Date("2024-12-01")
   # pre_entry_handling = "initialize" #c("initialize", "skip", "asis")
 
-  internal_function <- function() {
+  # internal_function <- function() {
     .safe_inc_progress(1/6)
 
     ## Colors for groups
@@ -112,7 +112,7 @@ survival_analysis <- function(exposure_diagnoses,
           DATE_START = case_when(
             start == "DATE_EXPOSURE" ~ exp.DATE,
             start == "DATE_RESPONSE" ~ resp.DATE,
-            start == "DATE_EXPOSURE" ~ DATE_50,
+            start == "DATE_50" ~ DATE_50,
             TRUE ~ NA
           )
         ) |>
@@ -136,7 +136,7 @@ survival_analysis <- function(exposure_diagnoses,
       }
       ### Take first diagnose row per ID
       d1 <- d1 |>
-        arrange(DATE_EXPOSURE) |>
+        arrange(ID, DATE_EXPOSURE) |>
         group_by(ID) |>
         summarise(DATE_EXPOSURE = dplyr::first(DATE_EXPOSURE),
                   DATE_EXPOSURE_ORIGINAL = dplyr::first(DATE_EXPOSURE_ORIGINAL))
@@ -159,7 +159,7 @@ survival_analysis <- function(exposure_diagnoses,
       }
       ### Take first diagnose row per ID
       d2 <- d2 |>
-        arrange(DATE_RESPONSE) |>
+        arrange(ID, DATE_RESPONSE) |>
         group_by(ID) |>
         summarise(DATE_RESPONSE = dplyr::first(DATE_RESPONSE),
                   DATE_RESPONSE_ORIGINAL = dplyr::first(DATE_RESPONSE_ORIGINAL))
@@ -539,16 +539,16 @@ survival_analysis <- function(exposure_diagnoses,
     }
     .safe_inc_progress(6/6)
     return(d)
-  }
-
-  # Run with or without shiny progress -----
-  if (shiny::isRunning()) {
-    withProgress(message = "Creating Survival Analysis", value = 0, {
-      return(internal_function())
-    })
-  } else {
-    return(internal_function())
-  }
+  # }
+  #
+  # # Run with or without shiny progress -----
+  # if (shiny::isRunning()) {
+  #   withProgress(message = "Creating Survival Analysis", value = 0, {
+  #     return(internal_function())
+  #   })
+  # } else {
+  #   return(internal_function())
+  # }
 }
 
 
