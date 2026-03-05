@@ -15,7 +15,7 @@ survival_analysis(
   dpop,
   start = c("DATE_EXPOSURE", "DATE_RESPONSE", "DATE_50"),
   censoring_date = as.Date("2024-12-21"),
-  pre_entry_handling = c("intialize", "skip", "asis")
+  pre_entry_handling = c("initialize", "skip", "asis")
 )
 ```
 
@@ -51,7 +51,7 @@ survival_analysis(
   Strategy for handling diagnoses occurring before cohort entry (age
   50):
 
-  intialize
+  initialize
 
   :   Diagnosis date is set to entry date.
 

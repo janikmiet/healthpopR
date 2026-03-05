@@ -42,7 +42,7 @@
 #' @param pre_entry_handling Strategy for handling diagnoses occurring before
 #'   cohort entry (age 50):
 #'   \describe{
-#'     \item{intialize}{Diagnosis date is set to entry date.}
+#'     \item{initialize}{Diagnosis date is set to entry date.}
 #'     \item{skip}{Diagnoses before entry are ignored; first post-entry diagnosis is used.}
 #'     \item{asis}{Diagnosis date is used as recorded.}
 #'   }
@@ -75,7 +75,7 @@ survival_analysis <- function(exposure_diagnoses,
                               dpop,
                               start = c("DATE_EXPOSURE", "DATE_RESPONSE", "DATE_50"),
                               censoring_date = as.Date("2024-12-21"),
-                              pre_entry_handling = c("intialize", "skip", "asis")
+                              pre_entry_handling = c("initialize", "skip", "asis")
 ) {
 
 
@@ -83,7 +83,7 @@ survival_analysis <- function(exposure_diagnoses,
   ## ESIMERKKI CASE
   # start = "DATE_EXPOSURE"
   # censoring_date = as.Date("2024-12-01")
-  # pre_entry_handling = "intialize" #c("intialize", "skip", "asis")
+  # pre_entry_handling = "initialize" #c("initialize", "skip", "asis")
 
   internal_function <- function() {
     .safe_inc_progress(1/6)
@@ -126,7 +126,7 @@ survival_analysis <- function(exposure_diagnoses,
         dplyr::select(ID, DATE, DATE_50, DATE_START) |>
         dplyr::rename(DATE_EXPOSURE = DATE) |>
         dplyr::mutate(DATE_EXPOSURE_ORIGINAL = DATE_EXPOSURE)
-      if (pre_entry_handling == "intialize") {
+      if (pre_entry_handling == "initialize") {
         d1 <- d1 |> mutate(
           DATE_EXPOSURE = as.Date(ifelse(DATE_EXPOSURE < DATE_START, DATE_START, DATE_EXPOSURE), origin = "1970-01-01")
         )
@@ -148,7 +148,7 @@ survival_analysis <- function(exposure_diagnoses,
         dplyr::select(ID, DATE, DATE_50, DATE_START) |>
         dplyr::rename(DATE_RESPONSE = DATE) |>
         dplyr::mutate(DATE_RESPONSE_ORIGINAL = DATE_RESPONSE)
-      if (pre_entry_handling == "intialize") {
+      if (pre_entry_handling == "initialize") {
         d2 <- d2 |> mutate(
           DATE_RESPONSE_ORIGINAL = DATE_RESPONSE,
           DATE_RESPONSE = as.Date(ifelse(DATE_RESPONSE < DATE_START, DATE_START, DATE_RESPONSE) , origin = "1970-01-01")
