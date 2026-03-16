@@ -42,6 +42,8 @@
 
 ## Survival Analysis functions
 
+- [`plot_surv_mort()`](https://janikmiet.github.io/healthpopR/reference/plot_surv_mort.md)
+  : Plot cumulative incidence of mortality and exposure states
 - [`create_dsurv()`](https://janikmiet.github.io/healthpopR/reference/create_dsurv.md)
   : Create Long-Format Survival Data from Exposure-Response Events
 - [`plot_survival_cr()`](https://janikmiet.github.io/healthpopR/reference/plot_survival_cr.md)
@@ -76,6 +78,8 @@
 
 ## Helper functions
 
+- [`read_parquet()`](https://janikmiet.github.io/healthpopR/reference/read_parquet.md)
+  : Read a Parquet file using DuckDB
 - [`.regex_clean()`](https://janikmiet.github.io/healthpopR/reference/dot-regex_clean.md)
   : Clean Diagnosis Regex Strings
 - [`.capitalize()`](https://janikmiet.github.io/healthpopR/reference/dot-capitalize.md)

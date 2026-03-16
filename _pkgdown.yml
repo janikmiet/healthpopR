@@ -44,6 +44,7 @@ reference:
       - plot_icd10_diff_by_exposure
   - title: "Survival Analysis functions"
     contents:
+      - plot_surv_mort
       - create_dsurv
       - plot_survival_cr
       - plot_survival_km
@@ -61,6 +62,7 @@ reference:
       - pirr_results
   - title: "Helper functions"
     contents:
+      - read_parquet
       - .regex_clean
       - .capitalize
       - .relevel_by_reference

@@ -85,7 +85,7 @@ survival_analysis <- function(exposure_diagnoses,
   # censoring_date = as.Date("2024-12-01")
   # pre_entry_handling = "initialize" #c("initialize", "skip", "asis")
 
-  # internal_function <- function() {
+  internal_function <- function() {
     .safe_inc_progress(1/6)
 
     ## Colors for groups
@@ -525,12 +525,18 @@ survival_analysis <- function(exposure_diagnoses,
 
     .safe_inc_progress(5/6)
 
+    ## Survival Plot (Correct one) ----
+    plot_mort <- plot_survival_mort(dpop = dpop, censoring_date = censoring_date)
+
+
+
     ## PHASE 6 COLLECT RESULTS ------
     if(TRUE){
       ## Kootaan kaikki tulokset listaan, joka palautetaan
       d <- list(plot_days = p_days,
                 plot_years = p_years,
-                plot_mortality = p_mortality,
+                plot_mortality = plot_mort,
+                plot_mortality_old = p_mortality,
                 CR_days = CR_days,
                 CR_years = CR_years,
                 dmodel = dphase3a,
@@ -539,16 +545,16 @@ survival_analysis <- function(exposure_diagnoses,
     }
     .safe_inc_progress(6/6)
     return(d)
-  # }
-  #
-  # # Run with or without shiny progress -----
-  # if (shiny::isRunning()) {
-  #   withProgress(message = "Creating Survival Analysis", value = 0, {
-  #     return(internal_function())
-  #   })
-  # } else {
-  #   return(internal_function())
-  # }
+  }
+
+  # Run with or without shiny progress -----
+  if (shiny::isRunning()) {
+    withProgress(message = "Creating Survival Analysis", value = 0, {
+      return(internal_function())
+    })
+  } else {
+    return(internal_function())
+  }
 }
 
 
