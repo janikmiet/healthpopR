@@ -526,8 +526,7 @@ survival_analysis <- function(exposure_diagnoses,
     .safe_inc_progress(5/6)
 
     ## Survival Plot (Correct one) ----
-    plot_mort <- plot_survival_mort(dpop = dpop, censoring_date = censoring_date)
-
+    plot_mort <- healthpopR::plot_surv_mort(dpop = dpop, censoring_date = censoring_date)
 
 
     ## PHASE 6 COLLECT RESULTS ------
