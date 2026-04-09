@@ -214,7 +214,7 @@ survival_analysis <- function(exposure_diagnoses,
           apvm =  case_when(start == "DATE_EXPOSURE" ~ DATE_EXPOSURE,
                             start == "DATE_RESPONSE" ~ DATE_RESPONSE,
                             start == "DATE_50" ~ DATE_50,
-                            TRUE ~ NA_Date_),
+                            TRUE ~ as.Date(NA)),
           ## sensurointi
           epvm = DATE_CENSOR,
           ## lasketaan ajat
