@@ -128,7 +128,7 @@ survival_analysis <- function(exposure_diagnoses,
         dplyr::mutate(DATE_EXPOSURE_ORIGINAL = DATE_EXPOSURE)
       if (pre_entry_handling == "initialize") {
         d1 <- d1 |> mutate(
-          DATE_EXPOSURE = as.Date(ifelse(DATE_EXPOSURE < DATE_START, DATE_START, DATE_EXPOSURE), origin = "1970-01-01")
+          DATE_EXPOSURE = as.Date(ifelse(!is.na(DATE_START) & DATE_EXPOSURE < DATE_START, DATE_START, DATE_EXPOSURE), origin = "1970-01-01")
         )
       }
       if (pre_entry_handling == "skip") {
@@ -151,7 +151,7 @@ survival_analysis <- function(exposure_diagnoses,
       if (pre_entry_handling == "initialize") {
         d2 <- d2 |> mutate(
           DATE_RESPONSE_ORIGINAL = DATE_RESPONSE,
-          DATE_RESPONSE = as.Date(ifelse(DATE_RESPONSE < DATE_START, DATE_START, DATE_RESPONSE) , origin = "1970-01-01")
+          DATE_RESPONSE = as.Date(ifelse(!is.na(DATE_START) & DATE_RESPONSE < DATE_START, DATE_START, DATE_RESPONSE) , origin = "1970-01-01")
         )
       }
       if (pre_entry_handling == "skip") {

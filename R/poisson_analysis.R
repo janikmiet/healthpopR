@@ -72,26 +72,25 @@ pirr_data <- function(
     all_cases = FALSE, ## If you want to continue follow up after first response case.
     censoring_age = c(50, 90),
     censoring_date = c(as.Date("1953-01-01"), as.Date("2024-12-31")),
-    custom_responses = list() ## EMPTY if non, otherwise list(Any_fracture = "ankle+forearm+hip+humerus+vertebral", Osteoporotic = "forearm+hip+humerus+vertebral")
+    custom_responses = list() ## EMPTY if nothing. Otherwise list (Any_fracture = "ankle+forearm+hip+humerus+vertebral", Osteoporotic = "forearm+hip+humerus+vertebral")
 ) {
 
   ## DEBUG CHUNK
   if(FALSE){
     exposure_diagnoses = exposure_diagnoses
     response_diagnoses = response_diagnoses # diagnoses |> filter(DGREG == "FRACTURES")
+    # response_diagnoses = diagnoses |> dplyr::filter(DGREG == "FRACTURES")
     pop_dates = dpop
     all_cases = FALSE
     censoring_date = c(as.Date("1969-01-01"), as.Date("2023-12-31"))
-    censoring_age = 50 # ikä jolloin seuranta alkaa
+    censoring_age = c(50, 90) # ikä jolloin seuranta alkaa
     custom_responses = list()
-    custom_responses = list(Any_fracture = "ankle+forearm+hip+humerus+vertebral",
-                            Osteoporotic = "forearm+hip+humerus+vertebral",
-                            Hip = "hip")
+    # custom_responses = list(Any_fracture = "ankle+forearm+hip+humerus+vertebral", Osteoporotic = "forearm+hip+humerus+vertebral",Hip = "hip")
   }
 
-  if (!requireNamespace("heaven", quietly = TRUE)) {
-    stop("The 'heaven' package is required. Please install it from GitHub: https://github.com/tagteam/heaven")
-  }
+  # if (!requireNamespace("heaven", quietly = TRUE)) {
+  #   stop("The 'heaven' package is required. Please install it from GitHub: https://github.com/tagteam/heaven")
+  # }
 
   ## Data Handling Function
   all <- function(){
@@ -101,8 +100,8 @@ pirr_data <- function(
     dalt <- exposure_diagnoses |>
       dplyr::arrange(ID, DATE) |>
       dplyr::group_by(ID) |>
-      dplyr::summarise(DATE_EXPOSURE = first(DATE),
-                       DG = first(DG)) |>
+      dplyr::summarise(DATE_EXPOSURE = dplyr::first(DATE),
+                       DG = dplyr::first(DG)) |>
       dplyr::rename(DG_EXP = DG) |>
       dplyr::left_join(pop_dates, by = "ID") |>
       dplyr::mutate(AGE_EXPOSURE = trunc(lubridate::`%--%`(DATE_BIRTH, DATE_EXPOSURE) / lubridate::years(1))) |>
@@ -125,10 +124,10 @@ pirr_data <- function(
         dplyr::arrange(ID, DATE_RESPONSE) |>
         dplyr::left_join(pop_dates, by = "ID") |>
         dplyr::group_by(ID) |>
-        dplyr::summarise(DATE_RESPONSE = first(DATE_RESPONSE),
-                         DG_RES = first(DG_RES),
-                         DATE_BIRTH = first(DATE_BIRTH),
-                         AGE_RESPONSE = first(AGE_RESPONSE)
+        dplyr::summarise(DATE_RESPONSE = dplyr::first(DATE_RESPONSE),
+                         DG_RES = dplyr::first(DG_RES),
+                         DATE_BIRTH = dplyr::first(DATE_BIRTH),
+                         AGE_RESPONSE = dplyr::first(AGE_RESPONSE)
         )
     }
 
@@ -152,7 +151,8 @@ pirr_data <- function(
     if(shiny::isRunning()) .safe_inc_progress(2/5)
 
     ## Custom DG list -------
-    exprs <- lapply(custom_responses, function(x) rlang::parse_expr(x)) # Build expressions from dg_list
+    # exprs <- lapply(custom_responses, function(x) rlang::parse_expr(x)) # Build expressions from dg_list
+    exprs <- lapply(custom_responses, function(x) parse(text = x)[[1]])
     names(exprs) <- names(custom_responses) # Convert to named list of expressions
     ## No Custom Response Classes / Custom Response Classes
     if(length(custom_responses) == 0){
@@ -177,7 +177,7 @@ pirr_data <- function(
         )
     }else{
       dat1 <- pop_dates |>
-        dplyr::left_join(dvast %>% select(ID, DATE_RESPONSE), by = "ID") |>
+        dplyr::left_join(dvast |> dplyr::select(ID, DATE_RESPONSE), by = "ID") |>
         dplyr::mutate(
           Death = as.integer(!is.na(DATE_DEATH)),
           apvm = pmax(DATE_BIRTH, censoring_date[1], na.rm=TRUE),
@@ -187,7 +187,8 @@ pirr_data <- function(
 
     if(shiny::isRunning()) .safe_inc_progress(3/5)
 
-    ages <- c(20, censoring_age[1]:censoring_age[2])*365.25 ## TODO tämä vaikuttaa olevan sidoksissa censoring_age / also age_end?
+    ## TODO tämä vaikuttaa olevan sidoksissa censoring_age / also age_end?
+    ages <- c(20, censoring_age[1]:censoring_age[2])*365.25
 
     ## Dates and time --------
     cdat <- data.table::as.data.table(pop_dates) |>
@@ -200,6 +201,10 @@ pirr_data <- function(
       )
 
     ## split functions ----------
+
+    ## TODO tahan jäin ke 8.4.2026
+    ## TODO survival::tmerge here??
+
     dat2 <- dat1 |>
       heaven::lexisSeq(invars=c("ID","apvm","epvm","Death"),
                        varname="DATE_BIRTH",
@@ -219,7 +224,7 @@ pirr_data <- function(
     ## Finalizing ---------
     adat <- dat3 |>
       dplyr::mutate(
-        caika=factor(case_when(
+        caika=factor(dplyr::case_when(
           c15pvm==1 ~ "5 exposure 15+y",
           c10pvm==1 ~ "4 exposure 10-14y",
           c05pvm==1 ~ "3 exposure 5-9y",
@@ -227,7 +232,7 @@ pirr_data <- function(
           c00pvm==1 ~ "1 exposure < 1y",
           TRUE ~ "0 No exposure"
         )),
-        ikar=case_when( ## TODO nämä vaikuttaa olevan sidoksissa var_age_start / censoring_age
+        ikar=dplyr::case_when( ## TODO nämä vaikuttaa olevan sidoksissa var_age_start / censoring_age
           agec<2 ~ 20,
           TRUE ~ agec+48
         ),
@@ -305,7 +310,7 @@ pirr_data <- function(
 #' @export
 pirr_results <- function(adat,
                          colors=c("#5BC0DE", "#D9534F"),
-                         limits = c(0.3,3)
+                         limits = c(0.3, 3)
 ){
 
   ## Sniff dg list from data
@@ -326,14 +331,15 @@ pirr_results <- function(adat,
         n=sum(vaste),
         pyrs=sum(pyrs)
       ) |>
-      dplyr::mutate(rn=row_number())
+      dplyr::mutate(rn=dplyr::row_number())
+
     ## Model 1 - caika
     m1 <- glm(vaste ~ splines::bs(Age) + caika, offset = log(pyrs), family = poisson(link = "log"), data = adat)
     pval1 <- lmtest::coeftest(m1,vcov.=sandwich::vcovHC(m1,type="HC0"))
     pres <- tibble::tibble(pval=c(NA,pval1[,"Pr(>|z|)"][grep("exposure",rownames(pval1))])) |>
-      mutate(rn = dplyr::row_number())
+      dplyr::mutate(rn = dplyr::row_number())
     mdi <- tibble::tibble(ggeffects::predict_response(m1, terms=c("caika"), condition=(c(Age=70, pyrs=10000)))) |>
-      mutate(rn = dplyr::row_number())
+      dplyr::mutate(rn = dplyr::row_number())
     mdp <- ggeffects::predict_response(m1,
                                        terms=c("caika"),
                                        vcov_fun="vcovHC",
@@ -348,7 +354,7 @@ pirr_results <- function(adat,
         n=sum(vaste),
         pyrs=sum(pyrs)
       ) |>
-      dplyr::mutate(rn=row_number())
+      dplyr::mutate(rn=dplyr::row_number())
     ## Model 2 - cever
     m2 <- stats::glm(vaste ~ splines::bs(Age) + cever, offset = log(pyrs), family = poisson(link = "log"), data = adat)
     pval2 <- lmtest::coeftest(m2,vcov.=sandwich::vcovHC(m2,type="HC0"))
@@ -371,7 +377,7 @@ pirr_results <- function(adat,
     res <- NULL |>
       dplyr::bind_rows(mdp |>
                          as.data.frame() |>
-                         dplyr::mutate(rn=row_number()) |>
+                         dplyr::mutate(rn=dplyr::row_number()) |>
                          dplyr::filter(!is.na(x)) |>
                          dplyr::left_join(pres,by="rn") |>
                          dplyr::left_join(n1,by="rn") |>
@@ -379,7 +385,7 @@ pirr_results <- function(adat,
                                             dplyr::select(rn, adj=predicted), by="rn")) |>
       dplyr::bind_rows(mdp2 |>
                          as.data.frame() |>
-                         dplyr::mutate(rn=row_number()) |>
+                         dplyr::mutate(rn=dplyr::row_number()) |>
                          dplyr::filter(!is.na(x)) |>
                          dplyr::left_join(pres2,by="rn") |>
                          dplyr::left_join(n2,by="rn") |>

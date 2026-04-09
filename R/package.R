@@ -59,10 +59,6 @@
 # Data.table
 #' @importFrom data.table as.data.table
 
-# Rlang
-#' @importFrom rlang :=
-#' @importFrom rlang parse_expr
-
 # Utils
 #' @importFrom utils globalVariables
 
