@@ -334,7 +334,7 @@ survival_analysis <- function(exposure_diagnoses,
           ylab = "Cumulative incidence",
           title = "Competing Risk Model: Exposure to Response/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)) +
-          scale_x_continuous(limits = c(0.0001, NA)) +
+          ggplot2::scale_x_continuous(limits = c(0.0001, NA)) +
           ggplot2::scale_color_manual(
             values = c("1" = colors_groups[["response"]],
                        "2" = colors_groups[["dead"]]),
@@ -350,7 +350,7 @@ survival_analysis <- function(exposure_diagnoses,
           ylab = "Cumulative incidence",
           title = "Competing Risk Model: Exposure to Response/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)) +
-          scale_x_continuous(limits = c(0.0001, NA)) +
+          ggplot2::scale_x_continuous(limits = c(0.0001, NA)) +
           ggplot2::scale_color_manual(
             values = c("1" = colors_groups[["response"]],
                        "2" = colors_groups[["dead"]]),
@@ -370,8 +370,8 @@ survival_analysis <- function(exposure_diagnoses,
           title = "Competing Risk Model: Response to Exposure/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)
         )  +
-          scale_x_continuous(limits = c(0.0001, NA)) +
-          scale_color_manual(
+          ggplot2::scale_x_continuous(limits = c(0.0001, NA)) +
+          ggplot2::scale_color_manual(
             values = c("1" = colors_groups[["exposure"]],
                        "2" = colors_groups[["dead"]]),
             labels = c("1" = "Exposure",
@@ -387,8 +387,8 @@ survival_analysis <- function(exposure_diagnoses,
           title = "Competing Risk Model: Response to Exposure/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)
         )  +
-          scale_x_continuous(limits = c(0.0001, NA)) +
-          scale_color_manual(
+          ggplot2::scale_x_continuous(limits = c(0.0001, NA)) +
+          ggplot2::scale_color_manual(
             values = c("1" = colors_groups[["exposure"]],
                        "2" = colors_groups[["dead"]]),
             labels = c("1" = "Exposure",
@@ -407,8 +407,8 @@ survival_analysis <- function(exposure_diagnoses,
           title = "Competing Risk Model: From Follow up to Exposure/Response/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)
         )  +
-          scale_x_continuous(limits = c(0.0001, NA)) +
-          scale_color_manual(
+          ggplot2::scale_x_continuous(limits = c(0.0001, NA)) +
+          ggplot2::scale_color_manual(
             values = c("1" = colors_groups[["exposure"]],
                        "2" = colors_groups[["response"]],
                        "3" = colors_groups[["dead"]]),
@@ -426,8 +426,8 @@ survival_analysis <- function(exposure_diagnoses,
           title = "Competing Risk Model: From Follow up to Exposure/Response/Death",
           subtitle = paste0("pre_entry_handling=", pre_entry_handling)
         )  +
-          scale_x_continuous(limits = c(0.0001, NA)) +
-          scale_color_manual(
+          ggplot2::scale_x_continuous(limits = c(0.0001, NA)) +
+          ggplot2::scale_color_manual(
             values = c("1" = colors_groups[["exposure"]],
                        "2" = colors_groups[["response"]],
                        "3" = colors_groups[["dead"]]),
