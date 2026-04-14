@@ -78,15 +78,17 @@ survival_analysis <- function(exposure_diagnoses,
                               pre_entry_handling = c("initialize", "skip", "asis")
 ) {
 
+  ## TODO   Käy läpi ja mieti miksi voi tulla error dateja? time -2
+  ## TODO   DATE_50 -> DATE_CUSTOM ?
+  ## TODO CENSORING_DATE: plot_mort: Error in survival::tmerge(data1 = d2, data2 = d2, id = ID, event = event(t_censoring,  : found an ending time of -70, the default starting time of 0 is invalid
 
-  # type <- match.arg(type)
   ## ESIMERKKI CASE
   # start = "DATE_EXPOSURE"
-  # censoring_date = as.Date("2024-12-01")
+  # censoring_date = as.Date("2023-12-01")
   # pre_entry_handling = "initialize" #c("initialize", "skip", "asis")
 
   internal_function <- function() {
-    .safe_inc_progress(1/6)
+    healthpopR::.safe_inc_progress(1/6)
 
     ## Colors for groups
     colors_groups <- c(
@@ -109,14 +111,14 @@ survival_analysis <- function(exposure_diagnoses,
           DATE_MIGRATION = as.Date(ifelse(DATE_MIGRATION > censoring_date, NA, DATE_MIGRATION), origin = "1970-01-01"),
           DATE_50 = DATE_BIRTH + 50 * 365.25, ## TODO this should be in dpop, and named as DATE_START
           ## Onko DATE_START loppujen lopuksi eka dg
-          DATE_START = case_when(
+          DATE_START = dplyr::case_when(
             start == "DATE_EXPOSURE" ~ exp.DATE,
             start == "DATE_RESPONSE" ~ resp.DATE,
             start == "DATE_50" ~ DATE_50,
             TRUE ~ NA
           )
         ) |>
-        select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_50, DATE_START)
+        dplyr::select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_50, DATE_START)
       # select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_50, DATE_START, exp.DATE, resp.DATE)
 
       ## EXPOSURE DIAGNOSES
@@ -126,20 +128,23 @@ survival_analysis <- function(exposure_diagnoses,
         dplyr::select(ID, DATE, DATE_50, DATE_START) |>
         dplyr::rename(DATE_EXPOSURE = DATE) |>
         dplyr::mutate(DATE_EXPOSURE_ORIGINAL = DATE_EXPOSURE)
+
       if (pre_entry_handling == "initialize") {
-        d1 <- d1 |> mutate(
-          DATE_EXPOSURE = as.Date(ifelse(!is.na(DATE_START) & DATE_EXPOSURE < DATE_START, DATE_START, DATE_EXPOSURE), origin = "1970-01-01")
-        )
+        d1 <- d1 |>
+          dplyr::mutate(
+            DATE_EXPOSURE = as.Date(ifelse(!is.na(DATE_START) & DATE_EXPOSURE < DATE_START, DATE_START, DATE_EXPOSURE), origin = "1970-01-01"))
       }
+
       if (pre_entry_handling == "skip") {
         d1 <- dplyr::filter(d1, DATE_EXPOSURE >= DATE_START)
       }
       ### Take first diagnose row per ID
       d1 <- d1 |>
-        arrange(ID, DATE_EXPOSURE) |>
-        group_by(ID) |>
-        summarise(DATE_EXPOSURE = dplyr::first(DATE_EXPOSURE),
-                  DATE_EXPOSURE_ORIGINAL = dplyr::first(DATE_EXPOSURE_ORIGINAL))
+        dplyr::arrange(ID, DATE_EXPOSURE) |>
+        dplyr::group_by(ID) |>
+        dplyr::summarise(
+          DATE_EXPOSURE = dplyr::first(DATE_EXPOSURE),
+          DATE_EXPOSURE_ORIGINAL = dplyr::first(DATE_EXPOSURE_ORIGINAL))
 
       ## RESPONSE_DIAGNOSES
       d2 <- response_diagnoses |>
@@ -149,38 +154,41 @@ survival_analysis <- function(exposure_diagnoses,
         dplyr::rename(DATE_RESPONSE = DATE) |>
         dplyr::mutate(DATE_RESPONSE_ORIGINAL = DATE_RESPONSE)
       if (pre_entry_handling == "initialize") {
-        d2 <- d2 |> mutate(
-          DATE_RESPONSE_ORIGINAL = DATE_RESPONSE,
-          DATE_RESPONSE = as.Date(ifelse(!is.na(DATE_START) & DATE_RESPONSE < DATE_START, DATE_START, DATE_RESPONSE) , origin = "1970-01-01")
-        )
+        d2 <- d2 |>
+          dplyr::mutate(
+            DATE_RESPONSE_ORIGINAL = DATE_RESPONSE,
+            DATE_RESPONSE = as.Date(ifelse(!is.na(DATE_START) & DATE_RESPONSE < DATE_START, DATE_START, DATE_RESPONSE) , origin = "1970-01-01")
+          )
       }
       if (pre_entry_handling == "skip") {
         d2 <- dplyr::filter(d2, DATE_RESPONSE >= DATE_START)
       }
       ### Take first diagnose row per ID
       d2 <- d2 |>
-        arrange(ID, DATE_RESPONSE) |>
-        group_by(ID) |>
-        summarise(DATE_RESPONSE = dplyr::first(DATE_RESPONSE),
-                  DATE_RESPONSE_ORIGINAL = dplyr::first(DATE_RESPONSE_ORIGINAL))
+        dplyr::arrange(ID, DATE_RESPONSE) |>
+        dplyr::group_by(ID) |>
+        dplyr::summarise(
+          DATE_RESPONSE = dplyr::first(DATE_RESPONSE),
+          DATE_RESPONSE_ORIGINAL = dplyr::first(DATE_RESPONSE_ORIGINAL)
+        )
 
       ## FINAL (ensimmäiset DATE_EXPOSURE, DATE_RESPONSE ja DATE_CENSOR -tapaukset)
       df <- d0 |>
         dplyr::left_join(d1, by = "ID") |>
         dplyr::left_join(d2, by = "ID") |>
-        filter(is.na(DATE_DEATH) | DATE_DEATH > DATE_50) |> ## filter few odd cases
+        dplyr::filter(is.na(DATE_DEATH) | DATE_DEATH > DATE_50) |> ## filter few odd cases
         dplyr::mutate(
           DATE_CENSOR = pmin(DATE_MIGRATION, censoring_date, na.rm = TRUE),
-          GROUP = case_when(
-            start == "DATE_RESPONSE" ~ case_when(
+          GROUP = dplyr::case_when(
+            start == "DATE_RESPONSE" ~ dplyr::case_when(
               !is.na(DATE_EXPOSURE) ~ "Exposure",
               is.na(DATE_EXPOSURE) ~ "No Exposure",
               TRUE ~ NA),
-            start == "DATE_EXPOSURE" ~ case_when(
+            start == "DATE_EXPOSURE" ~ dplyr::case_when(
               !is.na(DATE_RESPONSE) ~ "Response",
               is.na(DATE_RESPONSE) ~ "No Response",
               TRUE ~ NA),
-            start == "DATE_50" ~ case_when(
+            start == "DATE_50" ~ dplyr::case_when(
               is.na(DATE_EXPOSURE) & is.na(DATE_RESPONSE) ~ "No condition",
               !is.na(DATE_EXPOSURE) & is.na(DATE_RESPONSE) ~ "Exposure",
               is.na(DATE_EXPOSURE) & !is.na(DATE_RESPONSE) ~ "Response",
@@ -191,19 +199,20 @@ survival_analysis <- function(exposure_diagnoses,
         )
       rm(list = c("d0", "d1", "d2"))
 
-      # df %>% filter(DATE_DEATH < DATE_50)
-      # df$DATE_EXPOSURE <- as.Date(df$DATE_EXPOSURE, origin = "1970-01-01")
-      # df$DATE_RESPONSE <- as.Date(df$DATE_RESPONSE, origin = "1970-01-01")
-
       ### DEBUG -----
       if(FALSE){
+        # df %>% filter(DATE_DEATH < DATE_50)
+        # df$DATE_EXPOSURE <- as.Date(df$DATE_EXPOSURE, origin = "1970-01-01")
+        # df$DATE_RESPONSE <- as.Date(df$DATE_RESPONSE, origin = "1970-01-01")
+
         ## Katsotaan kuinka monta tapausta joissa expsure ennen response
-        df %>% filter(DATE_EXPOSURE <= DATE_RESPONSE) %>% count()
+        df %>% dplyr::filter(DATE_EXPOSURE <= DATE_RESPONSE) %>%
+          dplyr::count()
         ## pysyy oikein
       }
     }
 
-    .safe_inc_progress(2/6)
+    healthpopR::.safe_inc_progress(2/6)
 
 
     ## PHASE 2: CALCULATE TIMES -----------------
@@ -211,24 +220,29 @@ survival_analysis <- function(exposure_diagnoses,
       dphase2 <- df |>
         dplyr::mutate(
           ## tämä on joko DATE_EXPOSURE, DATE_RESPONSE tai DATE_50
-          apvm =  case_when(start == "DATE_EXPOSURE" ~ DATE_EXPOSURE,
-                            start == "DATE_RESPONSE" ~ DATE_RESPONSE,
-                            start == "DATE_50" ~ DATE_50,
-                            TRUE ~ as.Date(NA)),
+          apvm = dplyr::case_when(
+            start == "DATE_EXPOSURE" ~ DATE_EXPOSURE,
+            start == "DATE_RESPONSE" ~ DATE_RESPONSE,
+            start == "DATE_50" ~ DATE_50,
+            TRUE ~ as.Date(NA)),
           ## sensurointi
           epvm = DATE_CENSOR,
           ## lasketaan ajat
-          time_exposure = trunc((apvm%--% DATE_EXPOSURE) / days(1)),
-          time_response = trunc((apvm %--% DATE_RESPONSE) / days(1)),
+          # time_exposure = trunc((apvm%--% DATE_EXPOSURE) / days(1)),
+          time_exposure = trunc((lubridate::interval(apvm, DATE_EXPOSURE)) / lubridate::days(1)),
+          # time_response = trunc((apvm %--% DATE_RESPONSE) / days(1)),
+          time_response = trunc((lubridate::interval(apvm, DATE_RESPONSE)) / lubridate::days(1)),
           time_dead = ifelse(!is.na(DATE_DEATH),
-                             trunc((apvm %--% DATE_DEATH) / days(1)), NA),
-          time_censoring = trunc((apvm %--% epvm) / days(1))
+                             # trunc((apvm %--% DATE_DEATH) / days(1)), NA),
+                             trunc((lubridate::interval(apvm, DATE_DEATH)) / lubridate::days(1)), NA),
+          # time_censoring = trunc((apvm %--% epvm) / days(1))
+          time_censoring = trunc((lubridate::interval(apvm, epvm)) / lubridate::days(1))
         )
       ## to long format
       dphase2 <- dphase2 |>
         tidyr::pivot_longer(cols = c(time_exposure, time_response, time_dead, time_censoring)) |>
         dplyr::filter(!is.na(value)) |>
-        select(ID, name, value, GROUP)
+        dplyr::select(ID, name, value, GROUP)
 
       ### DEBUG -----
       if(FALSE){
@@ -244,34 +258,34 @@ survival_analysis <- function(exposure_diagnoses,
       }
     }
 
-    .safe_inc_progress(3/6)
+    healthpopR::.safe_inc_progress(3/6)
 
 
     ## PHASE 3A: NORMAL-------------------
     ### FILTER EVENTS & CODING  --------
     if(TRUE){
       ## Limiting results only from starting point
-      dphase3a <- dphase2 |> filter(value >=0)
+      dphase3a <- dphase2 |> dplyr::filter(value >=0)
       ## Coding
       dphase3a <- dphase3a |>
         dplyr::mutate(
-          event = case_when(
+          event = dplyr::case_when(
             ## Start == DATE_EXPOSURE
-            start == "DATE_EXPOSURE" ~ case_when(
+            start == "DATE_EXPOSURE" ~ dplyr::case_when(
               name == "time_response"  ~ 1L,
               name == "time_dead"      ~ 2L,
               name == "time_censoring" ~ 3L,
               TRUE ~ NA_integer_
             ),
             ## Start == DATE_RESPONSE
-            start == "DATE_RESPONSE" ~ case_when(
+            start == "DATE_RESPONSE" ~ dplyr::case_when(
               name == "time_exposure"  ~ 1L,
               name == "time_dead"  ~ 2L,
               name == "time_censoring" ~ 3L,
               TRUE ~ NA_integer_
             ),
             # start == "DATE_50"
-            start == "DATE_50" ~ case_when(
+            start == "DATE_50" ~ dplyr::case_when(
               name == "time_exposure"  ~ 1L,
               name == "time_response"  ~ 2L,
               name == "time_dead"      ~ 3L,
@@ -284,14 +298,14 @@ survival_analysis <- function(exposure_diagnoses,
 
       ## Otetaan vain ensimmäinen tapaus
       dphase3a <- dphase3a |>
-        filter(!is.na(event)) |> ## Tyhjät tapausrivit pois
+        dplyr::filter(!is.na(event)) |> ## Tyhjät tapausrivit pois
         dplyr::group_by(ID) |>
         dplyr::slice_min(value, with_ties = FALSE) |>
         dplyr::ungroup()
 
       ## Aikamääre päivä ja vuosi
-      dphase3a <- dphase3a %>%
-        mutate(
+      dphase3a <- dphase3a |>
+        dplyr::mutate(
           days = value,
           years = value / 365.25)
 
@@ -439,14 +453,14 @@ survival_analysis <- function(exposure_diagnoses,
       }
     }
 
-    .safe_inc_progress(4/6)
+    healthpopR::.safe_inc_progress(4/6)
 
 
     ## PHASE 3B: MORTALITY -------------------
     ### FILTER EVENTS, CODING & RESULTS -------
     if(TRUE){
       ## Limiting results: tässä kohtaa malli: DATE_RESPONSE -> DEAD / CENSORING
-      dphase3b <- dphase2 |> filter(name == "time_dead" | name == "time_censoring")
+      dphase3b <- dphase2 |> dplyr::filter(name == "time_dead" | name == "time_censoring")
 
       ## Otetaan vain ensimmäinen tapaus per ID
       dphase3b <- dphase3b |>
@@ -454,33 +468,33 @@ survival_analysis <- function(exposure_diagnoses,
         dplyr::group_by(ID) |>
         dplyr::slice_min(value, with_ties = FALSE) |>
         dplyr::ungroup() |>
-        mutate(
+        dplyr::mutate(
           ## Aikamääre päivä ja vuosi
           days = value,
           years = value / 365.25
-        ) %>%
-        select(ID, name, GROUP, days, years)
+        ) |>
+        dplyr::select(ID, name, GROUP, days, years)
 
       ## TODO testaa: Eli tässä per ID joko DEATH tai CENSOR rivi. DEATH määrä pitää matchata siihen freq kuinka monta kuolee.
 
       ## PHASE 4b - MORTALITY SET CODING
       dphase4b <- dphase3b |>
         dplyr::mutate(
-          event = case_when(
+          event = dplyr::case_when(
             ## Start == DATE_EXPOSURE
-            start == "DATE_EXPOSURE" ~ case_when(
+            start == "DATE_EXPOSURE" ~ dplyr::case_when(
               name == "time_dead"  ~ 1L,
               name == "time_censoring" ~ 0L,
               TRUE ~ NA_integer_
             ),
             ## Start == DATE_RESPONSE
-            start == "DATE_RESPONSE" ~ case_when(
+            start == "DATE_RESPONSE" ~ dplyr::case_when(
               name == "time_dead"  ~ 1L,
               name == "time_censoring" ~ 0L,
               TRUE ~ NA_integer_
             ),
             # start == "DATE_50"
-            start == "DATE_50" ~ case_when(
+            start == "DATE_50" ~ dplyr::case_when(
               name == "time_dead"  ~ 1L,
               name == "time_censoring" ~ 0L,
               TRUE ~ NA_integer_
@@ -523,9 +537,12 @@ survival_analysis <- function(exposure_diagnoses,
       )
     }
 
-    .safe_inc_progress(5/6)
+    healthpopR::.safe_inc_progress(5/6)
 
     ## Survival Plot (Correct one) ----
+    ## TODO censoring date 2023 ei toimi
+    # Error in survival::tmerge(data1 = d2, data2 = d2, id = ID, event = event(t_censoring,  :
+    # found an ending time of -70, the default starting time of 0 is invalid
     plot_mort <- healthpopR::plot_surv_mort(dpop = dpop, censoring_date = censoring_date)
 
 
@@ -540,9 +557,9 @@ survival_analysis <- function(exposure_diagnoses,
                 CR_years = CR_years,
                 dmodel = dphase3a,
                 dmortality = dphase4b)
-      .safe_inc_progress(3/3)
+      healthpopR::.safe_inc_progress(3/3)
     }
-    .safe_inc_progress(6/6)
+    healthpopR::.safe_inc_progress(6/6)
     return(d)
   }
 
@@ -555,8 +572,3 @@ survival_analysis <- function(exposure_diagnoses,
     return(internal_function())
   }
 }
-
-
-
-
-
