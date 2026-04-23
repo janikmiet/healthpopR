@@ -61,8 +61,7 @@ Check
 - 🧠 **ICD-10 diagnostics**:
   [`plot_diagnoses_src()`](https://janikmiet.github.io/healthpopR/reference/plot_diagnoses_src.md),
   [`plot_health_icd10_profile()`](https://janikmiet.github.io/healthpopR/reference/plot_health_icd10_profile.md)
-- ⏳ **Survival analysis**:
-  [`plot_survival_km()`](https://janikmiet.github.io/healthpopR/reference/plot_survival_km.md),
+- ⏳ **Survival analysis**: `plot_survival_km()`,
   [`cox_create_data()`](https://janikmiet.github.io/healthpopR/reference/cox_create_data.md),
   [`cox_plot_spline()`](https://janikmiet.github.io/healthpopR/reference/cox_plot_spline.md)
 - 📈 **Comparison tools**:

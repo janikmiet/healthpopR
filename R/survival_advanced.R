@@ -70,20 +70,18 @@
 #'
 #' @export
 
-survival_analysis <- function(exposure_diagnoses,
+analysis_survival <- function(exposure_diagnoses,
                               response_diagnoses,
                               dpop,
-                              start = c("DATE_EXPOSURE", "DATE_RESPONSE", "DATE_50"),
+                              start = c("DATE_EXPOSURE", "DATE_RESPONSE", "DATE_CUSTOM"),
                               censoring_date = as.Date("2024-12-21"),
                               pre_entry_handling = c("initialize", "skip", "asis")
 ) {
 
   ## TODO   Käy läpi ja mieti miksi voi tulla error dateja? time -2
-  ## TODO   DATE_50 -> DATE_CUSTOM ?
-  ## TODO CENSORING_DATE: plot_mort: Error in survival::tmerge(data1 = d2, data2 = d2, id = ID, event = event(t_censoring,  : found an ending time of -70, the default starting time of 0 is invalid
 
   ## ESIMERKKI CASE
-  # start = "DATE_EXPOSURE"
+  # start = "DATE_CUSTOM"
   # censoring_date = as.Date("2023-12-01")
   # pre_entry_handling = "initialize" #c("initialize", "skip", "asis")
 
@@ -109,36 +107,34 @@ survival_analysis <- function(exposure_diagnoses,
           DATE_BIRTH = as.Date(DATE_BIRTH),
           DATE_DEATH = as.Date(ifelse(DATE_DEATH > censoring_date, NA, DATE_DEATH), origin = "1970-01-01"),
           DATE_MIGRATION = as.Date(ifelse(DATE_MIGRATION > censoring_date, NA, DATE_MIGRATION), origin = "1970-01-01"),
-          DATE_50 = DATE_BIRTH + 50 * 365.25, ## TODO this should be in dpop, and named as DATE_START
-          ## Onko DATE_START loppujen lopuksi eka dg
           DATE_START = dplyr::case_when(
             start == "DATE_EXPOSURE" ~ exp.DATE,
             start == "DATE_RESPONSE" ~ resp.DATE,
-            start == "DATE_50" ~ DATE_50,
+            start == "DATE_CUSTOM" ~ DATE_CUSTOM,
             TRUE ~ NA
           )
         ) |>
-        dplyr::select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_50, DATE_START)
-      # select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_50, DATE_START, exp.DATE, resp.DATE)
+        dplyr::select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_CUSTOM, DATE_START)
+      # select(ID, DATE_BIRTH, DATE_DEATH, DATE_MIGRATION, DATE_CUSTOM, DATE_START, exp.DATE, resp.DATE)
 
       ## EXPOSURE DIAGNOSES
       d1 <- exposure_diagnoses |>
         dplyr::filter(DATE <= censoring_date) |>
         dplyr::left_join(d0, by = "ID") |>
-        dplyr::select(ID, DATE, DATE_50, DATE_START) |>
+        dplyr::select(ID, DATE, DATE_CUSTOM, DATE_START) |>
         dplyr::rename(DATE_EXPOSURE = DATE) |>
         dplyr::mutate(DATE_EXPOSURE_ORIGINAL = DATE_EXPOSURE)
-
+      ### EXP DIAGNOSES: if DATE is before START, change DATE to START. "Event has happened".
       if (pre_entry_handling == "initialize") {
         d1 <- d1 |>
           dplyr::mutate(
             DATE_EXPOSURE = as.Date(ifelse(!is.na(DATE_START) & DATE_EXPOSURE < DATE_START, DATE_START, DATE_EXPOSURE), origin = "1970-01-01"))
       }
-
+      ### EXP DIAGNOSES: if DATE is before START, filter those out. "We want to know that there is event after starting point".
       if (pre_entry_handling == "skip") {
         d1 <- dplyr::filter(d1, DATE_EXPOSURE >= DATE_START)
       }
-      ### Take first diagnose row per ID
+      ### EXP DIAGNOSES: Take one and first diagnose row per ID
       d1 <- d1 |>
         dplyr::arrange(ID, DATE_EXPOSURE) |>
         dplyr::group_by(ID) |>
@@ -150,9 +146,10 @@ survival_analysis <- function(exposure_diagnoses,
       d2 <- response_diagnoses |>
         dplyr::filter(DATE <= censoring_date) |>
         dplyr::left_join(d0, by = "ID") |>
-        dplyr::select(ID, DATE, DATE_50, DATE_START) |>
+        dplyr::select(ID, DATE, DATE_CUSTOM, DATE_START) |>
         dplyr::rename(DATE_RESPONSE = DATE) |>
         dplyr::mutate(DATE_RESPONSE_ORIGINAL = DATE_RESPONSE)
+      ### RESP DIAGNOSES: if DATE is before START, change DATE to START. "Event has happened".
       if (pre_entry_handling == "initialize") {
         d2 <- d2 |>
           dplyr::mutate(
@@ -160,10 +157,11 @@ survival_analysis <- function(exposure_diagnoses,
             DATE_RESPONSE = as.Date(ifelse(!is.na(DATE_START) & DATE_RESPONSE < DATE_START, DATE_START, DATE_RESPONSE) , origin = "1970-01-01")
           )
       }
+      ### RESP DIAGNOSES: if DATE is before START, filter those out. "We want to know that there is event after starting point".
       if (pre_entry_handling == "skip") {
         d2 <- dplyr::filter(d2, DATE_RESPONSE >= DATE_START)
       }
-      ### Take first diagnose row per ID
+      ### RESP DIAGNOSES: Take first diagnose row per ID
       d2 <- d2 |>
         dplyr::arrange(ID, DATE_RESPONSE) |>
         dplyr::group_by(ID) |>
@@ -176,9 +174,9 @@ survival_analysis <- function(exposure_diagnoses,
       df <- d0 |>
         dplyr::left_join(d1, by = "ID") |>
         dplyr::left_join(d2, by = "ID") |>
-        dplyr::filter(is.na(DATE_DEATH) | DATE_DEATH > DATE_50) |> ## filter few odd cases
+        dplyr::filter(is.na(DATE_DEATH) | DATE_DEATH > DATE_CUSTOM) |> ## filter few odd cases
         dplyr::mutate(
-          DATE_CENSOR = pmin(DATE_MIGRATION, censoring_date, na.rm = TRUE),
+          DATE_CENSOR = pmin(DATE_MIGRATION, censoring_date, DATE_DEATH, na.rm = TRUE), ## TODO lisattiin DEATH. MITEN VAIKUTTAA
           GROUP = dplyr::case_when(
             start == "DATE_RESPONSE" ~ dplyr::case_when(
               !is.na(DATE_EXPOSURE) ~ "Exposure",
@@ -188,7 +186,7 @@ survival_analysis <- function(exposure_diagnoses,
               !is.na(DATE_RESPONSE) ~ "Response",
               is.na(DATE_RESPONSE) ~ "No Response",
               TRUE ~ NA),
-            start == "DATE_50" ~ dplyr::case_when(
+            start == "DATE_CUSTOM" ~ dplyr::case_when(
               is.na(DATE_EXPOSURE) & is.na(DATE_RESPONSE) ~ "No condition",
               !is.na(DATE_EXPOSURE) & is.na(DATE_RESPONSE) ~ "Exposure",
               is.na(DATE_EXPOSURE) & !is.na(DATE_RESPONSE) ~ "Response",
@@ -201,7 +199,7 @@ survival_analysis <- function(exposure_diagnoses,
 
       ### DEBUG -----
       if(FALSE){
-        # df %>% filter(DATE_DEATH < DATE_50)
+        # df %>% filter(DATE_DEATH < DATE_CUSTOM)
         # df$DATE_EXPOSURE <- as.Date(df$DATE_EXPOSURE, origin = "1970-01-01")
         # df$DATE_RESPONSE <- as.Date(df$DATE_RESPONSE, origin = "1970-01-01")
 
@@ -219,23 +217,19 @@ survival_analysis <- function(exposure_diagnoses,
     if(TRUE){
       dphase2 <- df |>
         dplyr::mutate(
-          ## tämä on joko DATE_EXPOSURE, DATE_RESPONSE tai DATE_50
+          ## FUP START: tämä on joko DATE_EXPOSURE, DATE_RESPONSE tai DATE_CUSTOM
           apvm = dplyr::case_when(
             start == "DATE_EXPOSURE" ~ DATE_EXPOSURE,
             start == "DATE_RESPONSE" ~ DATE_RESPONSE,
-            start == "DATE_50" ~ DATE_50,
+            start == "DATE_CUSTOM" ~ DATE_CUSTOM,
             TRUE ~ as.Date(NA)),
           ## sensurointi
           epvm = DATE_CENSOR,
           ## lasketaan ajat
-          # time_exposure = trunc((apvm%--% DATE_EXPOSURE) / days(1)),
           time_exposure = trunc((lubridate::interval(apvm, DATE_EXPOSURE)) / lubridate::days(1)),
-          # time_response = trunc((apvm %--% DATE_RESPONSE) / days(1)),
           time_response = trunc((lubridate::interval(apvm, DATE_RESPONSE)) / lubridate::days(1)),
           time_dead = ifelse(!is.na(DATE_DEATH),
-                             # trunc((apvm %--% DATE_DEATH) / days(1)), NA),
                              trunc((lubridate::interval(apvm, DATE_DEATH)) / lubridate::days(1)), NA),
-          # time_censoring = trunc((apvm %--% epvm) / days(1))
           time_censoring = trunc((lubridate::interval(apvm, epvm)) / lubridate::days(1))
         )
       ## to long format
@@ -265,7 +259,8 @@ survival_analysis <- function(exposure_diagnoses,
     ### FILTER EVENTS & CODING  --------
     if(TRUE){
       ## Limiting results only from starting point
-      dphase3a <- dphase2 |> dplyr::filter(value >=0)
+      dphase3a <- dphase2 |> dplyr::filter(value >=0) ## tiputtaa jotka kuolleet ennen seurannan alkua
+
       ## Coding
       dphase3a <- dphase3a |>
         dplyr::mutate(
@@ -284,8 +279,8 @@ survival_analysis <- function(exposure_diagnoses,
               name == "time_censoring" ~ 3L,
               TRUE ~ NA_integer_
             ),
-            # start == "DATE_50"
-            start == "DATE_50" ~ dplyr::case_when(
+            # start == "DATE_CUSTOM"
+            start == "DATE_CUSTOM" ~ dplyr::case_when(
               name == "time_exposure"  ~ 1L,
               name == "time_response"  ~ 2L,
               name == "time_dead"      ~ 3L,
@@ -323,7 +318,7 @@ survival_analysis <- function(exposure_diagnoses,
           cencode = 3
         )
       }
-      if(start == "DATE_50") {
+      if(start == "DATE_CUSTOM") {
         CR_days <- cmprsk::cuminc(
           ftime   = dphase3a$value,
           fstatus = dphase3a$event,
@@ -410,8 +405,8 @@ survival_analysis <- function(exposure_diagnoses,
             name = "Event"
           )
       }
-      ### 50v eteenpäin Exposure, Response tai Death
-      if(start == "DATE_50"){
+      ### CUSTOM eteenpäin Exposure, Response tai Death
+      if(start == "DATE_CUSTOM"){
         ## Piirretään cumulative incidence ratio kuvaaja
         p_days <- survminer::ggcompetingrisks(
           fit = CR_days,
@@ -493,8 +488,8 @@ survival_analysis <- function(exposure_diagnoses,
               name == "time_censoring" ~ 0L,
               TRUE ~ NA_integer_
             ),
-            # start == "DATE_50"
-            start == "DATE_50" ~ dplyr::case_when(
+            # start == "DATE_CUSTOM"
+            start == "DATE_CUSTOM" ~ dplyr::case_when(
               name == "time_dead"  ~ 1L,
               name == "time_censoring" ~ 0L,
               TRUE ~ NA_integer_
@@ -515,7 +510,7 @@ survival_analysis <- function(exposure_diagnoses,
         xlab <- "From Response Condition, Years"
       }
       # TODO this
-      if(start == "DATE_50"){
+      if(start == "DATE_CUSTOM"){
         leglabs <- c("Exposure", "Exposure & Response", "No Condition", "Response")
         custom_colors <- c(colors_groups[["exposure"]], colors_groups[["exposure & response"]], colors_groups[["no condition"]], colors_groups[["response"]])
         xlab <- "From Follow Up Start, Years"
@@ -539,20 +534,14 @@ survival_analysis <- function(exposure_diagnoses,
 
     healthpopR::.safe_inc_progress(5/6)
 
-    ## Survival Plot (Correct one) ----
-    ## TODO censoring date 2023 ei toimi
-    # Error in survival::tmerge(data1 = d2, data2 = d2, id = ID, event = event(t_censoring,  :
-    # found an ending time of -70, the default starting time of 0 is invalid
-    plot_mort <- healthpopR::plot_surv_mort(dpop = dpop, censoring_date = censoring_date)
-
 
     ## PHASE 6 COLLECT RESULTS ------
     if(TRUE){
       ## Kootaan kaikki tulokset listaan, joka palautetaan
       d <- list(plot_days = p_days,
                 plot_years = p_years,
-                plot_mortality = plot_mort,
-                plot_mortality_old = p_mortality,
+                # plot_mortality = plot_mort,
+                plot_mortality = p_mortality,
                 CR_days = CR_days,
                 CR_years = CR_years,
                 dmodel = dphase3a,
@@ -572,3 +561,4 @@ survival_analysis <- function(exposure_diagnoses,
     return(internal_function())
   }
 }
+
