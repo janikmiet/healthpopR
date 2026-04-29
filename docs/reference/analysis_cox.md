@@ -10,7 +10,7 @@ returns diagnostic plots and proportional hazards tests.
 
 ``` r
 analysis_cox(
-  dpop,
+  data_dpop,
   data_dates,
   data_socioeconomic,
   normal_vars = c("edu"),
@@ -22,12 +22,6 @@ analysis_cox(
 ```
 
 ## Arguments
-
-- dpop:
-
-  A data frame containing population-level variables including at
-  minimum: \`ID\`, \`DATE_BIRTH\`, \`DATE_DEATH\`, \`DATE_MIGRATION\`,
-  \`exp.DATE\`, and \`resp.DATE\`.
 
 - data_dates:
 
@@ -57,6 +51,12 @@ analysis_cox(
 - censoring_date:
 
   Administrative censoring date (Date).
+
+- dpop:
+
+  A data frame containing population-level variables including at
+  minimum: \`ID\`, \`DATE_BIRTH\`, \`DATE_DEATH\`, \`DATE_MIGRATION\`,
+  \`exp.DATE\`, and \`resp.DATE\`.
 
 ## Value
 

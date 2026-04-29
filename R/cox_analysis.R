@@ -78,7 +78,7 @@
 #'
 #' @export
 
-analysis_cox <- function(dpop,
+analysis_cox <- function(data_dpop,
                          data_dates,
                          data_socioeconomic,
                          normal_vars = c("edu"),
@@ -94,7 +94,7 @@ analysis_cox <- function(dpop,
 
     # Test & DEBUG Function -----
     if(FALSE){
-      dpop = dpop
+      data_dpop = dpop
       data_dates = ostpre_vastpaiv    ## needs: spvm, vpvmbl, -> age_bs, t_vars
       data_socioeconomic = population_variables   ## needs: edu (education, factor)
       normal_vars = c("")
@@ -114,7 +114,7 @@ analysis_cox <- function(dpop,
         d1 <- data_dates |>
           dplyr::filter(!is.na(vpvmbl)) |>
           dplyr::select(ID, vpvmbl) |>
-          dplyr::left_join(dpop, by = "ID") |>
+          dplyr::left_join(data_dpop, by = "ID") |>
           dplyr::left_join(data_socioeconomic, by = "ID")
 
       }

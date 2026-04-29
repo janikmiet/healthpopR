@@ -5,7 +5,7 @@
 \title{Time-dependent Cox Proportional Hazards Analysis with Splines and Diagnostics}
 \usage{
 analysis_cox(
-  dpop,
+  data_dpop,
   data_dates,
   data_socioeconomic,
   normal_vars = c("edu"),
@@ -16,10 +16,6 @@ analysis_cox(
 )
 }
 \arguments{
-\item{dpop}{A data frame containing population-level variables including
-at minimum: `ID`, `DATE_BIRTH`, `DATE_DEATH`, `DATE_MIGRATION`,
-`exp.DATE`, and `resp.DATE`.}
-
 \item{data_dates}{A data frame containing baseline date information.
 Must include `ID` and `vpvmbl` (baseline date).}
 
@@ -36,6 +32,10 @@ using cubic B-splines (`splines::bs()`).}
 categorical variables. Used internally for releveling.}
 
 \item{censoring_date}{Administrative censoring date (Date).}
+
+\item{dpop}{A data frame containing population-level variables including
+at minimum: `ID`, `DATE_BIRTH`, `DATE_DEATH`, `DATE_MIGRATION`,
+`exp.DATE`, and `resp.DATE`.}
 }
 \value{
 A list containing:
