@@ -77,7 +77,6 @@
 #'   \code{\link[survminer]{ggcoxzph}}
 #'
 #' @export
-
 analysis_cox <- function(data_dpop,
                          data_dates,
                          data_socioeconomic,
@@ -249,7 +248,7 @@ analysis_cox <- function(data_dpop,
 
       ## 2.1 Model spline variables ------
       mdl_str <- "Surv(tstart, tstop, event) ~ exposure_td"
-      if(length(spline_vars) > 0){
+      if(length(spline_vars) > 0 && any(spline_vars != "")){
         for (var in spline_vars) {
           if (!var %in% names(cox_model_data)) {
             stop(paste("Variable", var, "not found in the dataset."))
@@ -269,7 +268,7 @@ analysis_cox <- function(data_dpop,
       }
 
       ## 2.2 Model normal variables -----
-      if(length(normal_vars) > 0){
+      if(length(normal_vars) > 0 && any(normal_vars != "")){
         for (var in normal_vars) {
           if (!var %in% names(cox_model_data)) {
             stop(paste("Variable", var, "not found in the dataset."))
@@ -292,7 +291,7 @@ analysis_cox <- function(data_dpop,
 
       ## 3.1 Spline plots -----
       spline_plots <- list()
-      if(spline_vars != ""){
+      if(length(spline_vars) > 0 && any(spline_vars != "")){
         for (spline_var in spline_vars) {
           ### TODO Arguments / Options
           title = "Spline effect"
@@ -364,7 +363,6 @@ analysis_cox <- function(data_dpop,
     internal_function()
   }
 }
-
 
 
 
