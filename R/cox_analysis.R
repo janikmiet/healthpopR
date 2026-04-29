@@ -97,7 +97,7 @@ analysis_cox <- function(dpop,
       dpop = dpop
       data_dates = ostpre_vastpaiv    ## needs: spvm, vpvmbl, -> age_bs, t_vars
       data_socioeconomic = population_variables   ## needs: edu (education, factor)
-      normal_vars = c("edu")
+      normal_vars = c("")
       spline_vars = c("age_bs", "bmi")
       reference_values = list("bmi_cat1" = "Healthy Weight",
                               "bmi_cat2" = "Healthy Weight",
@@ -249,32 +249,36 @@ analysis_cox <- function(dpop,
 
       ## 2.1 Model spline variables ------
       mdl_str <- "Surv(tstart, tstop, event) ~ exposure_td"
-      for (var in spline_vars) {
-        if (!var %in% names(cox_model_data)) {
-          stop(paste("Variable", var, "not found in the dataset."))
+      if(length(spline_vars) > 0 & spline_vars != ""){
+        for (var in spline_vars) {
+          if (!var %in% names(cox_model_data)) {
+            stop(paste("Variable", var, "not found in the dataset."))
+          }
+          if (all(is.na(cox_model_data[[var]]))) {
+            stop(paste("Variable", var, "contains only NA values. Cannot create splines."))
+          }
+          ## TODO splines thoughts
+          # survival::coxph(Surv(tstart, tstop, event) ~ exposure_td, data = cox_model_data, ties = "efron")
+          # survival::coxph(Surv(tstart, tstop, event) ~ exposure_td + ns(bmi, df = 4) + edu, data = cox_model_data, ties = "efron")
+          # survival::coxph(Surv(tstart, tstop, event) ~ exposure_td + bs(bmi, df = 4) + edu, data = cox_model_data, ties = "efron")
+          ## Do we use ns or bs?
+          # splines::ns
+          # splines::bs
+          mdl_str <- paste0(mdl_str, " + splines::bs(", var,")")
         }
-        if (all(is.na(cox_model_data[[var]]))) {
-          stop(paste("Variable", var, "contains only NA values. Cannot create splines."))
-        }
-        ## TODO splines thoughts
-        # survival::coxph(Surv(tstart, tstop, event) ~ exposure_td, data = cox_model_data, ties = "efron")
-        # survival::coxph(Surv(tstart, tstop, event) ~ exposure_td + ns(bmi, df = 4) + edu, data = cox_model_data, ties = "efron")
-        # survival::coxph(Surv(tstart, tstop, event) ~ exposure_td + bs(bmi, df = 4) + edu, data = cox_model_data, ties = "efron")
-        ## Do we use ns or bs?
-        # splines::ns
-        # splines::bs
-        mdl_str <- paste0(mdl_str, " + splines::bs(", var,")")
       }
 
       ## 2.2 Model normal variables -----
-      for (var in normal_vars) {
-        if (!var %in% names(cox_model_data)) {
-          stop(paste("Variable", var, "not found in the dataset."))
+      if(length(normal_vars) > 0 & normal_vars != ""){
+        for (var in normal_vars) {
+          if (!var %in% names(cox_model_data)) {
+            stop(paste("Variable", var, "not found in the dataset."))
+          }
+          if (all(is.na(cox_model_data[[var]]))) {
+            stop(paste("Variable", var, "contains only NA values."))
+          }
+          mdl_str <- paste0(mdl_str, " + ", var, " ")
         }
-        if (all(is.na(cox_model_data[[var]]))) {
-          stop(paste("Variable", var, "contains only NA values."))
-        }
-        mdl_str <- paste0(mdl_str, " + ", var, " ")
       }
 
       ## 3.3 Creating a model ------
@@ -288,7 +292,7 @@ analysis_cox <- function(dpop,
 
       ## 3.1 Spline plots -----
       spline_plots <- list()
-      if(length(spline_vars) > 0){
+      if(spline_vars != ""){
         for (spline_var in spline_vars) {
           ### TODO Arguments / Options
           title = "Spline effect"
