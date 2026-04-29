@@ -249,7 +249,7 @@ analysis_cox <- function(data_dpop,
 
       ## 2.1 Model spline variables ------
       mdl_str <- "Surv(tstart, tstop, event) ~ exposure_td"
-      if(length(spline_vars) > 0 & spline_vars != ""){
+      if(length(spline_vars) > 0){
         for (var in spline_vars) {
           if (!var %in% names(cox_model_data)) {
             stop(paste("Variable", var, "not found in the dataset."))
@@ -269,7 +269,7 @@ analysis_cox <- function(data_dpop,
       }
 
       ## 2.2 Model normal variables -----
-      if(length(normal_vars) > 0 & normal_vars != ""){
+      if(length(normal_vars) > 0){
         for (var in normal_vars) {
           if (!var %in% names(cox_model_data)) {
             stop(paste("Variable", var, "not found in the dataset."))
