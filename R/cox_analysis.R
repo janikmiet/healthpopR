@@ -90,7 +90,7 @@ analysis_cox <- function(data_dpop,
 ){
 
   ## Setting all functionality to internal function so that the Shiny run can have messages.
-  # internal_function <- function(){
+  internal_function <- function(){
 
     # Test & DEBUG Function -----
     if(FALSE){
@@ -353,16 +353,16 @@ analysis_cox <- function(data_dpop,
       healthpopR:::.safe_inc_progress(12/12)
     }
     return(results)
-  # }
+  }
 
-  # ## Decide if running in Shiny or normal ------
-  # if (shiny::isRunning()) {
-  #   withProgress(message = paste("Cox Analysis"), value = 0, {
-  #     internal_function()
-  #   })
-  # } else {
-  #   internal_function()
-  # }
+  ## Decide if running in Shiny or normal ------
+  if (shiny::isRunning()) {
+    withProgress(message = paste("Cox Analysis"), value = 0, {
+      internal_function()
+    })
+  } else {
+    internal_function()
+  }
 }
 
 
