@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthpopR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Search Diagnoses by ICD Version and Source</h1>
-      <small class="dont-index">Source: <a href="https://github.com/janikmiet/healthpopR/blob/HEAD/R/diagnoses.R" class="external-link"><code>R/diagnoses.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/janikmiet/healthpopR/blob/HEAD/R/search_diagnoses.R" class="external-link"><code>R/search_diagnoses.R</code></a></small>
       <div class="d-none name"><code>search_diagnoses.Rd</code></div>
     </div>
 
@@ -44,8 +44,7 @@
 <span>  regex_icd9 <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  regex_icd8 <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  registry_source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span>,</span>
-<span>  regex_extra <span class="op">=</span> <span class="st">""</span>,</span>
-<span>  src_extra <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  censoring_date <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  data_diagnoses <span class="op">=</span> <span class="va">diagnoses</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -70,12 +69,8 @@
 <dd><p>character vector. Data sources to include (e.g., <code>"avohilmo"</code>, <code>"hilmo"</code>).</p></dd>
 
 
-<dt id="arg-regex-extra">regex_extra<a class="anchor" aria-label="anchor" href="#arg-regex-extra"></a></dt>
-<dd><p>character. Optional regular expression for other diagnosis formats (currently not implemented).</p></dd>
-
-
-<dt id="arg-src-extra">src_extra<a class="anchor" aria-label="anchor" href="#arg-src-extra"></a></dt>
-<dd><p>character. Optional source for extra diagnoses (currently not implemented).</p></dd>
+<dt id="arg-censoring-date">censoring_date<a class="anchor" aria-label="anchor" href="#arg-censoring-date"></a></dt>
+<dd><p>Date to apply censoring to filter out cases after the date. "" if max used.</p></dd>
 
 
 <dt id="arg-data-diagnoses">data_diagnoses<a class="anchor" aria-label="anchor" href="#arg-data-diagnoses"></a></dt>

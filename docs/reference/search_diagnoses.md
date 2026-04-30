@@ -11,8 +11,7 @@ search_diagnoses(
   regex_icd9 = "",
   regex_icd8 = "",
   registry_source = c(""),
-  regex_extra = "",
-  src_extra = "",
+  censoring_date = "",
   data_diagnoses = diagnoses
 )
 ```
@@ -36,15 +35,10 @@ search_diagnoses(
   character vector. Data sources to include (e.g., `"avohilmo"`,
   `"hilmo"`).
 
-- regex_extra:
+- censoring_date:
 
-  character. Optional regular expression for other diagnosis formats
-  (currently not implemented).
-
-- src_extra:
-
-  character. Optional source for extra diagnoses (currently not
-  implemented).
+  Date to apply censoring to filter out cases after the date. "" if max
+  used.
 
 - data_diagnoses:
 
