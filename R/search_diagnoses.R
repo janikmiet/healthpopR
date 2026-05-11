@@ -23,6 +23,7 @@ search_diagnoses <- function(regex_icd10="",
                              regex_icd9="",
                              regex_icd8="",
                              registry_source=c(""),
+                             age_range=c(0,120),
                              censoring_date="",
                              data_diagnoses=diagnoses
 ){
@@ -37,6 +38,7 @@ search_diagnoses <- function(regex_icd10="",
     regex_icd9 = "^250A"
     regex_icd8 = "^250"
     registry_source = c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa")
+    age_range=c(0,100)
     censoring_date=""
     data_diagnoses=diagnoses
     # selected_response_icd10 = "^I2[0-5]"
@@ -53,10 +55,11 @@ search_diagnoses <- function(regex_icd10="",
     regex_icd9 <- .regex_clean(regex_icd9)
     regex_icd8 <- .regex_clean(regex_icd8)
 
-    ## Filterin diagnoses by censoring date
+    ## Filterin diagnoses by censoring date & AGE_RANGE
     if(censoring_date == "") censoring_date <- max(data_diagnoses$DATE, na.rm = T)
     data_diagnoses <- data_diagnoses |>
-      dplyr::filter(DATE <= censoring_date)
+      dplyr::filter(DATE <= censoring_date) |>
+      dplyr::filter(AGE_DG >= age_range[1] & AGE_DG <= age_range[2])
 
     ## Initialize Datasets
     d1 <- tibble(ID = numeric(),

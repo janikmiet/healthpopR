@@ -21,6 +21,8 @@
                                 regex_icd9 = "",
                                 regex_icd8 = "",
                                 registry_source = c(""),
+                                age_range = c(0,120),
+                                censoring_date="",
                                 groups = c("exposure", "no exposure"),
                                 data_diagnoses = diagnoses,
                                 data_population = population,
@@ -32,6 +34,8 @@
     regex_icd10 = .regex_clean(regex_icd10),
     regex_icd9 = .regex_clean(regex_icd9),
     regex_icd8 = .regex_clean(regex_icd8),
+    age_range = age_range,
+    censoring_date = censoring_date,
     registry_source = registry_source,
     data_diagnoses = data_diagnoses
   )
