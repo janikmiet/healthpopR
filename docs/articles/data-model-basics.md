@@ -42,7 +42,7 @@ Diagnoses data is follow-up of the patients diagnoses over the timeline.
 | ICD10_3LETTERS | **Only with ICD10 code.** Diagnose Code in first 3 letters |
 | ICD10_CLASS | **Only with ICD10 code.** ICD-10 Diagnose Class (Ex. E00–E90, H60–H95, H00–H59) |
 | DATE_BIRTH | Day of patient birth |
-| AGE | **Only with murtumat** Patient age on diagnose date |
+| AGE_DG | Patient age on diagnose date |
 
 ### other datasets
 

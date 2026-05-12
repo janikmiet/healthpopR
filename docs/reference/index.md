@@ -13,6 +13,10 @@
   Group
 - [`plot_diagnoses_src()`](https://janikmiet.github.io/healthpopR/reference/plot_diagnoses_src.md)
   : Plot Venn Diagram of Diagnoses by Source
+- [`tbl_pop_var()`](https://janikmiet.github.io/healthpopR/reference/tbl_pop_var.md)
+  : Count Population Variable Categories by Group
+- [`plot_bmd()`](https://janikmiet.github.io/healthpopR/reference/plot_bmd.md)
+  : Plot Bone Mineral Density T-score by Age
 - [`summary_exp_resp_crosstabulation()`](https://janikmiet.github.io/healthpopR/reference/summary_exp_resp_crosstabulation.md)
   : Generate Crosstabulation of Exposure and Response Variables
 - [`summary_exp_resp_order()`](https://janikmiet.github.io/healthpopR/reference/summary_exp_resp_order.md)

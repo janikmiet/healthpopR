@@ -36,6 +36,7 @@
 <url><loc>https://janikmiet.github.io/healthpopR/reference/pirr_data.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/pirr_results.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/plot_age_distribution.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/reference/plot_bmd.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/plot_diagnoses_src.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/plot_health_icd10_profile.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/plot_icd10_diff_by_exposure.html</loc></url>
@@ -53,5 +54,6 @@
 <url><loc>https://janikmiet.github.io/healthpopR/reference/table_age_distribution.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/table_summary_diagnoses.html</loc></url>
 <url><loc>https://janikmiet.github.io/healthpopR/reference/tbl_icd10_diff_by_exposure.html</loc></url>
+<url><loc>https://janikmiet.github.io/healthpopR/reference/tbl_pop_var.html</loc></url>
 </urlset>
 
