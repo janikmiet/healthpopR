@@ -11,6 +11,7 @@ search_diagnoses(
   regex_icd9 = "",
   regex_icd8 = "",
   registry_source = c(""),
+  age_range = c(0, 120),
   censoring_date = "",
   data_diagnoses = diagnoses
 )
