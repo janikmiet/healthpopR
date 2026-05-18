@@ -57,49 +57,59 @@ tbl_icd10_diff_by_exposure <- function(data, diagnoses, exposure_icd10, exposure
     # exposure_icd10 <- "^E11"
     # exposure_src <- c("avohilmo", "erko", "hilmo", "local", "ksyy", "soshilmo", "syopa")
 
-    .safe_inc_progress(1/4)
+    healthpopR::.safe_inc_progress(1/4)
 
-    data_diagnoses <- diagnoses
+    # data_diagnoses <- diagnoses
 
     # Tarkastellaan TOP diagnoosit exposure populaatiolla
-    d1 <- data_diagnoses |>
-      filter(DGREG == "ICD10") |>
-      filter(SRC  %in% exposure_src) |>
-      filter(ID %in% data$ID[data$exp.GROUP == "exposure"] & !(grepl(pattern = .regex_clean(exposure_icd10), DG))) |>
-      group_by(ICD10_3LETTERS) |>
-      summarise(
-        exposure_group_patients = length(unique(ID))
+    exposure_ids <- unique(data$ID[data$exp.GROUP == "exposure"])
+    n_exposure    <- length(exposure_ids)
+    regex_icd10   <- .regex_clean(exposure_icd10)
+    d1 <- diagnoses |>
+      dplyr::filter(
+        DGREG == "ICD10" & SRC  %in% exposure_src,
+        ID %in% exposure_ids,
+        !grepl(regex_icd10, DG)
       ) |>
-      mutate(
-        exposure_group_pct = round(100 * exposure_group_patients / nrow(data[data$exp.GROUP == "exposure",]), 1)
+      dplyr::count(ICD10_3LETTERS, name = "exposure_group_patients") |>
+      dplyr::mutate(
+        exposure_group_pct =
+          round(100 * exposure_group_patients / n_exposure, 1)
       )
 
-    .safe_inc_progress(2/4)
+    healthpopR::.safe_inc_progress(2/4)
 
     # Tarkastellaan TOP diagnoosit no-exposure populaatiolla
-    d2 <- data_diagnoses |>
-      filter(DGREG == "ICD10") |>
-      filter(SRC  %in% exposure_src) |>
-      filter(ID %in% data$ID[data$exp.GROUP == "no exposure"]) |>
-      group_by(ICD10_3LETTERS) |>
-      summarise(
-        no_exposure_group_patients = length(unique(ID))
+    no_exposure_ids <- unique(data$ID[data$exp.GROUP == "no exposure"])
+    n_no_exposure   <- length(no_exposure_ids)
+
+    d2 <- diagnoses |>
+      dplyr::filter(
+        DGREG == "ICD10",
+        SRC %in% exposure_src,
+        ID %in% no_exposure_ids
       ) |>
-      mutate(
-        no_exposure_group_pct = round(100 * no_exposure_group_patients / nrow(data[data$exp.GROUP == "no exposure",]), 1)
+      dplyr::count(
+        ICD10_3LETTERS,
+        name = "no_exposure_group_patients"
+      ) |>
+      dplyr::mutate(
+        no_exposure_group_pct =
+          round(100 * no_exposure_group_patients / n_no_exposure, 1)
       )
 
-    .safe_inc_progress(3/4)
+    healthpopR::.safe_inc_progress(3/4)
 
-    d <- left_join(d1,d2, by = "ICD10_3LETTERS") |>
-      mutate(diff_pct = exposure_group_pct - no_exposure_group_pct,
-             total_patients = exposure_group_patients + no_exposure_group_patients) |>
-      left_join(
-        data_codes |> filter(CODECLASS == "ICD10") |> select(DG, DESC), ## TODO data_codes needs to go inside the function package
-        by = c("ICD10_3LETTERS" = "DG")) |>
-      select(ICD10_3LETTERS, total_patients, exposure_group_patients, exposure_group_pct, no_exposure_group_patients, no_exposure_group_pct, diff_pct, DESC )
+    ## Joind
+    d <- dplyr::left_join(d1,d2, by = "ICD10_3LETTERS") |>
+      dplyr::mutate(diff_pct = exposure_group_pct - no_exposure_group_pct,
+                    total_patients = exposure_group_patients + no_exposure_group_patients) |>
+      dplyr::left_join(
+        healthpopR::data_codes |> dplyr::filter(CODECLASS == "ICD10") |>
+          dplyr::select(DG, DESC), by = c("ICD10_3LETTERS" = "DG")) |>
+      dplyr::select(ICD10_3LETTERS, total_patients, exposure_group_patients, exposure_group_pct, no_exposure_group_patients, no_exposure_group_pct, diff_pct, DESC )
 
-    .safe_inc_progress(4/4)
+    healthpopR::.safe_inc_progress(4/4)
 
     return(d)
   }
