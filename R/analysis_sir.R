@@ -235,6 +235,7 @@ pirr_data <- function(
         ikar=dplyr::case_when( ## TODO nämä vaikuttaa olevan sidoksissa var_age_start / censoring_age
           agec<2 ~ 20,
           TRUE ~ agec+48
+          # TRUE ~ agec+63
         ),
         kesto=as.numeric(lubridate::decimal_date(epvm)-lubridate::decimal_date(apvm))
       ) |>
@@ -399,10 +400,10 @@ pirr_results <- function(adat,
       ggplot2::scale_y_continuous(trans="log10",limits=limits) +
       ggplot2::labs(y="Standardized Incidence Ratio (SIR), log scale",x="",title=nimi)
     p2 <- plot(mda2, colors=unname(colors)) +
-      ggplot2::labs(y="Exposure per 10000 person years",
+      ggplot2::labs(y="Response per 10000 person years",
                     x="Age",
                     title=nimi,
-                    color="Response status") +
+                    color="Exposure status") +
       ggplot2::theme(legend.position.inside=c(0.11,0.83))
 
     ## Store results to a list
