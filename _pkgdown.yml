@@ -29,7 +29,6 @@ reference:
       - plot_age_distribution
       - plot_diagnoses_src
       - tbl_pop_var
-      - plot_bmd
       - summary_exp_resp_crosstabulation
       - summary_exp_resp_order
       - table_age_distribution
@@ -38,6 +37,10 @@ reference:
       - search_diagnoses
       - plot_diagnoses_src
       - table_summary_diagnoses
+  - title: "Bone Mineral Density"
+    contents:
+      - plot_bmd
+      - plot_bmd_boxplot
   - title: "Health Analysis functions"
     contents:
       - classify_icd10_profile

@@ -73,7 +73,7 @@
 #' \code{\link[dplyr]{left_join}}
 #'
 #' @export
-plot_bmd <- function(data_bmd, data_dpop, date_dependency = FALSE){
+plot_bmd <- function(data_bmd, data_dpop, date_dependency = FALSE, reference = c("hip", "fracture", "osteo")){
 
   ## TODO add reference lines to fractures like hip fractures for comparison
   ## TODO options different ostheoporotic reference scales
@@ -115,37 +115,7 @@ plot_bmd <- function(data_bmd, data_dpop, date_dependency = FALSE){
   BMD_exp  <- filter(BMD, exp.GROUP == "exposure")
   BMD_resp <- filter(BMD, resp.GROUP == "response")
 
-  # ggplot(BMD, aes(x = AGE, y = TSCORE)) +
-  #   geom_point(
-  #     color = "gray60",
-  #     size = 0.5,
-  #     alpha = 0.3
-  #   ) +
-  #   geom_smooth(
-  #     method = "gam",
-  #     formula = y ~ s(x, bs = "cs"),
-  #     se = FALSE,
-  #     color = "gray30",
-  #     linewidth = 1
-  #   ) +
-  #   geom_smooth(
-  #     data = BMD_exp,
-  #     method = "gam",
-  #     formula = y ~ s(x, bs = "cs"),
-  #     se = FALSE,
-  #     color = "green",
-  #     linewidth = 1
-  #   ) +
-  #   geom_smooth(
-  #     data = BMD_resp,
-  #     method = "gam",
-  #     formula = y ~ s(x, bs = "cs"),
-  #     se = FALSE,
-  #     color = "red",
-  #     linewidth = 1
-  #   )
-
-  ggplot(BMD, aes(AGE, TSCORE)) +
+  p <- ggplot(BMD, aes(AGE, TSCORE)) +
     annotate(
       "rect",
       xmin = -Inf,
@@ -192,14 +162,53 @@ plot_bmd <- function(data_bmd, data_dpop, date_dependency = FALSE){
       method = "gam",
       formula = y ~ s(x),
       se = TRUE
-    ) +
+    )
+  ## References
+  if("hip" %in% reference){
+    BMD_hip <- filter(BMD, HIP_FRACTURE == 1)
+    p <- p +
+      geom_smooth(
+        data = BMD_hip,
+        aes(color = "Hip Fracture"),
+        method = "gam",
+        formula = y ~ s(x),
+        se = TRUE
+      )
+  }
+  if("osteo" %in% reference){
+    BMD_osteo <- filter(BMD, OSTEO == 1)
+    p <- p +
+      geom_smooth(
+        data = BMD_osteo,
+        aes(color = "Osteoporosis"),
+        method = "gam",
+        formula = y ~ s(x),
+        se = TRUE
+      )
+  }
+  if("fracture" %in% reference){
+    BMD_fract <- filter(BMD, ANY_FRACTURE == 1)
+    p <- p +
+      geom_smooth(
+        data = BMD_fract,
+        aes(color = "Any Fracture"),
+        method = "gam",
+        formula = y ~ s(x),
+        se = TRUE
+      )
+  }
+
+  p <- p +
     scale_color_manual(values = c(
       "All" = "yellow",
       "Exposure" = "#D9534F",
-      "Response"= "#5CB85C"
+      "Response"= "#5CB85C",
+      "Any Fracture" = "#5BC0DE",
+      "Hip Fracture" = "#9370DB",
+      "Osteoporosis" = "#F0AD4E"
     )) +
     labs(x= "Age at measure",
          color = "Group")
   # +facet_wrap(~DENS)
-
+  return(p)
 }

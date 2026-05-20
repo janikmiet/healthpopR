@@ -8,7 +8,12 @@ osteoporosis thresholds.
 ## Usage
 
 ``` r
-plot_bmd(data_bmd, data_dpop, date_dependency = FALSE)
+plot_bmd(
+  data_bmd,
+  data_dpop,
+  date_dependency = FALSE,
+  reference = c("hip", "fracture", "osteo")
+)
 ```
 
 ## Arguments

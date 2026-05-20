@@ -4,7 +4,12 @@
 \alias{plot_bmd}
 \title{Plot Bone Mineral Density T-score by Age}
 \usage{
-plot_bmd(data_bmd, data_dpop, date_dependency = FALSE)
+plot_bmd(
+  data_bmd,
+  data_dpop,
+  date_dependency = FALSE,
+  reference = c("hip", "fracture", "osteo")
+)
 }
 \arguments{
 \item{data_bmd}{A data frame containing bone mineral density

@@ -117,7 +117,7 @@ plot_age_distribution <- function(
 
     plt <- plt +
       hrbrthemes::theme_ipsum_rc() +
-      ggplot2::theme(plot.title = element_text(size = 14, face = "bold")) +
+      ggplot2::theme(plot.title = ggplot2::element_text(size = 14, face = "bold")) +
       ggplot2::labs(
         title = title,
         subtitle = paste("Age at First", .capitalize(group),"Diagnosis"),
