@@ -56,7 +56,7 @@
 plot_bmd_boxplot <- function(data_bmd, data_dpop, reference = c("hip", "fractures", "osteo"), date_dependency = FALSE){
 
   if(date_dependency){
-    BMD <- bone_density_scores |>
+    BMD <- data_bmd |>
       left_join(
         data_dpop |> select(ID, exp.DATE, resp.DATE),
         by = "ID"
@@ -73,9 +73,9 @@ plot_bmd_boxplot <- function(data_bmd, data_dpop, reference = c("hip", "fracture
         ANY_FRACTURE = ifelse(!is.na(DATE_ANYFRACTURE) & DATE_ANYFRACTURE >= DATE, 1, 0),
       )
   } else {
-    BMD <- bone_density_scores |>
+    BMD <- data_bmd |>
       left_join(
-        dpop |> select(ID, exp.GROUP, resp.GROUP),
+        data_dpop |> select(ID, exp.GROUP, resp.GROUP),
         by = "ID"
       ) |>
       dplyr::mutate(
