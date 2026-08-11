@@ -33,9 +33,9 @@
 #'         \item Ever exposed
 #'       }
 #'     \item \code{cox_results1}: Hazard ratios (HR) and confidence intervals
-#'       from unadjusted Cox model
+#'       from unadjusted Cox model (Risk to death after response)
 #'     \item \code{cox_results2}: Hazard ratios (HR) and confidence intervals
-#'       from Cox model adjusted for age (spline)
+#'       from Cox model adjusted for (spline) age (Risk to death after response)
 #'   }
 #'
 #' @details
@@ -79,17 +79,17 @@ analysis_mortality <- function(dpop,
   # DEBUG
   if(FALSE){
     # dpop = dpop
-    # censoring_date = as.Date("2020-12-31")
+    # censoring_date = as.Date("2024-12-31")
     # lines = c("Death after exposure", "Death without exposure", "Overall mortality", "Ever exposed")
   }
 
   if(TRUE){
     ## 1.2 Time variable calculations
     d2 <- dpop |>
-      mutate(DATE_MIGRATION = dplyr::if_else(DATE_MIGRATION > censoring_date, NA, DATE_MIGRATION),
-             DATE_DEATH = dplyr::if_else(DATE_DEATH > censoring_date, NA, DATE_DEATH),
-             resp.DATE = dplyr::if_else(resp.DATE > censoring_date, NA, resp.DATE),
-             exp.DATE = dplyr::if_else(exp.DATE > censoring_date, NA, exp.DATE) ) |>
+      dplyr::mutate(DATE_MIGRATION = dplyr::if_else(DATE_MIGRATION > censoring_date, NA, DATE_MIGRATION),
+                    DATE_DEATH = dplyr::if_else(DATE_DEATH > censoring_date, NA, DATE_DEATH),
+                    resp.DATE = dplyr::if_else(resp.DATE > censoring_date, NA, resp.DATE),
+                    exp.DATE = dplyr::if_else(exp.DATE > censoring_date, NA, exp.DATE) ) |>
       dplyr::filter(!is.na(resp.DATE )) |>
       dplyr::mutate(
         ## Follow up start and end dates
@@ -109,14 +109,14 @@ analysis_mortality <- function(dpop,
       dplyr::mutate(
         exp = ifelse(!is.na(t_exposure) & t_exposure <= 0, 1L, 0L), ## exposure at starting point
         t_exposure = ifelse(!is.na(t_exposure) & t_exposure <= 0, 0.001, t_exposure),
-        event=case_when(
+        event = dplyr::case_when(
           !is.na(t_death) ~ 1L,
           TRUE ~ 0L)
       )
 
     ## 1.22 Fixing date overlapping (if exp = resp = death) bc model cant handle same dates (ex. death at the same time than hip fracture diagnose)
-    d2 <- d2 %>%
-      mutate(
+    d2 <- d2 |>
+      dplyr::mutate(
         t_exposure = ifelse(!is.na(t_exposure) & !is.na(t_death) & t_exposure == t_death,
                             t_exposure - 0.0001,
                             t_exposure),
@@ -153,7 +153,8 @@ analysis_mortality <- function(dpop,
       )
 
     # Tässä tarvittavien mallien estimointi
-    fit_cr <- survival::survfit(Surv(tstart/365.25,tstop/365.25, event=event_competing_risks) ~ 1, data = sd2 |> filter(expo==0), id=ID)
+    fit_cr <- survival::survfit(Surv(tstart/365.25,tstop/365.25, event=event_competing_risks) ~ 1, data = sd2 |>
+                                  dplyr::filter(expo==0), id=ID)
     fit_ms <- survival::survfit(Surv(tstart/365.25,tstop/365.25, event=event_multistate) ~ 1, data = sd2, id=ID)
     #fit_de <- survival::survfit(Surv(tstart/365.25,tstop/365.25, event=event_competing_risks) ~ 1, data = sd2, id=ID)
     ## Tämä pois koska ei toistaiseksi tarvita (Total_mortality among exposed)
@@ -250,13 +251,17 @@ analysis_mortality <- function(dpop,
       )
   }
 
-  ## Results 2: Cox Model ------
+  ## Results 2: Cox Model to analyze death HR after response ------
+  ## Here fup start is response, exposure is time depended and recorded as 1 if exposure date < response date and 1 if happened during fup, event is censored 0 or death 1.
   if(TRUE){
-    dsurv <- survival::coxph(formula = survival::Surv(tstart, tstop, expo) ~ event, data = sd2, id = ID)
-    # adjusted model
-    cox_results1 <- exp(cbind(HR = coef(dsurv), confint(dsurv)))
-    dsurv2 <- survival::coxph(formula = survival::Surv(tstart, tstop, expo) ~ event + splines::bs(age_response), data = sd2, id = ID)
     # unadjusted model
+    # dsurv <- survival::coxph(formula = survival::Surv(tstart, tstop, expo) ~ event, data = sd2, id = ID)
+    dsurv <- survival::coxph(formula = survival::Surv(tstart, tstop, event) ~ expo, data = sd2, id = ID)
+    cox_results1 <- exp(cbind(HR = coef(dsurv), confint(dsurv)))
+
+    # adjusted model
+    # dsurv2 <- survival::coxph(formula = survival::Surv(tstart, tstop, expo) ~ event + splines::bs(age_response), data = sd2, id = ID)
+    dsurv2 <- survival::coxph(formula = survival::Surv(tstart, tstop, event) ~ expo + splines::bs(age_response), data = sd2, id = ID)
     cox_results2 <- exp(cbind(HR = coef(dsurv2), confint(dsurv2)))
   }
 
