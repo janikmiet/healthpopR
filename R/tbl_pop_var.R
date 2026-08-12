@@ -78,7 +78,7 @@ tbl_pop_var <- function(data, group, var){
   }
 
   ## Count pop freqs
-  tbl_1 <- dpop |>
+  tbl_1 <- data |>
     dplyr::left_join(population_variables, by = "ID") |>
     dplyr::count(!!dplyr::sym(var), name = "pop_n") |>
     dplyr::mutate(
