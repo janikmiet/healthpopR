@@ -58,20 +58,45 @@
 #'
 #' @export
 tbl_pop_var <- function(data, group, var){
+
+  if(FALSE){
+    data = dpop
+    group = "response"
+    var="bmi_cat2"
+  }
+
   ## Check that group is exposure or response
   if (!group %in% c("exposure", "response")) {
     stop("group must be either 'exposure' or 'response'")
   }
   ## Data
   if(group == "exposure"){
-    tbl <- data %>% filter(exp.GROUP == "exposure")
+    tbl <- data |> dplyr::filter(exp.GROUP == "exposure")
   }
   if(group == "response"){
-    tbl <- data %>% filter(resp.GROUP == "response")
+    tbl <- data |> dplyr::filter(resp.GROUP == "response")
   }
-  ## Count
-  tbl <- tbl %>%
-    dplyr::left_join(population_variables, by = "ID") %>%
-    count(!!sym(var), name = "n")
-  return(tbl)
+
+  ## Count pop freqs
+  tbl_1 <- dpop |>
+    dplyr::left_join(population_variables, by = "ID") |>
+    dplyr::count(!!dplyr::sym(var), name = "pop_n") |>
+    dplyr::mutate(
+      pop_pct = 100 * pop_n / sum(pop_n[!is.na(!!dplyr::sym(var))])
+    )
+  ## Count group freqs
+  n_col <- rlang::sym(paste0(group, "_n"))
+
+  tbl_2 <- tbl |>
+    dplyr::left_join(population_variables, by = "ID") |>
+    dplyr::count(!!dplyr::sym(var), name = as.character(n_col)) |>
+    dplyr::mutate(
+      pct = 100 * !!n_col /
+        sum((!!n_col)[!is.na(!!dplyr::sym(var))])
+    )
+  ## Combine and percentages
+  tbl_final <- tbl_2 |>
+    dplyr::left_join(tbl_1, by =var)
+
+  return(tbl_final)
 }
