@@ -69,12 +69,12 @@ classify_icd10_profile <- function(data,
       left_join(d |> select(ID, exp.GROUP, n_group), by = "ID") |>
       group_by(exp.GROUP, ICD10_CLASS) |>
       summarise(
-        cases=n(),
+        # cases=n(),
         patients=length(unique(ID)),
         n_group = dplyr::first(n_group)
       ) |>
       mutate(
-        per100=cases/100 * n_group,
+        # per100=cases/100 * n_group,
         pct = 100 * patients / n_group,
       )
 
