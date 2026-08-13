@@ -90,15 +90,16 @@ plot_bmd <- function(data_bmd, data_dpop, date_dependency = FALSE, reference = c
     data_bmd = bone_density_scores
     data_dpop = dpop
     date_dependency = FALSE
+    reference = c("hip", "fracture", "osteo")
   }
 
   if(date_dependency){
     BMD <- data_bmd |>
-      left_join(
-        data_dpop |> select(ID, exp.DATE, resp.DATE),
+      dplyr::left_join(
+        data_dpop |> dplyr::select(ID, exp.DATE, resp.DATE),
         by = "ID"
       ) |>
-      mutate(
+      dplyr::mutate(
         exp.GROUP  = ifelse(!is.na(exp.DATE)  & exp.DATE  <= DATE,
                             "exposure", "no exposure"),
         resp.GROUP = ifelse(!is.na(resp.DATE) & resp.DATE <= DATE,
@@ -106,17 +107,17 @@ plot_bmd <- function(data_bmd, data_dpop, date_dependency = FALSE, reference = c
       )
   } else {
     BMD <- data_bmd |>
-      left_join(
-        data_dpop |> select(ID, exp.GROUP, resp.GROUP),
+      dplyr::left_join(
+        data_dpop |> dplyr::select(ID, exp.GROUP, resp.GROUP),
         by = "ID"
       )
   }
 
-  BMD_exp  <- filter(BMD, exp.GROUP == "exposure")
-  BMD_resp <- filter(BMD, resp.GROUP == "response")
+  BMD_exp  <- dplyr::filter(BMD, exp.GROUP == "exposure")
+  BMD_resp <- dplyr::filter(BMD, resp.GROUP == "response")
 
-  p <- ggplot(BMD, aes(AGE, TSCORE)) +
-    annotate(
+  p <- ggplot2::ggplot(BMD, ggplot2::aes(AGE, TSCORE)) +
+    ggplot2::annotate(
       "rect",
       xmin = -Inf,
       xmax = Inf,
@@ -125,7 +126,7 @@ plot_bmd <- function(data_bmd, data_dpop, date_dependency = FALSE, reference = c
       alpha = 0.08,
       fill = "orange"
     ) +
-    annotate(
+    ggplot2::annotate(
       "rect",
       xmin = -Inf,
       xmax = Inf,
@@ -134,64 +135,64 @@ plot_bmd <- function(data_bmd, data_dpop, date_dependency = FALSE, reference = c
       alpha = 0.08,
       fill = "red"
     ) +
-    geom_point(alpha = 0.15, size = 0.4) +
-    geom_hline(
+    ggplot2::geom_point(alpha = 0.15, size = 0.4) +
+    ggplot2::geom_hline(
       yintercept = -1,
       linetype = "dotted"
     ) +
-    geom_hline(
+    ggplot2::geom_hline(
       yintercept = -2.5,
       linetype = "dotted"
     ) +
-    geom_smooth(
-      aes(color = "All"),
+    ggplot2::geom_smooth(
+      ggplot2::aes(color = "Full Population"),
       method = "gam",
       formula = y ~ s(x),
       se = TRUE
     ) +
-    geom_smooth(
+    ggplot2::geom_smooth(
       data = BMD_exp,
-      aes(color = "Exposure"),
+      ggplot2::aes(color = "Exposure"),
       method = "gam",
       formula = y ~ s(x),
       se = TRUE
     ) +
-    geom_smooth(
+    ggplot2::geom_smooth(
       data = BMD_resp,
-      aes(color = "Response"),
+      ggplot2::aes(color = "Response"),
       method = "gam",
       formula = y ~ s(x),
       se = TRUE
     )
   ## References
   if("hip" %in% reference){
-    BMD_hip <- filter(BMD, HIP_FRACTURE == 1)
+    BMD_hip <- dplyr::filter(BMD, HIP_FRACTURE == 1)
     p <- p +
-      geom_smooth(
+      ggplot2::geom_smooth(
         data = BMD_hip,
-        aes(color = "Hip Fracture"),
+        ggplot2::aes(color = "Hip Fracture"),
         method = "gam",
         formula = y ~ s(x),
         se = TRUE
       )
   }
   if("osteo" %in% reference){
-    BMD_osteo <- filter(BMD, OSTEO == 1)
+    BMD_osteo <- dplyr::filter(BMD, OSTEO == 1)
     p <- p +
-      geom_smooth(
+      ggplot2::geom_smooth(
         data = BMD_osteo,
-        aes(color = "Osteoporosis"),
+        ggplot2::aes(color = "Osteoporosis"),
         method = "gam",
         formula = y ~ s(x),
         se = TRUE
       )
   }
   if("fracture" %in% reference){
-    BMD_fract <- filter(BMD, ANY_FRACTURE == 1)
+    BMD_fract <- dplyr::filter(BMD, ANY_FRACTURE == 1)
     p <- p +
-      geom_smooth(
+      ggplot2::geom_smooth(
         data = BMD_fract,
-        aes(color = "Any Fracture"),
+        ggplot2::aes(color = "Any Fracture"),
         method = "gam",
         formula = y ~ s(x),
         se = TRUE
@@ -199,16 +200,17 @@ plot_bmd <- function(data_bmd, data_dpop, date_dependency = FALSE, reference = c
   }
 
   p <- p +
-    scale_color_manual(values = c(
-      "All" = "yellow",
+    ggplot2::scale_color_manual(values = c(
+      "Full Population" = "yellow",
       "Exposure" = "#D9534F",
       "Response"= "#5CB85C",
       "Any Fracture" = "#5BC0DE",
       "Hip Fracture" = "#9370DB",
       "Osteoporosis" = "#F0AD4E"
     )) +
-    labs(x= "Age at measure",
-         color = "Group")
+    ggplot2::labs(x= "Age at measure",
+                  color = "Group")
   # +facet_wrap(~DENS)
+  # p
   return(p)
 }

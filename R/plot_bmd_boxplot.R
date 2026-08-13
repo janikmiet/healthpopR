@@ -55,13 +55,20 @@
 #' @export
 plot_bmd_boxplot <- function(data_bmd, data_dpop, reference = c("hip", "fractures", "osteo"), date_dependency = FALSE){
 
+  if(FALSE){
+    data_bmd = bone_density_scores
+    data_dpop = dpop
+    reference = c("hip", "fractures")
+    date_dependency = FALSE
+  }
+
   if(date_dependency){
     BMD <- data_bmd |>
-      left_join(
-        data_dpop |> select(ID, exp.DATE, resp.DATE),
+      dplyr::left_join(
+        data_dpop |> dplyr::select(ID, exp.DATE, resp.DATE),
         by = "ID"
       ) |>
-      mutate(
+      dplyr::mutate(
         exp.GROUP  = ifelse(!is.na(exp.DATE)  & exp.DATE  <= DATE,
                             "exposure", "no exposure"),
         resp.GROUP = ifelse(!is.na(resp.DATE) & resp.DATE <= DATE,
@@ -74,8 +81,8 @@ plot_bmd_boxplot <- function(data_bmd, data_dpop, reference = c("hip", "fracture
       )
   } else {
     BMD <- data_bmd |>
-      left_join(
-        data_dpop |> select(ID, exp.GROUP, resp.GROUP),
+      dplyr::left_join(
+        data_dpop |> dplyr::select(ID, exp.GROUP, resp.GROUP),
         by = "ID"
       ) |>
       dplyr::mutate(
@@ -84,23 +91,53 @@ plot_bmd_boxplot <- function(data_bmd, data_dpop, reference = c("hip", "fracture
       )
   }
 
-  plot_data <- BMD %>%
+  plot_data <- BMD |>
     tidyr::pivot_longer(
       cols = c(Exposure, Response, HIP_FRACTURE, ANY_FRACTURE, OSTEO),
       names_to = "Group",
       values_to = "Value"
-    ) %>%
+    ) |>
     dplyr::filter(Value == 1)
 
+  plot_data <- plot_data |>
+    dplyr::mutate(
+      Group = dplyr::recode(
+        Group,
+        "ANY_FRACTURE" = "Any Fracture",
+        "HIP_FRACTURE" = "Hip Fracture",
+        "OSTEO" = "Osteoporosis"
+      )
+    ) |>
+    dplyr::mutate(
+      Group = factor(
+        Group,
+        levels = c(
+          "Exposure",
+          "Response",
+          "Hip Fracture",
+          "Any Fracture",
+          "Osteoporosis"
+        )
+      )
+    )
+
   # Boxplot
-  p <- ggplot(plot_data, aes(x = Group, y = TSCORE)) +
-    geom_boxplot() +
-    labs(
+  p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Group, y = TSCORE, color = Group)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::labs(
       x = "Group",
       y = "TSCORE",
       title = "TSCORE distribution by groups"
     ) +
-    theme_minimal()
-
+    ggplot2::scale_color_manual(values = c(
+      # "All" = "yellow",
+      "Exposure" = "#D9534F",
+      "Response"= "#5CB85C",
+      "Any Fracture" = "#5BC0DE",
+      "Hip Fracture" = "#9370DB",
+      "Osteoporosis" = "#F0AD4E"
+    )) +
+    ggplot2::theme_minimal()
+  # p
   return(p)
 }
